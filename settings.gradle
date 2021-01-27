@@ -1,0 +1,3 @@
+include ':YasuoRVAdapter'
+include ':app'
+rootProject.name = "YasuoRecyclerViewAdapter"
