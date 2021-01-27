@@ -7,7 +7,9 @@ import com.fusion_nex_gen.yasuorvadapter.YasuoRVViewBindingAdapter
 
 class RecyclerViewBindingHolder(root: View) :
     RecyclerView.ViewHolder(root) {
-    internal lateinit var binding: ViewBinding
+      lateinit var binding: ViewBinding
+
+      fun isInitBinding() = ::binding.isInitialized
 
     /**
      * 由于ViewBinding没有像DataBinding一样的DataBindingUtil来根据泛型创建实体的方法
@@ -15,7 +17,7 @@ class RecyclerViewBindingHolder(root: View) :
      * 例如ItemLayoutImageExBinding.bind(it)
      */
     fun <VB : ViewBinding> createBinding(createBinding: (view: View) -> VB): VB {
-        if (!::binding.isInitialized) {
+        if (!isInitBinding()) {
             binding = createBinding(itemView)
         }
         return binding as VB

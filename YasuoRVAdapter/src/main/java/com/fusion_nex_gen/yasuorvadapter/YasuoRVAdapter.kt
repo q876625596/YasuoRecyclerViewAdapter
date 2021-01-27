@@ -22,14 +22,14 @@ import kotlin.reflect.KClass
  * @param rvListener 绑定Adapter实体之前需要做的操作
  * @param rvListener What to do before binding adapter entity
  */
-inline fun <T : Any> RecyclerView.adapterBinding(
+inline fun RecyclerView.adapterBinding(
     context: Context,
     life: LifecycleOwner,
-    itemList: MutableList<T>,
-    headerItemList: MutableList<T> = ObList(),
-    footerItemList: MutableList<T> = ObList(),
-    rvListener: YasuoRVAdapter<T>.() -> YasuoRVAdapter<T>
-): YasuoRVAdapter<T> {
+    itemList: MutableList<Any>,
+    headerItemList: MutableList<Any> = ObList(),
+    footerItemList: MutableList<Any> = ObList(),
+    rvListener: YasuoRVAdapter.() -> YasuoRVAdapter
+): YasuoRVAdapter {
     return YasuoRVAdapter(context, life, itemList, headerItemList, footerItemList).bindLife().rvListener().attach(this)
 }
 
@@ -40,51 +40,51 @@ inline fun <T : Any> RecyclerView.adapterBinding(
  * @param rvListener 绑定Adapter实体之前需要做的操作
  * @param rvListener What to do before binding adapter entity
  */
-inline fun <T : Any> RecyclerView.adapterBinding(
-    adapter: YasuoRVAdapter<T>,
-    rvListener: YasuoRVAdapter<T>.() -> YasuoRVAdapter<T>
-): YasuoRVAdapter<T> {
+inline fun RecyclerView.adapterBinding(
+    adapter: YasuoRVAdapter,
+    rvListener: YasuoRVAdapter.() -> YasuoRVAdapter
+): YasuoRVAdapter {
     return adapter.bindLife().rvListener().attach(this)
 }
 
-open class YasuoRVAdapter<T : Any>(
+open class YasuoRVAdapter(
     context: Context,
     private val life: LifecycleOwner,
-    itemList: MutableList<T> = ObList(),
-    headerItemList: MutableList<T> = ObList(),
-    footerItemList: MutableList<T> = ObList(),
-) : YasuoBaseRVAdapter<T, RecyclerViewHolder>(context, itemList, headerItemList, footerItemList), LifecycleObserver {
+    itemList: MutableList<Any> = ObList(),
+    headerItemList: MutableList<Any> = ObList(),
+    footerItemList: MutableList<Any> = ObList(),
+) : YasuoBaseRVAdapter<Any, RecyclerViewHolder>(context, itemList, headerItemList, footerItemList), LifecycleObserver {
 
     init {
         //如果是使用的ObservableArrayList，那么需要注册监听
-        if (this.itemList is ObList<T>) {
-            (this.itemList as ObList<T>).addOnListChangedCallback(itemListListener)
+        if (this.itemList is ObList<Any>) {
+            (this.itemList as ObList<Any>).addOnListChangedCallback(itemListListener)
         }
-        if (this.headerItemList is ObList<T>) {
-            (this.headerItemList as ObList<T>).addOnListChangedCallback(headerListListener)
+        if (this.headerItemList is ObList<Any>) {
+            (this.headerItemList as ObList<Any>).addOnListChangedCallback(headerListListener)
         }
-        if (this.footerItemList is ObList<T>) {
-            (this.footerItemList as ObList<T>).addOnListChangedCallback(footerListListener)
+        if (this.footerItemList is ObList<Any>) {
+            (this.footerItemList as ObList<Any>).addOnListChangedCallback(footerListListener)
         }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemsRemoveListener() {
-        if (this.itemList is ObList<T>) {
-            (this.itemList as ObList<T>).removeOnListChangedCallback(itemListListener)
+        if (this.itemList is ObList<Any>) {
+            (this.itemList as ObList<Any>).removeOnListChangedCallback(itemListListener)
         }
-        if (this.headerItemList is ObList<T>) {
-            (this.headerItemList as ObList<T>).removeOnListChangedCallback(headerListListener)
+        if (this.headerItemList is ObList<Any>) {
+            (this.headerItemList as ObList<Any>).removeOnListChangedCallback(headerListListener)
         }
-        if (this.footerItemList is ObList<T>) {
-            (this.footerItemList as ObList<T>).removeOnListChangedCallback(footerListListener)
+        if (this.footerItemList is ObList<Any>) {
+            (this.footerItemList as ObList<Any>).removeOnListChangedCallback(footerListListener)
         }
     }
 
     /**
      * 绑定生命周期，初始化adapter之后必须调用
      */
-    fun bindLife(): YasuoRVAdapter<T> {
+    fun bindLife(): YasuoRVAdapter {
         life.lifecycle.addObserver(this)
         return this
     }
@@ -99,7 +99,7 @@ open class YasuoRVAdapter<T : Any>(
         SparseArray()
 
     //内部holder绑定的监听集合
-    private val innerHolderBindListenerMap: SparseArray<ViewHolderBindListener<RecyclerViewHolder, T>> =
+    private val innerHolderBindListenerMap: SparseArray<ViewHolderBindListener<RecyclerViewHolder>> =
         SparseArray()
 
     override fun <L : Listener<RecyclerViewHolder>> setHolderCreateListener(type: Int, listener: L) {
@@ -107,7 +107,7 @@ open class YasuoRVAdapter<T : Any>(
     }
 
     override fun <L : Listener<RecyclerViewHolder>> setHolderBindListener(type: Int, listener: L) {
-        innerHolderBindListenerMap.put(type, listener as ViewHolderBindListener<RecyclerViewHolder, T>)
+        innerHolderBindListenerMap.put(type, listener as ViewHolderBindListener<RecyclerViewHolder>)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerViewHolder {
@@ -121,47 +121,42 @@ open class YasuoRVAdapter<T : Any>(
             //执行之前判断非空
             getGlobalItemHolderListener()?.invoke(holder)
         }
-        when {
-            isEmptyLayoutMode() -> innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, emptyLayoutItem!!)
-            inAllList(position) -> innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, getItem(position))
-            hasLoadMore() -> innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, loadMoreLayoutItem!!)
-            else -> throw RuntimeException("onBindViewHolder position error! position = $position")
-        }
-    }
-}
+        innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(
+            holder, when {
+                isEmptyLayoutMode() -> emptyLayoutItem!!
+                inAllList(position) -> getItem(position)
+                hasLoadMore() -> loadMoreLayoutItem!!
+                else -> throw RuntimeException("onBindViewHolder position error! position = $position")
+            }
+        )
 
-/**
- * View Holder创建时触发
- * @param itemLayoutId itemView布局id
- */
-inline fun <T : Any, Adapter : YasuoRVAdapter<T>> Adapter.onHolderCreate(
-    itemLayoutId: Int,
-    crossinline block: (holder: RecyclerViewHolder) -> Unit
-): Adapter {
-    setHolderCreateListener(itemLayoutId, object : ViewHolderCreateListener<RecyclerViewHolder> {
-        override fun onCreateViewHolder(holder: RecyclerViewHolder) {
-            block(holder)
-        }
-    })
-    return this
+    }
 }
 
 /**
  * 建立数据类与布局文件之间的匹配关系，payloads
  * @param itemLayoutId itemView布局id
  * @param kClass 实体类::class
- * @param bind 绑定监听这个viewHolder的所有事件
+ * @param bindListener 绑定监听这个viewHolder的所有事件
  */
-fun <T : Any, Adapter : YasuoRVAdapter<T>> Adapter.onHolderBindAndPayloads(
+fun <T : Any, Adapter : YasuoRVAdapter> Adapter.onHolderBindAndPayloads(
     itemLayoutId: Int,
-    kClass: KClass<*>,
-    bind: (T.(holder: RecyclerViewHolder, payloads: List<Any>?) -> Unit)? = null
+    kClass: KClass<T>,
+    createListener: ((holder: RecyclerViewHolder) -> Unit)? = null,
+    bindListener: (T.(holder: RecyclerViewHolder, payloads: List<Any>?) -> Unit)? = null
 ): Adapter {
     itemTypes[kClass] = ItemType(itemLayoutId)
-    if (bind != null) {
-        setHolderBindListener(itemLayoutId, object : ViewHolderBindListener<RecyclerViewHolder, T> {
-            override fun onBindViewHolder(holder: RecyclerViewHolder, item: T, payloads: List<Any>?) {
-                item.bind(holder, payloads)
+    if (createListener != null) {
+        setHolderCreateListener(itemLayoutId, object : ViewHolderCreateListener<RecyclerViewHolder> {
+            override fun onCreateViewHolder(holder: RecyclerViewHolder) {
+                createListener(holder)
+            }
+        })
+    }
+    if (bindListener != null) {
+        setHolderBindListener(itemLayoutId, object : ViewHolderBindListener<RecyclerViewHolder> {
+            override fun onBindViewHolder(holder: RecyclerViewHolder, item: Any, payloads: List<Any>?) {
+                (item as T).bindListener(holder, payloads)
             }
         })
     }
@@ -172,18 +167,26 @@ fun <T : Any, Adapter : YasuoRVAdapter<T>> Adapter.onHolderBindAndPayloads(
  * 建立数据类与布局文件之间的匹配关系
  * @param itemLayoutId itemView布局id
  * @param kClass 实体类::class
- * @param bind 绑定监听这个viewHolder的所有事件
+ * @param bindListener 绑定监听这个viewHolder的所有事件
  */
-fun <T : Any, Adapter : YasuoRVAdapter<T>> Adapter.holderBind(
+fun <T : Any, Adapter : YasuoRVAdapter> Adapter.holderBind(
     itemLayoutId: Int,
-    kClass: KClass<*>,
-    bind: (T.(holder: RecyclerViewHolder) -> Unit)? = null
+    kClass: KClass<T>,
+    createListener: ((holder: RecyclerViewHolder) -> Unit)? = null,
+    bindListener: (T.(holder: RecyclerViewHolder) -> Unit)? = null
 ): Adapter {
     itemTypes[kClass] = ItemType(itemLayoutId)
-    if (bind != null) {
-        setHolderBindListener(itemLayoutId, object : ViewHolderBindListener<RecyclerViewHolder, T> {
-            override fun onBindViewHolder(holder: RecyclerViewHolder, item: T, payloads: List<Any>?) {
-                item.bind(holder)
+    if (createListener != null) {
+        setHolderCreateListener(itemLayoutId, object : ViewHolderCreateListener<RecyclerViewHolder> {
+            override fun onCreateViewHolder(holder: RecyclerViewHolder) {
+                createListener(holder)
+            }
+        })
+    }
+    if (bindListener != null) {
+        setHolderBindListener(itemLayoutId, object : ViewHolderBindListener<RecyclerViewHolder> {
+            override fun onBindViewHolder(holder: RecyclerViewHolder, item: Any, payloads: List<Any>?) {
+                (item as T).bindListener(holder)
             }
         })
     }
@@ -194,20 +197,28 @@ fun <T : Any, Adapter : YasuoRVAdapter<T>> Adapter.holderBind(
  * 建立loadMore数据类与布局文件之间的匹配关系
  * @param loadMoreLayoutId 加载更多布局id
  * @param loadMoreLayoutItem 加载更多布局对应的实体
- * @param bind 绑定监听这个viewHolder的所有事件
+ * @param bindListener 绑定监听这个viewHolder的所有事件
  */
-fun <T : Any, Adapter : YasuoRVAdapter<T>> Adapter.holderBindLoadMore(
+fun <T : Any, Adapter : YasuoRVAdapter> Adapter.holderBindLoadMore(
     loadMoreLayoutId: Int,
     loadMoreLayoutItem: T,
-    bind: (T.(holder: RecyclerViewHolder) -> Unit)? = null
+    createListener: ((holder: RecyclerViewHolder) -> Unit)? = null,
+    bindListener: (T.(holder: RecyclerViewHolder) -> Unit)? = null
 ): Adapter {
     this.loadMoreLayoutId = loadMoreLayoutId
     this.loadMoreLayoutItem = loadMoreLayoutItem
     itemTypes[loadMoreLayoutItem::class] = ItemType(loadMoreLayoutId)
-    if (bind != null) {
-        setHolderBindListener(loadMoreLayoutId, object : ViewHolderBindListener<RecyclerViewHolder, T> {
-            override fun onBindViewHolder(holder: RecyclerViewHolder, item: T, payloads: List<Any>?) {
-                item.bind(holder)
+    if (createListener != null) {
+        setHolderCreateListener(loadMoreLayoutId, object : ViewHolderCreateListener<RecyclerViewHolder> {
+            override fun onCreateViewHolder(holder: RecyclerViewHolder) {
+                createListener(holder)
+            }
+        })
+    }
+    if (bindListener != null) {
+        setHolderBindListener(loadMoreLayoutId, object : ViewHolderBindListener<RecyclerViewHolder> {
+            override fun onBindViewHolder(holder: RecyclerViewHolder, item: Any, payloads: List<Any>?) {
+                (item as T).bindListener(holder)
             }
         })
     }

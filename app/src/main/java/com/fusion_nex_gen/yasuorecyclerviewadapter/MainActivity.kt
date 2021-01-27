@@ -44,23 +44,18 @@ class MainActivity : AppCompatActivity() {
         //普通findViewById用法
         binding.myRV.adapterViewBinding(this, this, list, headerList, footerList) {
             ItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
-            holderBindLoadMore(R.layout.default_load_more_layout_data_binding, loadMoreItem) { holder ->
-                this as DefaultLoadMoreItem
-                val bin = holder.createBinding {
-                    DefaultLoadMoreLayoutBinding.bind(it)
-                }
-
-                bin.loadMoreText.text = text.value
+            holderBindLoadMore(R.layout.default_load_more_layout_data_binding, loadMoreItem, DefaultLoadMoreLayoutBinding::class, {
+                DefaultLoadMoreLayoutBinding.bind(it)
+            }) { holder, item ->
+                loadMoreText.text = item.text.value
 //                val textView = holder.getView<TextView>(R.id.loadMoreText)
 //                textView.text = text.value
             }
-            holderBind(R.layout.header_layout_one, HeaderOneBean::class) { holder ->
-                this as HeaderOneBean
-                val bin = holder.createBinding {
-                    HeaderLayoutOneExBinding.bind(it)
-                }
-                bin.headerText.text = headerOneText.value
-                bin.headerText.setOnClickListener {
+            holderBind(R.layout.header_layout_one, HeaderOneBean::class, HeaderLayoutOneExBinding::class, {
+                HeaderLayoutOneExBinding.bind(it)
+            }) { holder, item ->
+                headerText.text = item.headerOneText.value
+                headerText.setOnClickListener {
                     headerList.add(HeaderOneBean(MutableLiveData("我是header${headerList.size}，点击我新增header")))
                 }
 //                val textView = holder.getView<TextView>(R.id.headerText)
@@ -69,17 +64,16 @@ class MainActivity : AppCompatActivity() {
 //                    headerList.add(HeaderOneBean(MutableLiveData("我是header${headerList.size}，点击我新增header")))
 //                }
             }
-            holderBind(R.layout.header_layout_two, HeaderTwoBean::class) { holder ->
-                this as HeaderTwoBean
-                holder.itemView.setBackgroundColor(headerOneBgColor.value!!)
+            holderBind(R.layout.header_layout_two, HeaderTwoBean::class, HeaderLayoutTwoExBinding::class, {
+                HeaderLayoutTwoExBinding.bind(it)
+            }) { holder, item ->
+                root.setBackgroundColor(item.headerOneBgColor.value!!)
             }
-            holderBind(R.layout.footer_layout_one, FooterOneBean::class) { holder ->
-                this as FooterOneBean
-                val bin = holder.createBinding {
-                    FooterLayoutOneExBinding.bind(it)
-                }
-                bin.footerText.text = footerOneText.value
-                bin.footerText.setOnClickListener {
+            holderBind(R.layout.footer_layout_one, FooterOneBean::class, FooterLayoutOneExBinding::class, {
+                FooterLayoutOneExBinding.bind(it)
+            }) { holder, item ->
+                footerText.text = item.footerOneText.value
+                footerText.setOnClickListener {
                     footerList.add(FooterOneBean(MutableLiveData("我是footer${footerList.size}，点击我新增footer")))
                 }
 //                val textView = holder.getView<TextView>(R.id.footerText)
@@ -88,19 +82,17 @@ class MainActivity : AppCompatActivity() {
 //                    footerList.add(FooterOneBean(MutableLiveData("我是footer${footerList.size}，点击我新增footer")))
 //                }
             }
-            holderBind(R.layout.footer_layout_two, FooterTwoBean::class) { holder ->
-                this as FooterTwoBean
-                holder.itemView.setBackgroundColor(footerTwoBgColor.value!!)
+            holderBind(R.layout.footer_layout_two, FooterTwoBean::class, FooterLayoutTwoExBinding::class, {
+                FooterLayoutTwoExBinding.bind(it)
+            }) { holder, item ->
+                root.setBackgroundColor(item.footerTwoBgColor.value!!)
             }
-            holderBind(R.layout.item_layout_text, TextBean::class) { holder ->
-                //这里我将holder.bindingAdapterPosition对应的item返回给了this。只需要做一下转换即可
-                this as TextBean
-                val bin = holder.createBinding {
-                    ItemLayoutTextExBinding.bind(it)
-                }
+            holderBind(R.layout.item_layout_text, TextBean::class, ItemLayoutTextExBinding::class, {
+                ItemLayoutTextExBinding.bind(it)
+            }) { holder, item ->
                 //如果未使用了LiveData，这样写
-                bin.text.text = text.value
-                bin.text.setOnClickListener {
+                text.text = item.text.value
+                text.setOnClickListener {
                     itemList.remove(this)
                 }
 //                val textView = holder.getView<TextView>(R.id.text)
@@ -119,13 +111,10 @@ class MainActivity : AppCompatActivity() {
 //                    textView.text = it
 //                }
             }
-
-            holderBind(R.layout.item_layout_image, ImageBean::class) { holder ->
-                this as ImageBean
-                val bin = holder.createBinding {
-                    ItemLayoutImageExBinding.bind(it)
-                }
-                bin.image.setImageDrawable(image.value)
+            holderBind(R.layout.item_layout_image, ImageBean::class, ItemLayoutImageExBinding::class, {
+                ItemLayoutImageExBinding.bind(it)
+            }) { holder, item ->
+                image.setImageDrawable(item.image.value)
 //                val imageView = holder.getView<ImageView>(R.id.image)
 //                imageView.setImageDrawable(image.value)
             }

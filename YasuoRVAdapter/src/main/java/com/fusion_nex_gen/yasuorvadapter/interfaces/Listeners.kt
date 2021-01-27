@@ -1,6 +1,7 @@
 package com.fusion_nex_gen.yasuorvadapter.interfaces
 
 import androidx.databinding.ViewDataBinding
+import androidx.viewbinding.ViewBinding
 
 
 interface Listener<in VH>
@@ -47,13 +48,13 @@ interface ViewHolderCreateListenerForDataBinding<in VH> : Listener<VH> {
 /**
  * View Holder更新时触发，用于更新Item数据,ViewBinding专用
  */
-interface ViewHolderBindListener<in VH,T:Any> : Listener<VH> {
+interface ViewHolderBindListener<in VH> : Listener<VH> {
 
     /**
      * @param holder
      * @param item
      */
-    fun onBindViewHolder(holder: VH, item:T,payloads: List<Any>? = mutableListOf())
+    fun onBindViewHolder(holder: VH, item: Any, payloads: List<Any>? = mutableListOf())
 
 }
 
@@ -61,13 +62,13 @@ interface ViewHolderBindListener<in VH,T:Any> : Listener<VH> {
 /**
  * View Holder更新时触发，用于更新Item数据,ViewBinding专用
  */
-interface ViewHolderBindListenerForViewBinding<in VH,T:Any> : Listener<VH> {
+interface ViewHolderBindListenerForViewBinding<in VH> : Listener<VH> {
 
     /**
      * @param holder
      * @param item
      */
-    fun onBindViewHolder(holder: VH,item:T, payloads: List<Any>? = mutableListOf())
+    fun onBindViewHolder(holder: VH, binding: ViewBinding, item: Any, payloads: List<Any>? = mutableListOf())
 }
 
 /**

@@ -68,7 +68,7 @@ fun <T : Any> YasuoBaseRVAdapter<T, *>.putItems(items: Collection<T>) {
 /**
  * 添加数据集合
  */
-fun <T : Any> YasuoRVDataBindingAdapter<T>.putItems(items: Collection<T>) {
+fun <T : Any> YasuoRVDataBindingAdapter.putItems(items: Collection<T>) {
     this.itemList.clear()
     this.itemList.addAll(items)
 }
