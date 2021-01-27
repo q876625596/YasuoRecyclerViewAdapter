@@ -20,7 +20,7 @@ class LoadMoreListener(
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
         super.onScrolled(recyclerView, dx, dy)
-        if (adapter.lockedLoadMore) {
+        if (adapter.lockedLoadMoreListener) {
             return
         }
         //当前RecyclerView显示出来的最后一个的item的position
@@ -44,7 +44,7 @@ class LoadMoreListener(
         //如果相等则说明已经滑动到最后了
         if (lastPosition == recyclerView.layoutManager!!.itemCount - 1) {
             print("开始加载更多，最底部的item：position=${lastPosition}，已显示")
-            adapter.lockedLoadMore = true
+            adapter.lockedLoadMoreListener = true
             this.onLoadMore(lastPosition)
         }
     }

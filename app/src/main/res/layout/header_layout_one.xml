@@ -5,7 +5,7 @@
 
         <variable
             name="item"
-            type="com.fusion_nex_gen.yasuorecyclerviewadapter.model.TextBean" />
+            type="com.fusion_nex_gen.yasuorecyclerviewadapter.model.HeaderOneBean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,11 +14,10 @@
         android:layout_height="100dp">
 
         <TextView
-            android:id="@+id/text"
+            android:id="@+id/headerText"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:gravity="center"
-            android:text="@{item.text}"
+            android:text="@{item.headerOneText}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

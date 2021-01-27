@@ -28,10 +28,14 @@ import kotlin.reflect.KClass
 abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context: Context) :
     RecyclerView.Adapter<VH>() {
 
-    constructor(context: Context, newItems: MutableList<T>?) : this(context) {
-        if (newItems != null) {
-            this.itemList = newItems
-        }
+    constructor(
+        context: Context, itemList: MutableList<T>,
+        headerItemList: MutableList<T>,
+        footerItemList: MutableList<T>,
+    ) : this(context) {
+        this.itemList = itemList
+        this.headerItemList = headerItemList
+        this.footerItemList = footerItemList
     }
 
     /**
@@ -64,56 +68,50 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      */
     var itemTouchHelper: ItemTouchHelper? = null
 
-    /******全屏布局******/
+    /******空布局******/
 
     /**
-     * 全屏布局
-     * Full screen layout
+     * 空布局资源id/viewType
      */
-    var fullScreenLayoutId: Int? = null
+    var emptyLayoutId: Int? = null
 
     /**
-     * 全屏布局的实体数据
-     * Entity data of full screen layout
+     * 空布局的实体数据
      */
-    var fullScreenLayoutItem: Any? = null
+    var emptyLayoutItem: T? = null
 
     /**
-     * 判断当前是否是显示全屏布局状态
-     * Judge whether the current display is full screen layout state
+     * 判断当前是否是显示空布局状态
      */
-    fun isFullScreenMode(): Boolean {
+    fun isEmptyLayoutMode(): Boolean {
         // 当itemList为空，并且已经设置全屏布局的数据时
         // 则此时为显示全屏布局的状态
         // When itemList is empty and full screen layout data has been set
         // The full screen layout is displayed
-        return itemList.isNullOrEmpty() && alreadySetFullScreenData()
+        return itemList.isNullOrEmpty() && alreadySetEmptyLayoutData()
     }
 
     /**
-     * 是否已经设置好了全屏布局的数据
+     * 是否已经设置好了空布局的数据
      */
-    internal fun alreadySetFullScreenData(): Boolean {
-        return fullScreenLayoutId != null && fullScreenLayoutItem != null
+    internal fun alreadySetEmptyLayoutData(): Boolean {
+        return emptyLayoutId != null && emptyLayoutItem != null
     }
 
     /**
-     * 设置全屏布局，该方法会强制将itemList清空
-     * Set the full screen layout, which forces the itemList to be cleared
-     * @param type 全屏布局类型
-     * @param type Full screen layout type
+     * 设置空布局，该方法会强制将itemList清空，并锁定loadMore的监听
      */
-    fun showFullScreen() {
-        if (!alreadySetFullScreenData()) {
+    fun showEmptyLayout() {
+        if (!alreadySetEmptyLayoutData()) {
             throw RuntimeException("Data without full screen layout")
         }
-        lockedLoadMore = true
+        lockedLoadMoreListener = true
         //清空itemList
         //clear itemList
         if (itemList.isNotEmpty()) {
             itemList.clear()
         }
-        //添加全屏布局
+        //添加空布局
         notifyItemInserted(0)
     }
 
@@ -122,7 +120,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 锁定加载更多，如果为true，那么不再触发监听
      */
-    var lockedLoadMore = false
+    var lockedLoadMoreListener = false
 
     /**
      * 加载更多的布局类型
@@ -132,19 +130,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 加载更多的布局类型数据实体
      */
-    var loadMoreLayoutItem: Any? = null
+    var loadMoreLayoutItem: T? = null
 
     fun hasLoadMore(): Boolean {
         return loadMoreLayoutId != null && loadMoreLayoutItem != null
     }
 
-    /**
-     * 停止加载
-     * 必须在添加数据之前调用
-     */
-    fun stopLoadMore() {
-        notifyItemRemoved(itemList.size)
-    }
+    /******header******/
+
+    var headerItemList: MutableList<T> = mutableListOf()
+
+    /******footer******/
+
+    var footerItemList: MutableList<T> = mutableListOf()
 
     /******item相关******/
 
@@ -154,21 +152,45 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      */
     override fun getItemCount(): Int {
         //如果是全屏布局模式
-        if (isFullScreenMode()) {
+        if (isEmptyLayoutMode()) {
             return 1
         }
         //如果有loadMore
         if (hasLoadMore()) {
-            return itemList.size + 1
+            return getAllListSize() + 1
         }
-        return itemList.size
+        return getAllListSize()
+    }
+
+    fun getAllListSize() = headerItemList.size + itemList.size + footerItemList.size
+
+
+    /**
+     * 判断position只包含在allList内
+     */
+    internal fun inAllList(position: Int): Boolean {
+        return position >= 0 && position < getAllListSize()
+    }
+
+    /**
+     * 判断position只包含在headerList内
+     */
+    internal fun inHeaderList(position: Int): Boolean {
+        return position >= 0 && position < headerItemList.size
     }
 
     /**
      * 判断position只包含在itemList内
      */
-    internal fun inRange(position: Int): Boolean {
-        return position >= 0 && position < itemList.size
+    internal fun inItemList(position: Int): Boolean {
+        return position >= headerItemList.size && position < itemList.size + headerItemList.size
+    }
+
+    /**
+     * 判断position只包含在footerList内
+     */
+    internal fun inFooterList(position: Int): Boolean {
+        return position >= headerItemList.size + itemList.size && position < getAllListSize()
     }
 
 
@@ -178,10 +200,13 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * @param position holder.bindingAdapterPosition
      */
     open fun getItem(position: Int): T {
-        if (inRange(position)) {
-            return itemList[position]
-        } else {
-            throw RuntimeException("The position is not in the itemList")
+        return when {
+            isEmptyLayoutMode() -> emptyLayoutItem!!
+            inHeaderList(position) -> headerItemList[position]
+            inItemList(position) -> itemList[position - headerItemList.size]
+            inFooterList(position) -> footerItemList[position - itemList.size - headerItemList.size]
+            hasLoadMore() -> loadMoreLayoutItem!!
+            else -> throw RuntimeException("The position is not in the itemList")
         }
     }
 
@@ -191,11 +216,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * @param position holder.bindingAdapterPosition
      */
     override fun getItemId(position: Int): Long {
-        return if (hasStableIds()) {
-            (getItem(position).hashCode() + position).toLong()
-        } else {
-            super.getItemId(position)
-        }
+        return position.toLong()
     }
 
     /**
@@ -203,26 +224,15 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * @param position holder.bindingAdapterPosition
      */
     override fun getItemViewType(position: Int): Int {
-        //先判断全屏布局
-        //如果是全屏模式，那么直接返回全屏viewType
-        if (isFullScreenMode()) {
-            return fullScreenLayoutId!!
-        }
-        //再判断loadMoreView
-        if (position == itemList.size) {
-            return loadMoreLayoutId!!
-        }
-        //否则就是itemList中的type
-        val itemType = itemTypes[getItem(position)::class]
-        if (itemType != null) {
-            return itemType.itemLayoutId
-        }
-        if (innerLayoutFactory != null) {
-            return innerLayoutFactory!!.run {
-                getLayoutId(position)
+        return when {
+            isEmptyLayoutMode() -> emptyLayoutId!!
+            inAllList(position) -> {
+                itemTypes[getItem(position)::class]?.itemLayoutId
+                    ?: throw RuntimeException("viewType not found")
             }
+            hasLoadMore() -> loadMoreLayoutId!!
+            else -> throw RuntimeException("viewType not found")
         }
-        throw RuntimeException("viewType not found")
     }
 
     /******布局占比相关******/
@@ -240,7 +250,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      */
     open fun isFullSpanType(viewType: Int): Boolean {
         //默认判断loadMoreViewType和全屏布局的type
-        return loadMoreLayoutId == viewType || fullScreenLayoutId == viewType
+        return loadMoreLayoutId == viewType || emptyLayoutId == viewType
     }
 
     override fun onViewAttachedToWindow(holder: VH) {
@@ -262,7 +272,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         if (manager is GridLayoutManager) {
             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
-                    if (!inRange(position)) {
+                    if (!inItemList(position)) {
                         return manager.spanCount
                     }
                     val type = getItemViewType(position)
@@ -306,17 +316,17 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /******列表改变的监听******/
 
     /**
-     * 列表改变的监听
-     * Monitoring of list changes
+     * header列表改变的监听
+     * Monitoring of header list changes
      */
-    val listener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
+    val headerListListener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
         override fun onChanged(contributorViewModels: ObservableList<T>) {
             notifyDataSetChanged()
             afterDataChangeListener?.invoke()
         }
 
         override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
-            notifyItemRangeChanged(i, i1)
+            notifyItemRangeChanged(i + headerItemList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -325,7 +335,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             i: Int,
             i1: Int
         ) {
-            notifyItemRangeInserted(i, i1)
+            notifyItemRangeInserted(i + headerItemList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -335,7 +345,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             i1: Int,
             i2: Int
         ) {
-            notifyItemMoved(i, i1)
+            notifyItemMoved(i + headerItemList.size, i1 + headerItemList.size)
             afterDataChangeListener?.invoke()
         }
 
@@ -343,11 +353,101 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
-                notifyItemRangeRemoved(i, i1)
+                notifyItemRangeRemoved(i + headerItemList.size, i1)
             }
             afterDataChangeListener?.invoke()
         }
     }
+
+    /**
+     * 列表改变的监听
+     * Monitoring of list changes
+     */
+    val itemListListener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
+        override fun onChanged(contributorViewModels: ObservableList<T>) {
+            notifyDataSetChanged()
+            afterDataChangeListener?.invoke()
+        }
+
+        override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+            notifyItemRangeChanged(i + headerItemList.size, i1)
+            afterDataChangeListener?.invoke()
+        }
+
+        override fun onItemRangeInserted(
+            contributorViewModels: ObservableList<T>,
+            i: Int,
+            i1: Int
+        ) {
+            notifyItemRangeInserted(i + headerItemList.size, i1)
+            afterDataChangeListener?.invoke()
+        }
+
+        override fun onItemRangeMoved(
+            contributorViewModels: ObservableList<T>,
+            i: Int,
+            i1: Int,
+            i2: Int
+        ) {
+            notifyItemMoved(i + headerItemList.size, i1 + headerItemList.size)
+            afterDataChangeListener?.invoke()
+        }
+
+        override fun onItemRangeRemoved(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+            if (contributorViewModels.isEmpty()) {
+                notifyDataSetChanged()
+            } else {
+                notifyItemRangeRemoved(i + headerItemList.size, i1)
+            }
+            afterDataChangeListener?.invoke()
+        }
+    }
+
+
+    /**
+     * footer列表改变的监听
+     * Monitoring of footer list changes
+     */
+    val footerListListener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
+        override fun onChanged(contributorViewModels: ObservableList<T>) {
+            notifyDataSetChanged()
+            afterDataChangeListener?.invoke()
+        }
+
+        override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+            notifyItemRangeChanged(i + headerItemList.size + itemList.size, i1)
+            afterDataChangeListener?.invoke()
+        }
+
+        override fun onItemRangeInserted(
+            contributorViewModels: ObservableList<T>,
+            i: Int,
+            i1: Int
+        ) {
+            notifyItemRangeInserted(i + headerItemList.size + itemList.size, i1)
+            afterDataChangeListener?.invoke()
+        }
+
+        override fun onItemRangeMoved(
+            contributorViewModels: ObservableList<T>,
+            i: Int,
+            i1: Int,
+            i2: Int
+        ) {
+            notifyItemMoved(i + headerItemList.size + itemList.size, i1 + headerItemList.size + itemList.size)
+            afterDataChangeListener?.invoke()
+        }
+
+        override fun onItemRangeRemoved(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+            if (contributorViewModels.isEmpty()) {
+                notifyDataSetChanged()
+            } else {
+                notifyItemRangeRemoved(i + headerItemList.size + itemList.size, i1)
+            }
+            afterDataChangeListener?.invoke()
+        }
+    }
+
 
     /**
      * 列表数据发生改变后的监听，在notify之后触发

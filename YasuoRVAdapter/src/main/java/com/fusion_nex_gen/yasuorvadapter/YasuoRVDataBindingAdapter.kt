@@ -27,13 +27,15 @@ import kotlin.reflect.KClass
  * @param rvListener 绑定Adapter实体之前需要做的操作
  * @param rvListener What to do before binding adapter entity
  */
-inline fun <T : Any> RecyclerView.rvDataBindingAdapter(
+inline fun <T : Any> RecyclerView.adapterDataBinding(
     context: Context,
     life: LifecycleOwner,
-    list: MutableList<T>,
+    itemList: MutableList<T>,
+    headerItemList: MutableList<T> = ObList(),
+    footerItemList: MutableList<T> = ObList(),
     rvListener: YasuoRVDataBindingAdapter<T>.() -> YasuoRVDataBindingAdapter<T>
 ): YasuoRVDataBindingAdapter<T> {
-    return YasuoRVDataBindingAdapter<T>(context, life, list).bindLife().rvListener()
+    return YasuoRVDataBindingAdapter<T>(context, life, itemList, headerItemList, footerItemList).bindLife().rvListener()
         .attach(this)
 }
 
@@ -44,7 +46,7 @@ inline fun <T : Any> RecyclerView.rvDataBindingAdapter(
  * @param rvListener 绑定Adapter实体之前需要做的操作
  * @param rvListener What to do before binding adapter entity
  */
-inline fun <T : Any> RecyclerView.rvDataBindingAdapter(
+inline fun <T : Any> RecyclerView.adapterDataBinding(
     adapter: YasuoRVDataBindingAdapter<T>,
     rvListener: YasuoRVDataBindingAdapter<T>.() -> YasuoRVDataBindingAdapter<T>
 ) {
@@ -54,8 +56,10 @@ inline fun <T : Any> RecyclerView.rvDataBindingAdapter(
 open class YasuoRVDataBindingAdapter<T : Any>(
     context: Context,
     private val life: LifecycleOwner,
-    itemList: MutableList<T>
-) : YasuoBaseRVAdapter<T, RecyclerDataBindingHolder<ViewDataBinding>>(context, itemList),
+    itemList: MutableList<T> = ObList(),
+    headerItemList: MutableList<T> = ObList(),
+    footerItemList: MutableList<T> = ObList(),
+) : YasuoBaseRVAdapter<T, RecyclerDataBindingHolder<ViewDataBinding>>(context, itemList,headerItemList, footerItemList),
     LifecycleObserver {
     private val dataInvalidation = Any()
 
@@ -64,22 +68,29 @@ open class YasuoRVDataBindingAdapter<T : Any>(
      */
     var variableIdIsDefault = true
 
-    constructor(context: Context, life: LifecycleOwner) : this(
-        context, life,
-        ObList()
-    )
-
     init {
         //如果是使用的ObservableArrayList，那么需要注册监听
         if (this.itemList is ObList<T>) {
-            (this.itemList as ObList<T>).addOnListChangedCallback(listener)
+            (this.itemList as ObList<T>).addOnListChangedCallback(itemListListener)
+        }
+        if (this.headerItemList is ObList<T>) {
+            (this.headerItemList as ObList<T>).addOnListChangedCallback(headerListListener)
+        }
+        if (this.footerItemList is ObList<T>) {
+            (this.footerItemList as ObList<T>).addOnListChangedCallback(footerListListener)
         }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemListRemoveListener() {
         if (this.itemList is ObList<T>) {
-            (this.itemList as ObList<T>).removeOnListChangedCallback(listener)
+            (this.itemList as ObList<T>).removeOnListChangedCallback(itemListListener)
+        }
+        if (this.headerItemList is ObList<T>) {
+            (this.headerItemList as ObList<T>).removeOnListChangedCallback(headerListListener)
+        }
+        if (this.footerItemList is ObList<T>) {
+            (this.footerItemList as ObList<T>).removeOnListChangedCallback(footerListListener)
         }
     }
 
@@ -169,11 +180,9 @@ open class YasuoRVDataBindingAdapter<T : Any>(
         }
         when {
             //判断是全屏布局
-            isFullScreenMode() -> holder.binding.setVariable(BR.item, fullScreenLayoutItem)
-            //判断loadMoreView
-            position == itemList.size -> holder.binding.setVariable(BR.item, loadMoreLayoutItem)
+            isEmptyLayoutMode() -> holder.binding.setVariable(BR.item, emptyLayoutItem)
             //普通item
-            else -> {
+            inAllList(position) -> {
                 //如果使用默认variableId
                 if (variableIdIsDefault) {
                     holder.binding.setVariable(BR.item, getItem(position))
@@ -190,6 +199,9 @@ open class YasuoRVDataBindingAdapter<T : Any>(
                     }
                 }
             }
+            //loadMoreView
+            hasLoadMore()->  holder.binding.setVariable(BR.item, loadMoreLayoutItem)
+            else -> throw RuntimeException("onBindViewHolder position error! position = $position")
         }
         innerHolderBindListenerMap[holder.itemViewType]?.apply {
             onBindViewHolder(holder, holder.binding)
@@ -287,7 +299,7 @@ fun <T, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter<T>>
  * @param bind 绑定监听这个viewHolder的所有事件
  */
 fun <T, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter<T>>
-        Adapter.onHolderDataBinding(
+        Adapter.holderBind(
     itemLayoutId: Int,
     itemClass: KClass<*>,
     bindingClass: KClass<VB>,
@@ -315,7 +327,7 @@ fun <T, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter<T>>
  * @param itemClass Item::class
  */
 fun <T, Adapter : YasuoRVDataBindingAdapter<T>>
-        Adapter.onHolderDataBinding(
+        Adapter.holderBind(
     itemLayoutId: Int,
     itemClass: KClass<*>,
     customItemBR: Int = BR.item,

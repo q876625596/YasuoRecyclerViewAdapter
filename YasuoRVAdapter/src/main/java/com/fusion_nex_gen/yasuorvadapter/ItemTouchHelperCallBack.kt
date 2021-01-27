@@ -1,5 +1,6 @@
 package com.fusion_nex_gen.yasuorvadapter
 
+import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.fusion_nex_gen.yasuorvadapter.interfaces.Listener
@@ -11,7 +12,7 @@ fun <RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapt
     adapter.itemTouchHelper = object : ItemTouchHelper(this) {
         override fun startDrag(viewHolder: RecyclerView.ViewHolder) {
             if (adapter.itemList is ObList) {
-                (adapter.itemList as ObList).removeOnListChangedCallback(adapter.listener)
+                (adapter.itemList as ObList).removeOnListChangedCallback(adapter.itemListListener)
             }
             super.startDrag(viewHolder)
         }
@@ -49,7 +50,7 @@ class ItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseR
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         if (adapter.itemList is ObList) {
-            (adapter.itemList as ObList).addOnListChangedCallback(adapter.listener)
+            (adapter.itemList as ObList).addOnListChangedCallback(adapter.itemListListener)
         }
         super.clearView(recyclerView, viewHolder)
     }
@@ -58,14 +59,11 @@ class ItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseR
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        if (disableLayoutType.contains(viewHolder.itemViewType) || adapter.fullScreenLayoutId == viewHolder.itemViewType || adapter.loadMoreLayoutId == viewHolder.itemViewType) {
+        if (disableLayoutType.contains(viewHolder.itemViewType) || !adapter.inItemList(viewHolder.bindingAdapterPosition)) {
             return makeMovementFlags(0, 0)
         }
+        Log.e("qqq",viewHolder.bindingAdapterPosition.toString())
         return makeMovementFlags(dragDirection, swipeDirection)
-    }
-
-    private fun inRange(position: Int): Boolean {
-        return position >= 0 && position < adapter.itemList.size
     }
 
     override fun onMove(
@@ -73,12 +71,15 @@ class ItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseR
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        if (disableLayoutType.contains(viewHolder.itemViewType) || adapter.fullScreenLayoutId == viewHolder.itemViewType || adapter.loadMoreLayoutId == viewHolder.itemViewType) {
+        if (disableLayoutType.contains(viewHolder.itemViewType) || !adapter.inItemList(viewHolder.bindingAdapterPosition) || !adapter.inItemList(target.bindingAdapterPosition)) {
             return false
         }
         val fromPosition = viewHolder.bindingAdapterPosition
         val targetPosition = target.bindingAdapterPosition
-        if (inRange(fromPosition) && inRange(targetPosition)) {
+        Log.e("aaa",fromPosition.toString())
+        Log.e("bbb",targetPosition.toString())
+        //TODO 位置错误
+        if (adapter.inItemList(fromPosition) && adapter.inItemList(targetPosition)) {
             if (fromPosition < targetPosition) {
                 for (i in fromPosition until targetPosition) {
                     Collections.swap(adapter.itemList, i, i + 1)
