@@ -14,6 +14,12 @@ fun <RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapt
             if (adapter.itemList is ObList) {
                 (adapter.itemList as ObList).removeOnListChangedCallback(adapter.itemListListener)
             }
+           /* if (adapter.headerItemList is ObList) {
+                (adapter.headerItemList as ObList).removeOnListChangedCallback(adapter.headerListListener)
+            }
+            if (adapter.footerItemList is ObList) {
+                (adapter.footerItemList as ObList).removeOnListChangedCallback(adapter.footerListListener)
+            }*/
             super.startDrag(viewHolder)
         }
     }.apply {
@@ -52,6 +58,12 @@ class ItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseR
         if (adapter.itemList is ObList) {
             (adapter.itemList as ObList).addOnListChangedCallback(adapter.itemListListener)
         }
+   /*     if (adapter.headerItemList is ObList) {
+            (adapter.headerItemList as ObList).addOnListChangedCallback(adapter.headerListListener)
+        }
+        if (adapter.footerItemList is ObList) {
+            (adapter.footerItemList as ObList).addOnListChangedCallback(adapter.footerListListener)
+        }*/
         super.clearView(recyclerView, viewHolder)
     }
 
@@ -62,7 +74,6 @@ class ItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseR
         if (disableLayoutType.contains(viewHolder.itemViewType) || !adapter.inItemList(viewHolder.bindingAdapterPosition)) {
             return makeMovementFlags(0, 0)
         }
-        Log.e("qqq",viewHolder.bindingAdapterPosition.toString())
         return makeMovementFlags(dragDirection, swipeDirection)
     }
 
@@ -76,28 +87,24 @@ class ItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseR
         }
         val fromPosition = viewHolder.bindingAdapterPosition
         val targetPosition = target.bindingAdapterPosition
-        Log.e("aaa",fromPosition.toString())
-        Log.e("bbb",targetPosition.toString())
         //TODO 位置错误
-        if (adapter.inItemList(fromPosition) && adapter.inItemList(targetPosition)) {
-            if (fromPosition < targetPosition) {
-                for (i in fromPosition until targetPosition) {
-                    Collections.swap(adapter.itemList, i, i + 1)
-                }
-            } else {
-                for (i in fromPosition downTo targetPosition + 1) {
-                    Collections.swap(adapter.itemList, i, i - 1)
-                }
+        if (fromPosition < targetPosition) {
+            for (i in fromPosition until targetPosition) {
+                Collections.swap(adapter.itemList, i -adapter.headerItemList.size, i + 1 -adapter.headerItemList.size)
             }
-            adapter.notifyItemMoved(fromPosition, targetPosition)
+        } else {
+            for (i in fromPosition downTo targetPosition + 1) {
+                Collections.swap(adapter.itemList, i -adapter.headerItemList.size, i - 1 -adapter.headerItemList.size)
+            }
         }
+        adapter.notifyItemMoved(fromPosition, targetPosition)
         //adapter.notifyItemRangeChanged(min(fromPosition, targetPosition), abs(fromPosition - targetPosition) +1)
         innerDragListener?.onItemDrag(fromPosition, targetPosition)
         return true
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        adapter.itemList.removeAt(viewHolder.bindingAdapterPosition)
+        adapter.itemList.removeAt(viewHolder.bindingAdapterPosition - adapter.headerItemList.size)
         innerSwipeListener?.onItemSwipe(viewHolder.bindingAdapterPosition, direction)
     }
 

@@ -3,18 +3,21 @@ package com.fusion_nex_gen.yasuorvadapter.holder
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import com.fusion_nex_gen.yasuorvadapter.YasuoRVViewBindingAdapter
 
-class RecyclerViewBindingHolder<VB : ViewBinding>(root: View) :
+class RecyclerViewBindingHolder(root: View) :
     RecyclerView.ViewHolder(root) {
-    internal lateinit var binding: VB
+    internal lateinit var binding: ViewBinding
 
     /**
-     * 首次调用需要初始化binding
+     * 由于ViewBinding没有像DataBinding一样的DataBindingUtil来根据泛型创建实体的方法
+     * 因此如果使用ViewBinding，那么必须在[YasuoRVViewBindingAdapter.holderBind]中使用对应的ViewBinding.bind初始化binding
+     * 例如ItemLayoutImageExBinding.bind(it)
      */
-    fun <V : ViewBinding> createBinding(createBinding: (view: View) -> VB): V {
+    fun <VB : ViewBinding> createBinding(createBinding: (view: View) -> VB): VB {
         if (!::binding.isInitialized) {
             binding = createBinding(itemView)
         }
-        return binding as V
+        return binding as VB
     }
 }

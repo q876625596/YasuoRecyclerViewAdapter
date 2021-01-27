@@ -7,8 +7,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.fusion_nex_gen.yasuorvadapter.interfaces.Factory
-import com.fusion_nex_gen.yasuorvadapter.interfaces.LayoutFactory
 import com.fusion_nex_gen.yasuorvadapter.interfaces.Listener
 import kotlin.reflect.KClass
 
@@ -29,7 +27,8 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     RecyclerView.Adapter<VH>() {
 
     constructor(
-        context: Context, itemList: MutableList<T>,
+        context: Context,
+        itemList: MutableList<T>,
         headerItemList: MutableList<T>,
         footerItemList: MutableList<T>,
     ) : this(context) {
@@ -38,13 +37,26 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         this.footerItemList = footerItemList
     }
 
+    internal val dataInvalidation = Any()
+
     /**
-     * 列表
+     * item列表
      */
     var itemList: MutableList<T> = mutableListOf()
 
     /**
-     * 列表所有类型的集合，实体类kClass作为key，类型type作为value
+     * header列表
+     */
+    var headerItemList: MutableList<T> = mutableListOf()
+
+    /**
+     * footer列表
+     */
+    var footerItemList: MutableList<T> = mutableListOf()
+
+
+    /**
+     * 所有列表类型的集合，实体类[KClass]作为key，类型[ItemType]作为value
      */
     internal val itemTypes: MutableMap<KClass<*>, ItemType> = mutableMapOf()
 
@@ -54,11 +66,6 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     internal var recyclerView: RecyclerView? = null
 
     /**
-     * 内部布局拦截器
-     */
-    internal var innerLayoutFactory: LayoutFactory? = null
-
-    /**
      * 布局创建器
      */
     internal val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -66,19 +73,24 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 拖拽/侧滑删除
      */
-    var itemTouchHelper: ItemTouchHelper? = null
+    internal var itemTouchHelper: ItemTouchHelper? = null
 
     /******空布局******/
 
     /**
-     * 空布局资源id/viewType
+     * 空布局资源id，等同于viewType
      */
-    var emptyLayoutId: Int? = null
+    internal var emptyLayoutId: Int? = null
 
     /**
      * 空布局的实体数据
      */
-    var emptyLayoutItem: T? = null
+    internal var emptyLayoutItem: T? = null
+
+    fun setEmptyLayout(emptyLayoutId: Int, emptyLayoutItem: T) {
+        this.emptyLayoutId = emptyLayoutId
+        this.emptyLayoutItem = emptyLayoutItem
+    }
 
     /**
      * 判断当前是否是显示空布局状态
@@ -125,24 +137,21 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 加载更多的布局类型
      */
-    var loadMoreLayoutId: Int? = null
+    internal var loadMoreLayoutId: Int? = null
 
     /**
      * 加载更多的布局类型数据实体
      */
-    var loadMoreLayoutItem: T? = null
+    internal var loadMoreLayoutItem: T? = null
+
+    fun setLoadMoreLayout(loadMoreLayoutId: Int, loadMoreLayoutItem: T) {
+        this.loadMoreLayoutId = loadMoreLayoutId
+        this.loadMoreLayoutItem = loadMoreLayoutItem
+    }
 
     fun hasLoadMore(): Boolean {
         return loadMoreLayoutId != null && loadMoreLayoutItem != null
     }
-
-    /******header******/
-
-    var headerItemList: MutableList<T> = mutableListOf()
-
-    /******footer******/
-
-    var footerItemList: MutableList<T> = mutableListOf()
 
     /******item相关******/
 
@@ -162,11 +171,13 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         return getAllListSize()
     }
 
+    /**
+     * 获取全部列表的长度
+     */
     fun getAllListSize() = headerItemList.size + itemList.size + footerItemList.size
 
-
     /**
-     * 判断position只包含在allList内
+     * 判断position包含在allList内
      */
     internal fun inAllList(position: Int): Boolean {
         return position >= 0 && position < getAllListSize()
@@ -216,7 +227,11 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * @param position holder.bindingAdapterPosition
      */
     override fun getItemId(position: Int): Long {
-        return position.toLong()
+        return if (hasStableIds()) {
+            (getItem(position).hashCode() + position).toLong()
+        } else {
+            super.getItemId(position)
+        }
     }
 
     /**
@@ -306,12 +321,6 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      */
     abstract fun <L : Listener<VH>> setHolderBindListener(type: Int, listener: L)
 
-    open fun setInnerFactory(factory: Factory) {
-        when (factory) {
-            is LayoutFactory -> innerLayoutFactory = factory
-        }
-    }
-
 
     /******列表改变的监听******/
 
@@ -326,7 +335,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         }
 
         override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
-            notifyItemRangeChanged(i + headerItemList.size, i1)
+            notifyItemRangeChanged(i, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -335,7 +344,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             i: Int,
             i1: Int
         ) {
-            notifyItemRangeInserted(i + headerItemList.size, i1)
+            notifyItemRangeInserted(i, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -345,7 +354,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             i1: Int,
             i2: Int
         ) {
-            notifyItemMoved(i + headerItemList.size, i1 + headerItemList.size)
+            notifyItemMoved(i, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -353,7 +362,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
-                notifyItemRangeRemoved(i + headerItemList.size, i1)
+                notifyItemRangeRemoved(i, i1)
             }
             afterDataChangeListener?.invoke()
         }
@@ -484,6 +493,26 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         return false
     }
 
+    override fun onBindViewHolder(holder: VH, position: Int, payloads: List<Any>) {
+        if (isValidPayLoads(payloads)) {
+            onBindViewHolder(holder, position)
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
+    internal fun isValidPayLoads(payloads: List<Any>): Boolean {
+        if (payloads.isEmpty()) {
+            return false
+        }
+        payloads.forEach {
+            if (it != dataInvalidation) {
+                return false
+            }
+        }
+        return true
+    }
+
 }
 
 /**
@@ -507,8 +536,4 @@ fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setSpan(
         }
     }
     return this
-}
-
-fun <T> List<Any>.getFormat(position: Int): T {
-    return get(position) as T
 }
