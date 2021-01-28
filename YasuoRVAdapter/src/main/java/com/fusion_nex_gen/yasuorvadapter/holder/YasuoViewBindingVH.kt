@@ -5,11 +5,11 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.fusion_nex_gen.yasuorvadapter.YasuoRVViewBindingAdapter
 
+class YasuoViewBindingVH(root: View) :
+    RecyclerView.ViewHolder(root) {
+      lateinit var binding: ViewBinding
 
-class RecyclerViewHolder(private val convertView: View) :
-    RecyclerView.ViewHolder(convertView) {
-
-    internal lateinit var binding: ViewBinding
+      fun isInitBinding() = ::binding.isInitialized
 
     /**
      * 由于ViewBinding没有像DataBinding一样的DataBindingUtil来根据泛型创建实体的方法
@@ -17,17 +17,9 @@ class RecyclerViewHolder(private val convertView: View) :
      * 例如ItemLayoutImageExBinding.bind(it)
      */
     fun <VB : ViewBinding> createBinding(createBinding: (view: View) -> VB): VB {
-        if (!::binding.isInitialized) {
+        if (!isInitBinding()) {
             binding = createBinding(itemView)
         }
         return binding as VB
-    }
-
-    fun <T : View> getView(viewId: Int): T {
-        val view = convertView.findViewById<T>(viewId)
-        if (view != null) {
-            return view
-        }
-        throw Exception("The specified view id is not found")
     }
 }

@@ -1,16 +1,16 @@
-package com.fusion_nex_gen.yasuorvadapter.interfaces
+package com.fusion_nex_gen.yasuorvadapter.listener
 
 import androidx.databinding.ViewDataBinding
 import androidx.viewbinding.ViewBinding
 
 
-interface Listener<in VH>
+interface YasuoVHListener<in VH>
 
 /**
  * View Holder创建时触发，用于完成视图的初始化
  *
  */
-interface ViewHolderCreateListener<in VH> : Listener<VH> {
+interface YasuoVHCreateListener<in VH> : YasuoVHListener<VH> {
     /**
      * @param holder adapter position
      */
@@ -22,7 +22,7 @@ interface ViewHolderCreateListener<in VH> : Listener<VH> {
  * View Holder创建时触发，用于完成视图的初始化
  *
  */
-interface ViewHolderCreateListenerForViewBinding<in VH> : Listener<VH> {
+interface YasuoViewBindingVHCreateListener<in VH> : YasuoVHListener<VH> {
 
     /**
      * @param holder adapter position
@@ -35,7 +35,7 @@ interface ViewHolderCreateListenerForViewBinding<in VH> : Listener<VH> {
  * View Holder创建时触发，用于完成视图的初始化
  *
  */
-interface ViewHolderCreateListenerForDataBinding<in VH> : Listener<VH> {
+interface YasuoDataBindingVHCreateListener<in VH> : YasuoVHListener<VH> {
 
     /**
      * @param holder adapter position
@@ -46,9 +46,9 @@ interface ViewHolderCreateListenerForDataBinding<in VH> : Listener<VH> {
 
 
 /**
- * View Holder更新时触发，用于更新Item数据,ViewBinding专用
+ * View Holder更新时触发，用于更新Item数据
  */
-interface ViewHolderBindListener<in VH> : Listener<VH> {
+interface YasuoVHBindListener<in VH> : YasuoVHListener<VH> {
 
     /**
      * @param holder
@@ -62,7 +62,7 @@ interface ViewHolderBindListener<in VH> : Listener<VH> {
 /**
  * View Holder更新时触发，用于更新Item数据,ViewBinding专用
  */
-interface ViewHolderBindListenerForViewBinding<in VH> : Listener<VH> {
+interface YasuoViewBindingVHBindListener<in VH> : YasuoVHListener<VH> {
 
     /**
      * @param holder
@@ -74,7 +74,7 @@ interface ViewHolderBindListenerForViewBinding<in VH> : Listener<VH> {
 /**
  * View Holder更新时触发，用于更新Item数据,ViewDataBinding专用
  */
-interface ViewHolderBindListenerForDataBinding<in VH> : Listener<VH> {
+interface YasuoDataBindingVHBindListener<in VH> : YasuoVHListener<VH> {
 
     /**
      * @param holder

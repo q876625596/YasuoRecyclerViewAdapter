@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.fusion_nex_gen.yasuorecyclerviewadapter.databinding.ActivityEmptyLayoutBinding
 import com.fusion_nex_gen.yasuorecyclerviewadapter.model.ImageBean
 import com.fusion_nex_gen.yasuorecyclerviewadapter.model.TextBean
-import com.fusion_nex_gen.yasuorvadapter.ObList
+import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.adapterBinding
 import com.fusion_nex_gen.yasuorvadapter.holderBind
 
@@ -18,7 +18,7 @@ class EmptyLayoutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = ActivityEmptyLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val list = ObList<Any>().apply {
+        val list = YasuoList<Any>().apply {
             add(TextBean(MutableLiveData("我是第一个text")))
             add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@EmptyLayoutActivity, R.drawable.aaa))))
             add(TextBean(MutableLiveData("我是第三个text")))

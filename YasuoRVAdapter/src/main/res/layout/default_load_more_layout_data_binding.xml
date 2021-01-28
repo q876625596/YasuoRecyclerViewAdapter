@@ -3,7 +3,7 @@
     <data>
         <variable
             name="item"
-            type="com.fusion_nex_gen.yasuorvadapter.DefaultLoadMoreItem" />
+            type="com.fusion_nex_gen.yasuorvadapter.bean.DefaultLoadMoreItem" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"

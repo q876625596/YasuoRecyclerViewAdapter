@@ -1,14 +1,14 @@
 package com.fusion_nex_gen.yasuorvadapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import androidx.databinding.ObservableList
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.fusion_nex_gen.yasuorvadapter.interfaces.Listener
+import com.fusion_nex_gen.yasuorvadapter.bean.*
+import com.fusion_nex_gen.yasuorvadapter.listener.YasuoVHListener
 import kotlin.reflect.KClass
 
 
@@ -22,6 +22,7 @@ import kotlin.reflect.KClass
  * 4、加载更多
  * 5、折叠布局
  * 6、拖拽、横向滑动删除
+ * TODO 7、吸顶
  * TODO 7、横向滑动显示选项
  */
 abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context: Context) :
@@ -35,37 +36,42 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      */
     constructor(
         context: Context,
-        itemList: ObList<T>,
-        headerItemList: ObList<T>,
-        footerItemList: ObList<T>,
+        itemList: YasuoList<T>,
+        headerItemList: YasuoList<T>,
+        footerItemList: YasuoList<T>,
+        isFold: Boolean = false,
     ) : this(context) {
         this.itemList = itemList
-        this.headerItemList = headerItemList
-        this.footerItemList = footerItemList
+        this.headerList = headerItemList
+        this.footerList = footerItemList
+        this.isFold = isFold
     }
 
     internal val dataInvalidation = Any()
 
+
+    var isFold: Boolean = false
+
     /**
      * item列表
      */
-    var itemList: ObList<T> = ObList()
+    var itemList: YasuoList<T> = YasuoList()
 
     /**
      * header列表
      */
-    var headerItemList: ObList<T> = ObList()
+    var headerList: YasuoList<T> = YasuoList()
 
     /**
      * footer列表
      */
-    var footerItemList: ObList<T> = ObList()
+    var footerList: YasuoList<T> = YasuoList()
 
 
     /**
-     * 所有列表类型的集合，实体类[KClass]作为key，类型[ItemType]作为value
+     * 所有列表类型的集合，实体类[KClass]作为key，类型[YasuoItemType]作为value
      */
-    internal val itemTypes: MutableMap<KClass<*>, ItemType> = mutableMapOf()
+    internal val itemTypes: MutableMap<KClass<*>, YasuoItemType> = mutableMapOf()
 
     /**
      * RV
@@ -88,11 +94,13 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 空布局资源id，等同于viewType
      */
     internal var emptyLayoutId: Int? = null
+    fun getEmptyLayoutId() = emptyLayoutId
 
     /**
      * 空布局的实体数据
      */
     internal var emptyLayoutItem: T? = null
+    fun getEmptyLayoutItem() = emptyLayoutItem
 
     /**
      * 设置空布局
@@ -103,8 +111,6 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         this.emptyLayoutId = emptyLayoutId
         this.emptyLayoutItem = emptyLayoutItem
     }
-
-    /******空布局******/
 
     /**
      * 判断当前是否是显示空布局状态
@@ -125,10 +131,13 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     }
 
     /**
-     * 如果[emptyLayoutItem]中没有使用[androidx.lifecycle.LiveData]来监听loadMore内容的改变
-     * 那么在修改了[emptyLayoutItem]中的数据后需要调用此方法手动刷新loadMore显示的内容
+     * 如果[emptyLayoutItem]中没有使用[androidx.lifecycle.LiveData]来监听内容的改变
+     * 那么需要调用此方法手动刷新emptyLayout显示的内容
      */
-    fun refreshEmptyLayout() {
+    fun refreshEmptyLayout(options: T.() -> Unit) {
+        emptyLayoutItem?.apply {
+            options()
+        } ?: throw RuntimeException("emptyLayoutItem is null")
         notifyItemChanged(0)
     }
 
@@ -155,7 +164,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /******加载更多******/
 
     /**
-     * 锁定加载更多，如果为true，那么不再触发监听
+     * 锁定加载更多的监听，如果为true，那么不再触发监听
      */
     var lockedLoadMoreListener = false
 
@@ -163,12 +172,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 加载更多的布局类型
      */
     internal var loadMoreLayoutId: Int? = null
+    fun getLoadMoreLayoutId() = loadMoreLayoutId
 
     /**
      * 加载更多的布局类型数据实体
      */
     internal var loadMoreLayoutItem: T? = null
+    fun getLoadMoreLayoutItem() = loadMoreLayoutItem
 
+    /**
+     * 设置加载更多布局与实体数据
+     * @param loadMoreLayoutId 加载更多的布局类型
+     * @param loadMoreLayoutItem 加载更多的布局类型数据实体
+     */
     fun setLoadMoreLayout(loadMoreLayoutId: Int, loadMoreLayoutItem: T) {
         this.loadMoreLayoutId = loadMoreLayoutId
         this.loadMoreLayoutItem = loadMoreLayoutItem
@@ -176,14 +192,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
 
 
     /**
-     * 如果[loadMoreLayoutItem]中没有使用[androidx.lifecycle.LiveData]来监听loadMore内容的改变
-     * 那么在修改了[loadMoreLayoutItem]中的数据后需要调用此方法手动刷新loadMore显示的内容
+     * 如果[loadMoreLayoutItem]中没有使用[androidx.lifecycle.LiveData]来监听内容的改变
+     * 那么需要调用此方法手动刷新loadMore显示的内容
      */
-    fun refreshLoadMoreLayout() {
+    fun refreshLoadMoreLayout(options: T.() -> Unit) {
+        loadMoreLayoutItem?.apply {
+            options()
+        } ?: throw RuntimeException("loadMoreLayoutItem is null")
         notifyItemChanged(getAllListSize())
     }
 
-
+    /**
+     * 设置了loadMore的布局与数据
+     */
     fun hasLoadMore(): Boolean {
         return loadMoreLayoutId != null && loadMoreLayoutItem != null
     }
@@ -191,8 +212,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /******item相关******/
 
     /**
-     * 获取item数量
-     * Get the counts of items
+     * 获取可显示的所有的item数量
      */
     override fun getItemCount(): Int {
         //如果是全屏布局模式
@@ -209,52 +229,70 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 获取全部列表的长度
      */
-    fun getAllListSize() = headerItemList.size + itemList.size + footerItemList.size
-
-    fun getHeaderTruePosition(position: Int) = position
-    fun getItemTruePosition(position: Int) = position - headerItemList.size
-    fun getFooterTruePosition(position: Int) = position - headerItemList.size - itemList.size
+    fun getAllListSize() = headerList.size + itemList.size + footerList.size
 
     /**
-     * 判断position包含在allList内
+     * 获取headerList的真实position
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
+     */
+    fun getHeaderTruePosition(position: Int) = position
+
+    /**
+     * 获取itemList的真实position
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
+     */
+    fun getItemTruePosition(position: Int) = position - headerList.size
+
+    /**
+     * 获取footerList的真实position
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
+     */
+    fun getFooterTruePosition(position: Int) = position - headerList.size - itemList.size
+
+    /**
+     * 判断position是否包含在headerList，itemList，footerList内
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
     internal fun inAllList(position: Int): Boolean {
-        return position >= 0 && position < getAllListSize()
+        return position in 0 until getAllListSize()
     }
 
     /**
      * 判断position只包含在headerList内
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
     internal fun inHeaderList(position: Int): Boolean {
-        return position >= 0 && position < headerItemList.size
+        return position in 0 until headerList.size
     }
 
     /**
      * 判断position只包含在itemList内
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
     internal fun inItemList(position: Int): Boolean {
-        return position >= headerItemList.size && position < itemList.size + headerItemList.size
+        return position in headerList.size until itemList.size + headerList.size
     }
 
     /**
      * 判断position只包含在footerList内
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
     internal fun inFooterList(position: Int): Boolean {
-        return position >= headerItemList.size + itemList.size && position < getAllListSize()
+        return position in headerList.size + itemList.size until getAllListSize()
     }
 
 
     /**
      * 根据position获取item
      * Get item according to position
-     * @param position holder.bindingAdapterPosition
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
     open fun getItem(position: Int): T {
         return when {
             isEmptyLayoutMode() -> emptyLayoutItem!!
-            inHeaderList(position) -> headerItemList[position]
-            inItemList(position) -> itemList[position - headerItemList.size]
-            inFooterList(position) -> footerItemList[position - itemList.size - headerItemList.size]
+            inHeaderList(position) -> headerList[getHeaderTruePosition(position)]
+            inItemList(position) -> itemList[getItemTruePosition(position)]
+            inFooterList(position) -> footerList[getFooterTruePosition(position)]
             hasLoadMore() -> loadMoreLayoutItem!!
             else -> throw RuntimeException(
                 "该position找不到对应实体，position = ${position}，\n" +
@@ -266,7 +304,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 防止itemView闪烁
      * Prevent ItemView from flashing
-     * @param position holder.bindingAdapterPosition
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
     override fun getItemId(position: Int): Long {
         return if (hasStableIds()) {
@@ -278,18 +316,16 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
 
     /**
      * 获取item的类型（类型即为布局id）
-     * @param position holder.bindingAdapterPosition
+     * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
     override fun getItemViewType(position: Int): Int {
         return when {
             isEmptyLayoutMode() -> emptyLayoutId!!
-            inAllList(position) -> {
-                itemTypes[getItem(position)::class]?.itemLayoutId
-                    ?: throw RuntimeException(
-                        "找不到viewType，position = ${position}，\n" +
-                                "viewType not found,position = $position"
-                    )
-            }
+            inAllList(position) -> itemTypes[getItem(position)::class]?.itemLayoutId
+                ?: throw RuntimeException(
+                    "找不到viewType，position = ${position}，\n" +
+                            "viewType not found,position = $position"
+                )
             hasLoadMore() -> loadMoreLayoutId!!
             else -> throw RuntimeException(
                 "找不到viewType，position = ${position}，\n" +
@@ -300,42 +336,72 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
 
 
     /******折叠布局******/
-    fun expandOrFoldItem(item: T) {
-        if (item is FoldItem) {
-            if (item.list.isEmpty()) {
-                return
+
+    /**
+     * 展开/折叠某个item
+     * @param item 需要展开的item
+     */
+    fun expandOrFoldItem(item: Any, forceNotify: Boolean = false) {
+        //首先判断该item是否继承于FoldItem
+        if (item !is YasuoFoldItem) {
+            throw RuntimeException(
+                "实体类必须继承FoldItem，\n" +
+                        "The entity class must extend FoldItem"
+            )
+        }
+        //如果下一级列表为 空，那么不做任何操作
+        if (item.list.isEmpty()) {
+            return
+        }
+        val position = itemList.indexOf(item as T)
+        //如果已经展开，那么收起
+        if (item.isExpand) {
+            item.isExpand = false
+            itemList.removeFrom(position + 1, position + 1 + item.list.size)
+            if (forceNotify) {
+                notifyItemRangeRemoved(position + 1, item.list.size)
             }
-            val position = itemList.indexOf(item)
-            if (item.isExpand) {
-                item.isExpand = false
-                itemList.removeFrom(position + 1, position + 1 + item.list.size)
-            } else {
-                item.isExpand = true
-                item.list.forEach {
-                    if (it.parentHash == null) {
-                        it.parentHash = item.hashCode()
-                    }
-                }
-                itemList.addAll(position + 1, item.list as ObList<T>)
+            return
+        }
+        //如果未展开，那么展开
+        item.isExpand = true
+        //展开的同时给子级的parentHash赋值
+        item.list.forEach {
+            if (it.parentHash == null) {
+                it.parentHash = item.hashCode()
             }
         }
-
+        itemList.addAll(position + 1, item.list as YasuoList<T>)
+        if (forceNotify) {
+            notifyItemRangeInserted(position + 1, item.list.size)
+        }
 
     }
 
     /**
-     * 如果删除的是展开列表中的item
+     * 如果有操作需要删除展开列表中的子级item
      * 则需要在list.remove之前调用此方法
+     * @param item 需要删除的item
      */
     fun removeFoldListItem(item: Any) {
-        Log.e("item is FoldItem", (item is FoldItem).toString())
-        //Log.e("item.parentHash",( item.parentHash != null).toString())
-        if (item is FoldItem && item.parentHash != null) {
-            (itemList.find {
-                Log.e("asas", (it.hashCode() == item.parentHash).toString())
-                it.hashCode() == item.parentHash
-            } as? FoldItem)?.list?.remove(item)
+        //首先判断该item是否继承于FoldItem
+        if (item !is YasuoFoldItem) {
+            throw RuntimeException(
+                "实体类必须继承FoldItem，\n" +
+                        "The entity class must extend FoldItem"
+            )
         }
+        //如果该子级item的parentHash为空，那么表示该item没有被展开显示过，那么抛出异常提示不能使用该方法删除
+        if (item.parentHash == null) {
+            throw RuntimeException(
+                "不要使用此方法删除列表中未显示的子item，\n" +
+                        "Do not use this method to delete child items that are not displayed in the list"
+            )
+        }
+        //如果找到该子项，那么删除
+        (itemList.find {
+            it.hashCode() == item.parentHash
+        } as? YasuoFoldItem)?.list?.remove(item)
     }
 
     /******布局占比相关******/
@@ -344,23 +410,23 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 在GridLayoutManager模式下，指定item在当前列或行的占比
      * In GridLayoutManager mode, specify the proportion of items in the current column or row
      */
-    var spanSizeLookup: GridLayoutManager.SpanSizeLookup? = null
+    var gridSpan: ((position: Int) -> Int)? = null
 
     /**
-     * 此方法针对一些需要强制性占满或无法在onAttachedToRecyclerView中实现占满的item
+     * 此方法针对StaggeredGridLayoutManager实现占满的item
      * 可重写此方法来添加header、footer，或者自定义loadMoreView、全屏布局的viewType
-     * @param viewType Layout type
      */
-    open fun isFullSpanType(viewType: Int): Boolean {
-        //默认判断loadMoreViewType和全屏布局的type
-        return loadMoreLayoutId == viewType || emptyLayoutId == viewType
+    var staggeredGridFullSpan: (position: Int, viewType: Int) -> Boolean = { position, viewType ->
+        loadMoreLayoutId == viewType || emptyLayoutId == viewType
+                || inHeaderList(position) || inFooterList(position)
     }
 
     override fun onViewAttachedToWindow(holder: VH) {
         super.onViewAttachedToWindow(holder)
-        if (isFullSpanType(holder.itemViewType)) {
-            val lp = holder.itemView.layoutParams
-            if (lp != null && lp is StaggeredGridLayoutManager.LayoutParams) {
+        //这里用于判断StaggeredGridLayoutManager的item是否占满一行
+        val lp = holder.itemView.layoutParams
+        if (lp != null && lp is StaggeredGridLayoutManager.LayoutParams) {
+            if (staggeredGridFullSpan(holder.bindingAdapterPosition, holder.itemViewType)) {
                 lp.isFullSpan = true
             }
         }
@@ -375,22 +441,46 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         if (manager is GridLayoutManager) {
             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
-                    if (!inItemList(position)) {
+                    //如果是空布局，那么也默认占满一行
+                    if (isEmptyLayoutMode()) {
                         return manager.spanCount
                     }
-                    val type = getItemViewType(position)
-                    return when {
-                        isFullSpanType(type) -> manager.spanCount
-                        spanSizeLookup == null -> {
-                            val item = getItem(position)
-                            if (item is FoldItem) {
-                                if (item.fullSpan) manager.spanCount else 1
-                            } else {
-                                1
-                            }
+                    val item = getItem(position)
+                    //整个粒度从小到大，高度定制span
+                    //如果是头部
+                    if (inHeaderList(position)) {
+                        //如果头部继承了YasuoHeaderItem，以YasuoHeaderItem.span为准
+                        return if (item is YasuoHeaderItem) {
+                            item.span
+                        } else {
+                            //否则以spanEx为准，无任何设置时头部默认占满
+                            gridSpan?.invoke(position) ?: manager.spanCount
                         }
-                        else -> spanSizeLookup!!.getSpanSize(position)
                     }
+                    //如果是尾部
+                    if (inFooterList(position)) {
+                        //如果尾部继承了YasuoFooterItem，以YasuoFooterItem.span为准
+                        return if (item is YasuoFooterItem) {
+                            item.span
+                        } else {
+                            //否则以spanEx为准，无任何设置时尾部默认占满
+                            gridSpan?.invoke(position) ?: manager.spanCount
+                        }
+                    }
+                    //如果是中间列表
+                    if (inItemList(position)) {
+                        return when (item) {
+                            //如果中间列表继承了YasuoNormalItem，以YasuoNormalItem.span为准
+                            is YasuoNormalItem -> item.span
+                            //如果中间列表继承了YasuoFoldItem，以YasuoFoldItem.span为准
+                            is YasuoFoldItem -> item.span
+                            //如果没有继承任何类
+                            //则以spanEx为准，无任何设置时中间列表默认一格
+                            else -> gridSpan?.invoke(position) ?: 1
+                        }
+                    }
+                    //如果以上都不是，那么只剩下loadMore，默认占满一行
+                    return manager.spanCount
                 }
             }
         }
@@ -408,13 +498,13 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 添加holder创建监听
      * innerHolderCreateListenerMap.put(type, listener)
      */
-    abstract fun <L : Listener<VH>> setHolderCreateListener(type: Int, listener: L)
+    abstract fun <L : YasuoVHListener<VH>> setHolderCreateListener(type: Int, listener: L)
 
     /**
      * 添加holder绑定监听
      * innerHolderBindListenerMap.put(type, listener)
      */
-    abstract fun <L : Listener<VH>> setHolderBindListener(type: Int, listener: L)
+    abstract fun <L : YasuoVHListener<VH>> setHolderBindListener(type: Int, listener: L)
 
 
     /******列表改变的监听******/
@@ -474,7 +564,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         }
 
         override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
-            notifyItemRangeChanged(i + headerItemList.size, i1)
+            notifyItemRangeChanged(i + headerList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -483,7 +573,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             i: Int,
             i1: Int
         ) {
-            notifyItemRangeInserted(i + headerItemList.size, i1)
+            notifyItemRangeInserted(i + headerList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -493,7 +583,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             i1: Int,
             i2: Int
         ) {
-            notifyItemMoved(i + headerItemList.size, i1 + headerItemList.size)
+            notifyItemMoved(i + headerList.size, i1 + headerList.size)
             afterDataChangeListener?.invoke()
         }
 
@@ -501,7 +591,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
-                notifyItemRangeRemoved(i + headerItemList.size, i1)
+                notifyItemRangeRemoved(i + headerList.size, i1)
             }
             afterDataChangeListener?.invoke()
         }
@@ -519,7 +609,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         }
 
         override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
-            notifyItemRangeChanged(i + headerItemList.size + itemList.size, i1)
+            notifyItemRangeChanged(i + headerList.size + itemList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -528,7 +618,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             i: Int,
             i1: Int
         ) {
-            notifyItemRangeInserted(i + headerItemList.size + itemList.size, i1)
+            notifyItemRangeInserted(i + headerList.size + itemList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
@@ -538,7 +628,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             i1: Int,
             i2: Int
         ) {
-            notifyItemMoved(i + headerItemList.size + itemList.size, i1 + headerItemList.size + itemList.size)
+            notifyItemMoved(i + headerList.size + itemList.size, i1 + headerList.size + itemList.size)
             afterDataChangeListener?.invoke()
         }
 
@@ -546,7 +636,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
-                notifyItemRangeRemoved(i + headerItemList.size + itemList.size, i1)
+                notifyItemRangeRemoved(i + headerList.size + itemList.size, i1)
             }
             afterDataChangeListener?.invoke()
         }
@@ -571,7 +661,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         }
     }
 
-    internal fun isValidPayLoads(payloads: List<Any>): Boolean {
+    private fun isValidPayLoads(payloads: List<Any>): Boolean {
         if (payloads.isEmpty()) {
             return false
         }
@@ -597,13 +687,19 @@ fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>, RV : RecyclerView> Adapter.atta
 /**
  * 当为GridLayoutManager的时候，设置item的占用比例
  */
-fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setSpan(
-    spanSizeLookup: (item: T, position: Int) -> Int
+fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setGridSpan(
+    spanEx: (position: Int) -> Int
 ): Adapter {
-    this.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-        override fun getSpanSize(position: Int): Int {
-            return spanSizeLookup(getItem(position), position - headerItemList.size)
-        }
-    }
+    this.gridSpan = spanEx
+    return this
+}
+
+/**
+ * 当为StaggeredGridLayoutManager的时候，设置item的是否占满
+ */
+fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setStaggeredGridFullSpan(
+    staggeredGridFullSpan: (position: Int, viewType: Int) -> Boolean
+): Adapter {
+    this.staggeredGridFullSpan = staggeredGridFullSpan
     return this
 }

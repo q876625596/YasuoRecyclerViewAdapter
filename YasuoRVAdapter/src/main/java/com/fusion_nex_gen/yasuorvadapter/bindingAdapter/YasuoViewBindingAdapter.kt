@@ -1,4 +1,4 @@
-package com.fusion_nex_gen.yasuorvadapter
+package com.fusion_nex_gen.yasuorvadapter.bindingAdapter
 
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
@@ -10,7 +10,7 @@ import androidx.databinding.BindingAdapter
  * 设置背景色
  */
 @BindingAdapter(value = ["android:background"])
-fun View.setMyBackground(background: Any?) {
+fun View.setYasuoBackground(background: Any?) {
     if (background is Drawable) {
         setBackground(background)
         return
@@ -23,6 +23,6 @@ fun View.setMyBackground(background: Any?) {
 
 
 @BindingAdapter("android:textSize")
-fun setTextSizeSp(view: TextView, size: Float) {
+fun setYasuoTextSizeSp(view: TextView, size: Float) {
     view.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
 }

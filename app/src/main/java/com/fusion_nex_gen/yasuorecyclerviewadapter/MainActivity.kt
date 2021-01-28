@@ -10,7 +10,12 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.fusion_nex_gen.yasuorecyclerviewadapter.databinding.*
 import com.fusion_nex_gen.yasuorecyclerviewadapter.model.*
 import com.fusion_nex_gen.yasuorvadapter.*
+import com.fusion_nex_gen.yasuorvadapter.bean.DefaultLoadMoreItem
+import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
+import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.databinding.DefaultLoadMoreLayoutBinding
+import com.fusion_nex_gen.yasuorvadapter.listener.YasuoItemTouchHelperCallBack
+import com.fusion_nex_gen.yasuorvadapter.listener.attach
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,14 +24,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val list = ObList<Any>()
+        val list = YasuoList<Any>()
         for (i in 0 until 40) {
             when (i % 7) {
                 0 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.aaa))).apply {
-                    this.list = ObList<FoldItem>().apply {
-                        add(TextBean(MutableLiveData("我是内部第1个text")).apply { fullSpan = true })
+                    this.list = YasuoList<YasuoFoldItem>().apply {
+                        add(TextBean(MutableLiveData("我是内部第1个text")).apply { span = 3 })
                         add(TextBean(MutableLiveData("我是内部第2个text")))
                         add(TextBean(MutableLiveData("我是内部第3个text")))
+                        add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
+                            canClick.value = true
+                        })
                     }
                 })
                 1 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.bbb))))
@@ -38,11 +46,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val headerList = ObList<Any>().apply {
+        val headerList = YasuoList<Any>().apply {
             add(HeaderOneBean(MutableLiveData("我是header1，点击我新增header")))
             add(HeaderTwoBean(MutableLiveData(Color.RED)))
         }
-        val footerList = ObList<Any>().apply {
+        val footerList = YasuoList<Any>().apply {
             add(FooterOneBean(MutableLiveData("我是footer1，点击我新增footer")))
             add(FooterTwoBean(MutableLiveData(Color.BLUE)))
         }
@@ -50,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         binding.myRV.layoutManager = GridLayoutManager(this, 3)
         //普通findViewById用法
         binding.myRV.adapterViewBinding(this, this, list, headerList, footerList, true) {
-            ItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
+            YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
             holderBindLoadMore(R.layout.default_load_more_layout, loadMoreItem, DefaultLoadMoreLayoutBinding::class, {
                 DefaultLoadMoreLayoutBinding.bind(it)
             }) { holder, item ->
@@ -99,11 +107,15 @@ class MainActivity : AppCompatActivity() {
             }) { holder, item ->
                 //如果未使用了LiveData，这样写
                 text.text = item.text.value
+
                 text.setOnClickListener {
                     Log.e("asas", "setOnClickListener")
-                    removeFoldListItem(item)
+                    if (item.parentHash != null) {
+                        removeFoldListItem(item)
+                    }
                     itemList.remove(item)
                 }
+
 //                val textView = holder.getView<TextView>(R.id.text)
 //                textView.text = text.value
 //                textView.setOnClickListener {
@@ -124,6 +136,16 @@ class MainActivity : AppCompatActivity() {
                 ItemLayoutImageExBinding.bind(it)
             }) { holder, item ->
                 image.setImageDrawable(item.image.value)
+                if (item.canClick.value == true) {
+                    image.setOnClickListener {
+                        item.image.value = ContextCompat.getDrawable(this@MainActivity, R.drawable.ccc)
+                        image.setImageDrawable(item.image.value)
+                    }
+                } else {
+                    image.setOnClickListener {
+                        expandOrFoldItem(item)
+                    }
+                }
 //                val imageView = holder.getView<ImageView>(R.id.image)
 //                imageView.setImageDrawable(image.value)
             }

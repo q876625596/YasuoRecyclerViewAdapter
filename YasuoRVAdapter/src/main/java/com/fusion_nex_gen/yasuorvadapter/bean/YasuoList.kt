@@ -1,9 +1,9 @@
-package com.fusion_nex_gen.yasuorvadapter
+package com.fusion_nex_gen.yasuorvadapter.bean
 
 import androidx.databinding.ObservableArrayList
 import kotlin.math.min
 
-open class ObList<T> : ObservableArrayList<T>() {
+open class YasuoList<T> : ObservableArrayList<T>() {
 
     fun removeAtIndexes(vararg indexes: Int) {
         indexes.forEach {

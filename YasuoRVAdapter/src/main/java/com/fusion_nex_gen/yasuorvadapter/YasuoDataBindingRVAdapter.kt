@@ -11,10 +11,12 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.RecyclerView
-import com.fusion_nex_gen.yasuorvadapter.holder.RecyclerDataBindingHolder
-import com.fusion_nex_gen.yasuorvadapter.interfaces.Listener
-import com.fusion_nex_gen.yasuorvadapter.interfaces.ViewHolderBindListenerForDataBinding
-import com.fusion_nex_gen.yasuorvadapter.interfaces.ViewHolderCreateListenerForDataBinding
+import com.fusion_nex_gen.yasuorvadapter.bean.YasuoItemType
+import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
+import com.fusion_nex_gen.yasuorvadapter.holder.YasuoDataBindingVH
+import com.fusion_nex_gen.yasuorvadapter.listener.YasuoVHListener
+import com.fusion_nex_gen.yasuorvadapter.listener.YasuoDataBindingVHBindListener
+import com.fusion_nex_gen.yasuorvadapter.listener.YasuoDataBindingVHCreateListener
 import kotlin.reflect.KClass
 
 /******使用viewDataBinding******/
@@ -30,12 +32,13 @@ import kotlin.reflect.KClass
 inline fun RecyclerView.adapterDataBinding(
     context: Context,
     life: LifecycleOwner,
-    itemList: ObList<Any>,
-    headerItemList: ObList<Any> = ObList(),
-    footerItemList: ObList<Any> = ObList(),
+    itemList: YasuoList<Any>,
+    headerItemList: YasuoList<Any> = YasuoList(),
+    footerItemList: YasuoList<Any> = YasuoList(),
+    isFold: Boolean = false,
     rvListener: YasuoRVDataBindingAdapter.() -> YasuoRVDataBindingAdapter
 ): YasuoRVDataBindingAdapter {
-    return YasuoRVDataBindingAdapter(context, life, itemList, headerItemList, footerItemList).bindLife().rvListener()
+    return YasuoRVDataBindingAdapter(context, life, itemList, headerItemList, footerItemList, isFold).bindLife().rvListener()
         .attach(this)
 }
 
@@ -56,10 +59,11 @@ inline fun RecyclerView.adapterDataBinding(
 open class YasuoRVDataBindingAdapter(
     context: Context,
     private val life: LifecycleOwner,
-    itemList: ObList<Any> = ObList(),
-    headerItemList: ObList<Any> = ObList(),
-    footerItemList: ObList<Any> = ObList(),
-) : YasuoBaseRVAdapter<Any, RecyclerDataBindingHolder<ViewDataBinding>>(context, itemList, headerItemList, footerItemList), LifecycleObserver {
+    itemList: YasuoList<Any> = YasuoList(),
+    headerItemList: YasuoList<Any> = YasuoList(),
+    footerItemList: YasuoList<Any> = YasuoList(),
+    isFold: Boolean = false,
+) : YasuoBaseRVAdapter<Any, YasuoDataBindingVH<ViewDataBinding>>(context, itemList, headerItemList, footerItemList, isFold), LifecycleObserver {
 
     /**
      * 如果为true，那么布局中的variableId默认为BR.item，可以提升性能
@@ -69,15 +73,15 @@ open class YasuoRVDataBindingAdapter(
     init {
         //如果是使用的ObservableArrayList，那么需要注册监听
         this.itemList.addOnListChangedCallback(itemListListener)
-        this.headerItemList.addOnListChangedCallback(headerListListener)
-        this.footerItemList.addOnListChangedCallback(footerListListener)
+        this.headerList.addOnListChangedCallback(headerListListener)
+        this.footerList.addOnListChangedCallback(footerListListener)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemListRemoveListener() {
         this.itemList.removeOnListChangedCallback(itemListListener)
-        this.headerItemList.removeOnListChangedCallback(headerListListener)
-        this.footerItemList.removeOnListChangedCallback(footerListListener)
+        this.headerList.removeOnListChangedCallback(headerListListener)
+        this.footerList.removeOnListChangedCallback(footerListListener)
     }
 
     /**
@@ -94,25 +98,25 @@ open class YasuoRVDataBindingAdapter(
     }
 
     //内部holder创建的监听集合
-    private val innerHolderCreateListenerMap: SparseArray<ViewHolderCreateListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>>> =
+    private val innerHolderCreateListenerMap: SparseArray<YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>>> =
         SparseArray()
 
     //内部holder绑定的监听集合
-    private val innerHolderBindListenerMap: SparseArray<ViewHolderBindListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>>> =
+    private val innerHolderBindListenerMap: SparseArray<YasuoDataBindingVHBindListener<YasuoDataBindingVH<ViewDataBinding>>> =
         SparseArray()
 
-    override fun <L : Listener<RecyclerDataBindingHolder<ViewDataBinding>>> setHolderCreateListener(type: Int, listener: L) {
-        innerHolderCreateListenerMap.put(type, listener as ViewHolderCreateListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>>)
+    override fun <L : YasuoVHListener<YasuoDataBindingVH<ViewDataBinding>>> setHolderCreateListener(type: Int, listener: L) {
+        innerHolderCreateListenerMap.put(type, listener as YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>>)
     }
 
-    override fun <L : Listener<RecyclerDataBindingHolder<ViewDataBinding>>> setHolderBindListener(type: Int, listener: L) {
-        innerHolderBindListenerMap.put(type, listener as ViewHolderBindListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>>)
+    override fun <L : YasuoVHListener<YasuoDataBindingVH<ViewDataBinding>>> setHolderBindListener(type: Int, listener: L) {
+        innerHolderBindListenerMap.put(type, listener as YasuoDataBindingVHBindListener<YasuoDataBindingVH<ViewDataBinding>>)
     }
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerDataBindingHolder<ViewDataBinding> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YasuoDataBindingVH<ViewDataBinding> {
         val binding = DataBindingUtil.inflate<ViewDataBinding>(inflater, viewType, parent, false)
-        val holder = RecyclerDataBindingHolder(binding)
+        val holder = YasuoDataBindingVH(binding)
         binding.addOnRebindCallback(object : OnRebindCallback<ViewDataBinding>() {
             override fun onPreBind(binding: ViewDataBinding): Boolean = let {
                 recyclerView!!.isComputingLayout
@@ -133,7 +137,7 @@ open class YasuoRVDataBindingAdapter(
         return holder
     }
 
-    override fun onBindViewHolder(holder: RecyclerDataBindingHolder<ViewDataBinding>, position: Int) {
+    override fun onBindViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, position: Int) {
         val item = getItem(position)
         if (variableIdIsDefault) {
             holder.binding.setVariable(BR.item, item)
@@ -146,7 +150,6 @@ open class YasuoRVDataBindingAdapter(
             }
         }
         innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, holder.binding)
-        super.onBindViewHolder(holder, position)
         holder.binding.lifecycleOwner = life
         holder.binding.executePendingBindings()
     }
@@ -166,20 +169,20 @@ fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.onHolder
     kClass: KClass<*>,
     bindingType: KClass<VB>,
     customItemBR: Int = BR.item,
-    createListener: (VB.(holder: RecyclerDataBindingHolder<ViewDataBinding>) -> Unit)? = null,
-    bindListener: (VB.(holder: RecyclerDataBindingHolder<ViewDataBinding>, payloads: List<Any>?) -> Unit)? = null
+    createListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>) -> Unit)? = null,
+    bindListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>, payloads: List<Any>?) -> Unit)? = null
 ): Adapter {
-    itemTypes[kClass] = ItemType(itemLayoutId, customItemBR)
+    itemTypes[kClass] = YasuoItemType(itemLayoutId, customItemBR)
     if (createListener != null) {
-        setHolderCreateListener(itemLayoutId, object : ViewHolderCreateListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>> {
-            override fun onCreateViewHolder(holder: RecyclerDataBindingHolder<ViewDataBinding>, binding: ViewDataBinding) {
+        setHolderCreateListener(itemLayoutId, object : YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>> {
+            override fun onCreateViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding) {
                 (binding as VB).createListener(holder)
             }
         })
     }
     if (bindListener != null) {
-        setHolderBindListener(itemLayoutId, object : ViewHolderBindListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>> {
-            override fun onBindViewHolder(holder: RecyclerDataBindingHolder<ViewDataBinding>, binding: ViewDataBinding, payloads: List<Any>?) {
+        setHolderBindListener(itemLayoutId, object : YasuoDataBindingVHBindListener<YasuoDataBindingVH<ViewDataBinding>> {
+            override fun onBindViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding, payloads: List<Any>?) {
                 (binding as VB).bindListener(holder, payloads)
             }
         })
@@ -199,20 +202,20 @@ fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBi
     itemClass: KClass<*>,
     bindingClass: KClass<VB>,
     customItemBR: Int = BR.item,
-    createListener: (VB.(holder: RecyclerDataBindingHolder<ViewDataBinding>) -> Unit)? = null,
-    bindListener: (VB.(holder: RecyclerDataBindingHolder<ViewDataBinding>) -> Unit)? = null
+    createListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>) -> Unit)? = null,
+    bindListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>) -> Unit)? = null
 ): Adapter {
-    itemTypes[itemClass] = ItemType(itemLayoutId, customItemBR)
+    itemTypes[itemClass] = YasuoItemType(itemLayoutId, customItemBR)
     if (createListener != null) {
-        setHolderCreateListener(itemLayoutId, object : ViewHolderCreateListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>> {
-            override fun onCreateViewHolder(holder: RecyclerDataBindingHolder<ViewDataBinding>, binding: ViewDataBinding) {
+        setHolderCreateListener(itemLayoutId, object : YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>> {
+            override fun onCreateViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding) {
                 (binding as VB).createListener(holder)
             }
         })
     }
     if (bindListener != null) {
-        setHolderBindListener(itemLayoutId, object : ViewHolderBindListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>> {
-            override fun onBindViewHolder(holder: RecyclerDataBindingHolder<ViewDataBinding>, binding: ViewDataBinding, payloads: List<Any>?) {
+        setHolderBindListener(itemLayoutId, object : YasuoDataBindingVHBindListener<YasuoDataBindingVH<ViewDataBinding>> {
+            override fun onBindViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding, payloads: List<Any>?) {
                 (binding as VB).bindListener(holder)
             }
         })
@@ -231,22 +234,22 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
     loadMoreLayoutItem: T,
     bindingClass: KClass<VB>,
     customItemBR: Int = BR.item,
-    createListener: (VB.(holder: RecyclerDataBindingHolder<ViewDataBinding>) -> Unit)? = null,
-    bindListener: (VB.(holder: RecyclerDataBindingHolder<ViewDataBinding>) -> Unit)? = null
+    createListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>) -> Unit)? = null,
+    bindListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>) -> Unit)? = null
 ): Adapter {
     this.loadMoreLayoutId = loadMoreLayoutId
     this.loadMoreLayoutItem = loadMoreLayoutItem
-    itemTypes[loadMoreLayoutItem::class] = ItemType(loadMoreLayoutId, customItemBR)
+    itemTypes[loadMoreLayoutItem::class] = YasuoItemType(loadMoreLayoutId, customItemBR)
     if (createListener != null) {
-        setHolderCreateListener(loadMoreLayoutId, object : ViewHolderCreateListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>> {
-            override fun onCreateViewHolder(holder: RecyclerDataBindingHolder<ViewDataBinding>, binding: ViewDataBinding) {
+        setHolderCreateListener(loadMoreLayoutId, object : YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>> {
+            override fun onCreateViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding) {
                 (binding as VB).createListener(holder)
             }
         })
     }
     if (bindListener != null) {
-        setHolderBindListener(loadMoreLayoutId, object : ViewHolderBindListenerForDataBinding<RecyclerDataBindingHolder<ViewDataBinding>> {
-            override fun onBindViewHolder(holder: RecyclerDataBindingHolder<ViewDataBinding>, binding: ViewDataBinding, payloads: List<Any>?) {
+        setHolderBindListener(loadMoreLayoutId, object : YasuoDataBindingVHBindListener<YasuoDataBindingVH<ViewDataBinding>> {
+            override fun onBindViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding, payloads: List<Any>?) {
                 (binding as VB).bindListener(holder)
             }
         })

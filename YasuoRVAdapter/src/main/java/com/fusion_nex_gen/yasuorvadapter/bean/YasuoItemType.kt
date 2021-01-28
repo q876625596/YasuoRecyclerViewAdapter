@@ -1,10 +1,10 @@
-package com.fusion_nex_gen.yasuorvadapter
+package com.fusion_nex_gen.yasuorvadapter.bean
 
 import android.view.View
 import androidx.viewbinding.ViewBinding
 
 //实体类型type
-data class ItemType(
+data class YasuoItemType(
     //item的布局id
     val itemLayoutId: Int,
     //item的绑定id

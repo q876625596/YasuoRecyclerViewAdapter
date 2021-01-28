@@ -1,4 +1,4 @@
-package com.fusion_nex_gen.yasuorvadapter.extension
+package com.fusion_nex_gen.yasuorvadapter.listener
 
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -6,9 +6,16 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.fusion_nex_gen.yasuorvadapter.YasuoBaseRVAdapter
 
-class LoadMoreListener(
+fun <Adapter : YasuoBaseRVAdapter<*, *>> RecyclerView.onLoadMoreListener(
+    adapter: Adapter,
+    onLoadMore: YasuoLoadMoreListener.(lastVisiblePosition: Int) -> Unit
+) {
+    addOnScrollListener(YasuoLoadMoreListener(adapter, onLoadMore))
+}
+
+class YasuoLoadMoreListener(
     private val adapter: YasuoBaseRVAdapter<*, *>,
-    private val onLoadMore: LoadMoreListener.(lastVisiblePosition: Int) -> Unit
+    private val onLoadMore: YasuoLoadMoreListener.(lastVisiblePosition: Int) -> Unit
 ) :
     RecyclerView.OnScrollListener() {
 
@@ -48,11 +55,4 @@ class LoadMoreListener(
             this.onLoadMore(lastPosition)
         }
     }
-}
-
-fun <Adapter : YasuoBaseRVAdapter<*, *>> RecyclerView.setOnLoadMoreListener(
-    adapter: Adapter,
-    onLoadMore: LoadMoreListener.(lastVisiblePosition: Int) -> Unit
-) {
-    addOnScrollListener(LoadMoreListener(adapter, onLoadMore))
 }
