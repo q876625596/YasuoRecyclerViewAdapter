@@ -3,36 +3,27 @@ package com.fusion_nex_gen.yasuorvadapter
 import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.fusion_nex_gen.yasuorvadapter.interfaces.Listener
+import androidx.recyclerview.widget.YasuoItemTouchHelper
 import java.util.*
 
 fun <RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<*, VH>> ItemTouchHelperCallBack<VH, Adapter>.attach(
     rv: RV
 ): ItemTouchHelper {
-    adapter.itemTouchHelper = object : ItemTouchHelper(this) {
+    adapter.itemTouchHelper = object : YasuoItemTouchHelper(this) {
+        override fun select(selected: RecyclerView.ViewHolder?, actionState: Int) {
+            if (actionState == ACTION_STATE_DRAG) {
+                requireNotNull(selected) { "Must pass a ViewHolder when dragging" }
+                adapter.itemList.removeOnListChangedCallback(adapter.itemListListener)
+            }
+            super.select(selected, actionState)
+        }
+
         override fun startDrag(viewHolder: RecyclerView.ViewHolder) {
-            if (adapter.itemList is ObList) {
-                (adapter.itemList as ObList).removeOnListChangedCallback(adapter.itemListListener)
-            }
-           /* if (adapter.headerItemList is ObList) {
-                (adapter.headerItemList as ObList).removeOnListChangedCallback(adapter.headerListListener)
-            }
-            if (adapter.footerItemList is ObList) {
-                (adapter.footerItemList as ObList).removeOnListChangedCallback(adapter.footerListListener)
-            }*/
+            adapter.itemList.removeOnListChangedCallback(adapter.itemListListener)
             super.startDrag(viewHolder)
         }
     }.apply {
         attachToRecyclerView(rv)
-    }
-    //如果启用长按拖拽
-    if (this.isLongPressDragEnable) {
-        adapter.setGlobalItemHolderListener { holder ->
-            holder.itemView.setOnLongClickListener {
-                adapter.itemTouchHelper?.startDrag(holder)
-                return@setOnLongClickListener true
-            }
-        }
     }
     return adapter.itemTouchHelper!!
 }
@@ -41,29 +32,21 @@ class ItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseR
     val adapter: Adapter,
     val isLongPressDragEnable: Boolean = true,
     val isItemViewSwipeEnable: Boolean = false,
-    val disableLayoutType: IntArray = intArrayOf()
+    val disableLayoutType: IntArray = intArrayOf(),
+    val innerDragListener: ((from: Int, target: Int) -> Unit)? = null,
+    val innerSwipeListener: ((position: Int, direction: Int) -> Boolean)? = null
 ) : ItemTouchHelper.Callback() {
     var dragDirection: Int =
         ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
     var swipeDirection: Int = ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-    private var innerDragListener: ItemDragListener<VH>? = null
-    private var innerSwipeListener: ItemSwipeListener<VH>? = null
 
     //禁用默认的长按，使用 setOnLongClickListener来监听长按
-    override fun isLongPressDragEnabled(): Boolean = false
+    override fun isLongPressDragEnabled(): Boolean = isLongPressDragEnable
 
     override fun isItemViewSwipeEnabled(): Boolean = isItemViewSwipeEnable
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-        if (adapter.itemList is ObList) {
-            (adapter.itemList as ObList).addOnListChangedCallback(adapter.itemListListener)
-        }
-   /*     if (adapter.headerItemList is ObList) {
-            (adapter.headerItemList as ObList).addOnListChangedCallback(adapter.headerListListener)
-        }
-        if (adapter.footerItemList is ObList) {
-            (adapter.footerItemList as ObList).addOnListChangedCallback(adapter.footerListListener)
-        }*/
+        adapter.itemList.addOnListChangedCallback(adapter.itemListListener)
         super.clearView(recyclerView, viewHolder)
     }
 
@@ -87,31 +70,29 @@ class ItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseR
         }
         val fromPosition = viewHolder.bindingAdapterPosition
         val targetPosition = target.bindingAdapterPosition
-        //TODO 位置错误
         if (fromPosition < targetPosition) {
             for (i in fromPosition until targetPosition) {
-                Collections.swap(adapter.itemList, i -adapter.headerItemList.size, i + 1 -adapter.headerItemList.size)
+                Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i + 1))
             }
         } else {
             for (i in fromPosition downTo targetPosition + 1) {
-                Collections.swap(adapter.itemList, i -adapter.headerItemList.size, i - 1 -adapter.headerItemList.size)
+                Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i - 1))
             }
         }
         adapter.notifyItemMoved(fromPosition, targetPosition)
         //adapter.notifyItemRangeChanged(min(fromPosition, targetPosition), abs(fromPosition - targetPosition) +1)
-        innerDragListener?.onItemDrag(fromPosition, targetPosition)
+        innerDragListener?.invoke(adapter.getItemTruePosition(fromPosition), adapter.getItemTruePosition(targetPosition))
         return true
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        adapter.itemList.removeAt(viewHolder.bindingAdapterPosition - adapter.headerItemList.size)
-        innerSwipeListener?.onItemSwipe(viewHolder.bindingAdapterPosition, direction)
-    }
-
-    fun <L : Listener<VH>> setListener(listener: L) {
-        when (listener) {
-            is ItemDragListener<*> -> innerDragListener = listener as ItemDragListener<VH>
-            is ItemSwipeListener<*> -> innerSwipeListener = listener as ItemSwipeListener<VH>
-        }
+        val truePosition = adapter.getItemTruePosition(viewHolder.bindingAdapterPosition)
+        val item = adapter.getItem(viewHolder.bindingAdapterPosition)
+        Log.e("onSwiped.truePosition",truePosition.toString())
+        Log.e("onSwiped.item",item::class.toString())
+        //判断是否是折叠布局，如果是折叠布局，那么将折叠布局中的原始item也删除
+        adapter.removeFoldListItem(item)
+        innerSwipeListener?.invoke(truePosition, direction)
+        adapter.itemList.removeAt(truePosition)
     }
 }

@@ -2,6 +2,7 @@ package com.fusion_nex_gen.yasuorecyclerviewadapter
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
@@ -21,7 +22,13 @@ class MainActivity : AppCompatActivity() {
         val list = ObList<Any>()
         for (i in 0 until 40) {
             when (i % 7) {
-                0 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.aaa))))
+                0 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.aaa))).apply {
+                    this.list = ObList<FoldItem>().apply {
+                        add(TextBean(MutableLiveData("我是内部第1个text")).apply { fullSpan = true })
+                        add(TextBean(MutableLiveData("我是内部第2个text")))
+                        add(TextBean(MutableLiveData("我是内部第3个text")))
+                    }
+                })
                 1 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.bbb))))
                 2 -> list.add(TextBean(MutableLiveData("我是第${i + 1}个text")))
                 3 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.ddd))))
@@ -42,16 +49,16 @@ class MainActivity : AppCompatActivity() {
         val loadMoreItem = DefaultLoadMoreItem()
         binding.myRV.layoutManager = GridLayoutManager(this, 3)
         //普通findViewById用法
-        binding.myRV.adapterViewBinding(this, this, list, headerList, footerList) {
+        binding.myRV.adapterViewBinding(this, this, list, headerList, footerList, true) {
             ItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
-            holderBindLoadMore(R.layout.default_load_more_layout_data_binding, loadMoreItem, DefaultLoadMoreLayoutBinding::class, {
+            holderBindLoadMore(R.layout.default_load_more_layout, loadMoreItem, DefaultLoadMoreLayoutBinding::class, {
                 DefaultLoadMoreLayoutBinding.bind(it)
             }) { holder, item ->
                 loadMoreText.text = item.text.value
 //                val textView = holder.getView<TextView>(R.id.loadMoreText)
 //                textView.text = text.value
             }
-            holderBind(R.layout.header_layout_one, HeaderOneBean::class, HeaderLayoutOneExBinding::class, {
+            holderBind(R.layout.header_layout_one_ex, HeaderOneBean::class, HeaderLayoutOneExBinding::class, {
                 HeaderLayoutOneExBinding.bind(it)
             }) { holder, item ->
                 headerText.text = item.headerOneText.value
@@ -64,12 +71,12 @@ class MainActivity : AppCompatActivity() {
 //                    headerList.add(HeaderOneBean(MutableLiveData("我是header${headerList.size}，点击我新增header")))
 //                }
             }
-            holderBind(R.layout.header_layout_two, HeaderTwoBean::class, HeaderLayoutTwoExBinding::class, {
+            holderBind(R.layout.header_layout_two_ex, HeaderTwoBean::class, HeaderLayoutTwoExBinding::class, {
                 HeaderLayoutTwoExBinding.bind(it)
             }) { holder, item ->
                 root.setBackgroundColor(item.headerOneBgColor.value!!)
             }
-            holderBind(R.layout.footer_layout_one, FooterOneBean::class, FooterLayoutOneExBinding::class, {
+            holderBind(R.layout.footer_layout_one_ex, FooterOneBean::class, FooterLayoutOneExBinding::class, {
                 FooterLayoutOneExBinding.bind(it)
             }) { holder, item ->
                 footerText.text = item.footerOneText.value
@@ -82,18 +89,20 @@ class MainActivity : AppCompatActivity() {
 //                    footerList.add(FooterOneBean(MutableLiveData("我是footer${footerList.size}，点击我新增footer")))
 //                }
             }
-            holderBind(R.layout.footer_layout_two, FooterTwoBean::class, FooterLayoutTwoExBinding::class, {
+            holderBind(R.layout.footer_layout_two_ex, FooterTwoBean::class, FooterLayoutTwoExBinding::class, {
                 FooterLayoutTwoExBinding.bind(it)
             }) { holder, item ->
                 root.setBackgroundColor(item.footerTwoBgColor.value!!)
             }
-            holderBind(R.layout.item_layout_text, TextBean::class, ItemLayoutTextExBinding::class, {
+            holderBind(R.layout.item_layout_text_ex, TextBean::class, ItemLayoutTextExBinding::class, {
                 ItemLayoutTextExBinding.bind(it)
             }) { holder, item ->
                 //如果未使用了LiveData，这样写
                 text.text = item.text.value
                 text.setOnClickListener {
-                    itemList.remove(this)
+                    Log.e("asas", "setOnClickListener")
+                    removeFoldListItem(item)
+                    itemList.remove(item)
                 }
 //                val textView = holder.getView<TextView>(R.id.text)
 //                textView.text = text.value
@@ -111,7 +120,7 @@ class MainActivity : AppCompatActivity() {
 //                    textView.text = it
 //                }
             }
-            holderBind(R.layout.item_layout_image, ImageBean::class, ItemLayoutImageExBinding::class, {
+            holderBind(R.layout.item_layout_image_ex, ImageBean::class, ItemLayoutImageExBinding::class, {
                 ItemLayoutImageExBinding.bind(it)
             }) { holder, item ->
                 image.setImageDrawable(item.image.value)
@@ -121,20 +130,38 @@ class MainActivity : AppCompatActivity() {
         }
         //viewBinding的用法
         //dataBinding的用法
-        /*     binding.myRV.adapterDataBinding(this, this, list) {
-                 loadMoreLayoutId = R.layout.default_load_more_layout
-                 loadMoreLayoutItem = loadMoreItem
-                 ItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
-                 holderBind(R.layout.item_layout_text, TextBean::class, ItemLayoutTextBinding::class) {
-                     root.setOnClickListener {
-                         //loadMoreItem.bgColor.value = Color.BLACK
-                         item!!.text.value = "123456"
-                     }
+        /* binding.myRV.adapterDataBinding(this, this, list) {
+             ItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
+             holderBind(R.layout.item_layout_text, TextBean::class, ItemLayoutTextBinding::class) {
+                 text.setOnClickListener {
+                     itemList.remove(item)
                  }
-
-                 holderBind(R.layout.item_layout_image, ImageBean::class, ItemLayoutImageBinding::class) {
-
+                 main.setOnLongClickListener {
+                     Log.e("asas", "Asasas")
+                     true
                  }
-             }*/
+             }
+
+             holderBind(R.layout.item_layout_image, ImageBean::class, ItemLayoutImageBinding::class) {
+
+             }
+         }
+ */
+        /*binding.myRV.adapterBinding(this, this, list) {
+            ItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
+            holderBind(R.layout.item_layout_text_ex, TextBean::class){
+                holder ->
+                val textView = holder.getView<TextView>(R.id.text)
+                textView.text  = text.value
+                textView.setOnClickListener {
+                    itemList.remove(this)
+                }
+            }
+            holderBind(R.layout.item_layout_image, ImageBean::class){
+                    holder ->
+                val imageView = holder.getView<ImageView>(R.id.image)
+                imageView.setImageDrawable(image.value)
+            }
+        }*/
     }
 }

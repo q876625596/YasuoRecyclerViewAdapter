@@ -30,9 +30,9 @@ import kotlin.reflect.KClass
 inline fun RecyclerView.adapterDataBinding(
     context: Context,
     life: LifecycleOwner,
-    itemList: MutableList<Any>,
-    headerItemList: MutableList<Any> = ObList(),
-    footerItemList: MutableList<Any> = ObList(),
+    itemList: ObList<Any>,
+    headerItemList: ObList<Any> = ObList(),
+    footerItemList: ObList<Any> = ObList(),
     rvListener: YasuoRVDataBindingAdapter.() -> YasuoRVDataBindingAdapter
 ): YasuoRVDataBindingAdapter {
     return YasuoRVDataBindingAdapter(context, life, itemList, headerItemList, footerItemList).bindLife().rvListener()
@@ -56,9 +56,9 @@ inline fun RecyclerView.adapterDataBinding(
 open class YasuoRVDataBindingAdapter(
     context: Context,
     private val life: LifecycleOwner,
-    itemList: MutableList<Any> = ObList(),
-    headerItemList: MutableList<Any> = ObList(),
-    footerItemList: MutableList<Any> = ObList(),
+    itemList: ObList<Any> = ObList(),
+    headerItemList: ObList<Any> = ObList(),
+    footerItemList: ObList<Any> = ObList(),
 ) : YasuoBaseRVAdapter<Any, RecyclerDataBindingHolder<ViewDataBinding>>(context, itemList, headerItemList, footerItemList), LifecycleObserver {
 
     /**
@@ -68,28 +68,16 @@ open class YasuoRVDataBindingAdapter(
 
     init {
         //如果是使用的ObservableArrayList，那么需要注册监听
-        if (this.itemList is ObList<Any>) {
-            (this.itemList as ObList<Any>).addOnListChangedCallback(itemListListener)
-        }
-        if (this.headerItemList is ObList<Any>) {
-            (this.headerItemList as ObList<Any>).addOnListChangedCallback(headerListListener)
-        }
-        if (this.footerItemList is ObList<Any>) {
-            (this.footerItemList as ObList<Any>).addOnListChangedCallback(footerListListener)
-        }
+        this.itemList.addOnListChangedCallback(itemListListener)
+        this.headerItemList.addOnListChangedCallback(headerListListener)
+        this.footerItemList.addOnListChangedCallback(footerListListener)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemListRemoveListener() {
-        if (this.itemList is ObList<Any>) {
-            (this.itemList as ObList<Any>).removeOnListChangedCallback(itemListListener)
-        }
-        if (this.headerItemList is ObList<Any>) {
-            (this.headerItemList as ObList<Any>).removeOnListChangedCallback(headerListListener)
-        }
-        if (this.footerItemList is ObList<Any>) {
-            (this.footerItemList as ObList<Any>).removeOnListChangedCallback(footerListListener)
-        }
+        this.itemList.removeOnListChangedCallback(itemListListener)
+        this.headerItemList.removeOnListChangedCallback(headerListListener)
+        this.footerItemList.removeOnListChangedCallback(footerListListener)
     }
 
     /**
@@ -146,37 +134,19 @@ open class YasuoRVDataBindingAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerDataBindingHolder<ViewDataBinding>, position: Int) {
-        //非禁用全局监听的布局才执行
-        if (!disableGlobalItemHolderListenerType(holder.itemViewType)) {
-            //执行之前判断非空
-            getGlobalItemHolderListener()?.invoke(holder)
-        }
-        when {
-            //判断是全屏布局
-            isEmptyLayoutMode() -> holder.binding.setVariable(BR.item, emptyLayoutItem)
-            //普通item
-            inAllList(position) -> {
-                //如果使用默认variableId
-                if (variableIdIsDefault) {
-                    holder.binding.setVariable(BR.item, getItem(position))
-                } else {
-                    //否则去查找自定义variableId
-                    val item = getItem(position)
-                    val itemType = itemTypes[item::class]
-                    if (itemType != null) {
-                        if (itemType.variableId != null) {
-                            holder.binding.setVariable(itemType.variableId, item)
-                        }
-                    } else {
-                        throw Exception("A layout of the corresponding type was not found")
-                    }
-                }
+        val item = getItem(position)
+        if (variableIdIsDefault) {
+            holder.binding.setVariable(BR.item, item)
+        } else {
+            //否则去查找自定义variableId
+            val itemType = itemTypes[item::class]
+                ?: throw RuntimeException("找不到相应类型的布局，请检查是否绑定布局，position = ${position}\nThe corresponding type of layout cannot be found, please check whether the layout is bound,position = $position")
+            if (itemType.variableId != null) {
+                holder.binding.setVariable(itemType.variableId, item)
             }
-            //loadMoreView
-            hasLoadMore() -> holder.binding.setVariable(BR.item, loadMoreLayoutItem)
-            else -> throw RuntimeException("onBindViewHolder position error! position = $position")
         }
         innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, holder.binding)
+        super.onBindViewHolder(holder, position)
         holder.binding.lifecycleOwner = life
         holder.binding.executePendingBindings()
     }

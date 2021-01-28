@@ -25,9 +25,9 @@ import kotlin.reflect.KClass
 inline fun RecyclerView.adapterBinding(
     context: Context,
     life: LifecycleOwner,
-    itemList: MutableList<Any>,
-    headerItemList: MutableList<Any> = ObList(),
-    footerItemList: MutableList<Any> = ObList(),
+    itemList: ObList<Any>,
+    headerItemList: ObList<Any> = ObList(),
+    footerItemList: ObList<Any> = ObList(),
     rvListener: YasuoRVAdapter.() -> YasuoRVAdapter
 ): YasuoRVAdapter {
     return YasuoRVAdapter(context, life, itemList, headerItemList, footerItemList).bindLife().rvListener().attach(this)
@@ -49,36 +49,24 @@ inline fun RecyclerView.adapterBinding(
 
 open class YasuoRVAdapter(
     context: Context,
-    private val life: LifecycleOwner,
-    itemList: MutableList<Any> = ObList(),
-    headerItemList: MutableList<Any> = ObList(),
-    footerItemList: MutableList<Any> = ObList(),
+    val life: LifecycleOwner,
+    itemList: ObList<Any> = ObList(),
+    headerItemList: ObList<Any> = ObList(),
+    footerItemList: ObList<Any> = ObList(),
 ) : YasuoBaseRVAdapter<Any, RecyclerViewHolder>(context, itemList, headerItemList, footerItemList), LifecycleObserver {
 
     init {
         //如果是使用的ObservableArrayList，那么需要注册监听
-        if (this.itemList is ObList<Any>) {
-            (this.itemList as ObList<Any>).addOnListChangedCallback(itemListListener)
-        }
-        if (this.headerItemList is ObList<Any>) {
-            (this.headerItemList as ObList<Any>).addOnListChangedCallback(headerListListener)
-        }
-        if (this.footerItemList is ObList<Any>) {
-            (this.footerItemList as ObList<Any>).addOnListChangedCallback(footerListListener)
-        }
+        this.itemList.addOnListChangedCallback(itemListListener)
+        this.headerItemList.addOnListChangedCallback(headerListListener)
+        this.footerItemList.addOnListChangedCallback(footerListListener)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemsRemoveListener() {
-        if (this.itemList is ObList<Any>) {
-            (this.itemList as ObList<Any>).removeOnListChangedCallback(itemListListener)
-        }
-        if (this.headerItemList is ObList<Any>) {
-            (this.headerItemList as ObList<Any>).removeOnListChangedCallback(headerListListener)
-        }
-        if (this.footerItemList is ObList<Any>) {
-            (this.footerItemList as ObList<Any>).removeOnListChangedCallback(footerListListener)
-        }
+        this.itemList.removeOnListChangedCallback(itemListListener)
+        this.headerItemList.removeOnListChangedCallback(headerListListener)
+        this.footerItemList.removeOnListChangedCallback(footerListListener)
     }
 
     /**
@@ -117,19 +105,8 @@ open class YasuoRVAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerViewHolder, position: Int) {
-        if (!disableGlobalItemHolderListenerType(holder.itemViewType)) {
-            //执行之前判断非空
-            getGlobalItemHolderListener()?.invoke(holder)
-        }
-        innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(
-            holder, when {
-                isEmptyLayoutMode() -> emptyLayoutItem!!
-                inAllList(position) -> getItem(position)
-                hasLoadMore() -> loadMoreLayoutItem!!
-                else -> throw RuntimeException("onBindViewHolder position error! position = $position")
-            }
-        )
-
+        //super.onBindViewHolder(holder, position)
+        innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, getItem(position))
     }
 }
 

@@ -1,6 +1,7 @@
 package com.fusion_nex_gen.yasuorvadapter
 
 import android.content.Context
+import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
@@ -29,12 +30,13 @@ import kotlin.reflect.KClass
 inline fun RecyclerView.adapterViewBinding(
     context: Context,
     life: LifecycleOwner,
-    itemList: MutableList<Any>,
-    headerItemList: MutableList<Any> = ObList(),
-    footerItemList: MutableList<Any> = ObList(),
+    itemList: ObList<Any>,
+    headerItemList: ObList<Any> = ObList(),
+    footerItemList: ObList<Any> = ObList(),
+    isFold: Boolean = false,
     rvListener: YasuoRVViewBindingAdapter.() -> YasuoRVViewBindingAdapter
 ): YasuoRVViewBindingAdapter {
-    return YasuoRVViewBindingAdapter(context, life, itemList, headerItemList, footerItemList).bindLife().rvListener()
+    return YasuoRVViewBindingAdapter(context, life, itemList, headerItemList, footerItemList, isFold).bindLife().rvListener()
         .attach(this)
 }
 
@@ -55,35 +57,23 @@ inline fun RecyclerView.adapterViewBinding(
 open class YasuoRVViewBindingAdapter(
     context: Context,
     private val life: LifecycleOwner,
-    itemList: MutableList<Any> = ObList(),
-    headerItemList: MutableList<Any> = ObList(),
-    footerItemList: MutableList<Any> = ObList(),
+    itemList: ObList<Any> = ObList(),
+    headerItemList: ObList<Any> = ObList(),
+    footerItemList: ObList<Any> = ObList(),
+    private val isFold: Boolean = false,
 ) : YasuoBaseRVAdapter<Any, RecyclerViewBindingHolder>(context, itemList, headerItemList, footerItemList), LifecycleObserver {
 
     init {
-        //如果是使用的ObservableArrayList，那么需要注册监听
-        if (this.itemList is ObList<Any>) {
-            (this.itemList as ObList<Any>).addOnListChangedCallback(itemListListener)
-        }
-        if (this.headerItemList is ObList<Any>) {
-            (this.headerItemList as ObList<Any>).addOnListChangedCallback(headerListListener)
-        }
-        if (this.footerItemList is ObList<Any>) {
-            (this.footerItemList as ObList<Any>).addOnListChangedCallback(footerListListener)
-        }
+        this.itemList.addOnListChangedCallback(itemListListener)
+        this.headerItemList.addOnListChangedCallback(headerListListener)
+        this.footerItemList.addOnListChangedCallback(footerListListener)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemListRemoveListener() {
-        if (this.itemList is ObList<Any>) {
-            (this.itemList as ObList<Any>).removeOnListChangedCallback(itemListListener)
-        }
-        if (this.headerItemList is ObList<Any>) {
-            (this.headerItemList as ObList<Any>).removeOnListChangedCallback(headerListListener)
-        }
-        if (this.footerItemList is ObList<Any>) {
-            (this.footerItemList as ObList<Any>).removeOnListChangedCallback(footerListListener)
-        }
+        this.itemList.removeOnListChangedCallback(itemListListener)
+        this.headerItemList.removeOnListChangedCallback(headerListListener)
+        this.footerItemList.removeOnListChangedCallback(footerListListener)
     }
 
     /**
@@ -123,17 +113,14 @@ open class YasuoRVViewBindingAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerViewBindingHolder, position: Int) {
-        //非禁用全局监听的布局才执行
-        if (!disableGlobalItemHolderListenerType(holder.itemViewType)) {
-            //执行之前判断非空
-            getGlobalItemHolderListener()?.invoke(holder)
-        }
-
-        val item = when {
-            isEmptyLayoutMode() -> emptyLayoutItem!!
-            inAllList(position) -> getItem(position)
-            hasLoadMore() -> loadMoreLayoutItem!!
-            else -> throw RuntimeException("onBindViewHolder position error! position = $position")
+        super.onBindViewHolder(holder, position)
+        val item = getItem(position)
+        if (isFold && item is FoldItem) {
+            if (item.autoExpand) {
+                holder.itemView.setOnClickListener {
+                    expandOrFoldItem(item)
+                }
+            }
         }
         if (!holder.isInitBinding()) {
             holder.createBinding {
@@ -141,7 +128,7 @@ open class YasuoRVViewBindingAdapter(
                     ?: throw RuntimeException("The method to create ViewBinding is not set")
             }
         }
-        innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, holder.binding!!, item)
+        innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, holder.binding, item)
     }
 }
 

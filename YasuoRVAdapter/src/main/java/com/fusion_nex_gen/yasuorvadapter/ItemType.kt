@@ -9,5 +9,6 @@ data class ItemType(
     val itemLayoutId: Int,
     //item的绑定id
     val variableId: Int? = null,
+    //创建ViewBinding
     val createBindingFun:((view: View)->ViewBinding)? = null
 )
