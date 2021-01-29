@@ -25,6 +25,7 @@ import kotlin.reflect.KClass
  * 6、拖拽、横向滑动删除
  * 7、吸顶(采用qiujayen/sticky-layoutmanager的方案，低耦合adapter和item，最低限度的修改代码)
  * TODO 8、横向滑动显示选项
+ * TODO 9、新增一些额外的常用功能，比如结合下拉刷新之后显示一个一临时头部，提示刷新了多少条
  */
 abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context: Context) :
     RecyclerView.Adapter<VH>(), StickyCallBack {
