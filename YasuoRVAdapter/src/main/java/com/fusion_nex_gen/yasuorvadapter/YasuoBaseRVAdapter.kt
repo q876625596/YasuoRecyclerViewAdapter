@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.fusion_nex_gen.yasuorvadapter.bean.*
 import com.fusion_nex_gen.yasuorvadapter.listener.YasuoVHListener
+import com.fusion_nex_gen.yasuorvadapter.sticky.StickyCallBack
 import kotlin.reflect.KClass
 
 
@@ -22,11 +23,11 @@ import kotlin.reflect.KClass
  * 4、加载更多
  * 5、折叠布局
  * 6、拖拽、横向滑动删除
- * TODO 7、吸顶
- * TODO 7、横向滑动显示选项
+ * 7、吸顶(采用qiujayen/sticky-layoutmanager的方案，低耦合adapter和item，最低限度的修改代码)
+ * TODO 8、横向滑动显示选项
  */
 abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context: Context) :
-    RecyclerView.Adapter<VH>() {
+    RecyclerView.Adapter<VH>(), StickyCallBack {
 
     /**
      * @param context 上下文
@@ -71,7 +72,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 所有列表类型的集合，实体类[KClass]作为key，类型[YasuoItemType]作为value
      */
-    internal val itemTypes: MutableMap<KClass<*>, YasuoItemType> = mutableMapOf()
+    val itemTypes: MutableMap<KClass<*>, YasuoItemType> = mutableMapOf()
 
     /**
      * RV
@@ -93,13 +94,13 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 空布局资源id，等同于viewType
      */
-    internal var emptyLayoutId: Int? = null
+    private var emptyLayoutId: Int? = null
     fun getEmptyLayoutId() = emptyLayoutId
 
     /**
      * 空布局的实体数据
      */
-    internal var emptyLayoutItem: T? = null
+    private var emptyLayoutItem: T? = null
     fun getEmptyLayoutItem() = emptyLayoutItem
 
     /**
@@ -126,7 +127,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 是否已经设置好了空布局的数据
      */
-    internal fun alreadySetEmptyLayoutData(): Boolean {
+    fun alreadySetEmptyLayoutData(): Boolean {
         return emptyLayoutId != null && emptyLayoutItem != null
     }
 
@@ -138,7 +139,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         emptyLayoutItem?.apply {
             options()
         } ?: throw RuntimeException("emptyLayoutItem is null")
-        notifyItemChanged(0)
+        notifyItemChanged(0,dataInvalidation)
     }
 
     /**
@@ -253,7 +254,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 判断position是否包含在headerList，itemList，footerList内
      * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
-    internal fun inAllList(position: Int): Boolean {
+    fun inAllList(position: Int): Boolean {
         return position in 0 until getAllListSize()
     }
 
@@ -261,7 +262,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 判断position只包含在headerList内
      * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
-    internal fun inHeaderList(position: Int): Boolean {
+    fun inHeaderList(position: Int): Boolean {
         return position in 0 until headerList.size
     }
 
@@ -269,7 +270,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 判断position只包含在itemList内
      * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
-    internal fun inItemList(position: Int): Boolean {
+    fun inItemList(position: Int): Boolean {
         return position in headerList.size until itemList.size + headerList.size
     }
 
@@ -277,7 +278,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 判断position只包含在footerList内
      * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
-    internal fun inFooterList(position: Int): Boolean {
+    fun inFooterList(position: Int): Boolean {
         return position in headerList.size + itemList.size until getAllListSize()
     }
 
@@ -410,7 +411,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 在GridLayoutManager模式下，指定item在当前列或行的占比
      * In GridLayoutManager mode, specify the proportion of items in the current column or row
      */
-    var gridSpan: ((position: Int) -> Int)? = null
+    var itemGridSpan: ((position: Int) -> Int)? = null
+
+    /**
+     * 在GridLayoutManager模式下，指定header在当前列或行的占比
+     * In GridLayoutManager mode, specify the proportion of headers in the current column or row
+     */
+    var headerGridSpan: ((position: Int) -> Int)? = null
+
+    /**
+     * 在GridLayoutManager模式下，指定footer在当前列或行的占比
+     * In GridLayoutManager mode, specify the proportion of footers in the current column or row
+     */
+    var footerGridSpan: ((position: Int) -> Int)? = null
 
     /**
      * 此方法针对StaggeredGridLayoutManager实现占满的item
@@ -428,7 +441,15 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         if (lp != null && lp is StaggeredGridLayoutManager.LayoutParams) {
             if (staggeredGridFullSpan(holder.bindingAdapterPosition, holder.itemViewType)) {
                 lp.isFullSpan = true
+            } else {
+                //如果是sticky
+                if (isSticky != null) {
+                    if (isSticky!!(holder.bindingAdapterPosition)) {
+                        lp.isFullSpan = true
+                    }
+                }
             }
+
         }
     }
 
@@ -441,46 +462,57 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         if (manager is GridLayoutManager) {
             manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
+                    //优先级：特殊布局 > isSticky > item.sticky > gridSpan > item.span
                     //如果是空布局，那么也默认占满一行
                     if (isEmptyLayoutMode()) {
                         return manager.spanCount
                     }
+                    //判断是loadMore
+                    if (position == getAllListSize()) {
+                        return manager.spanCount
+                    }
+                    //如果设置了sticky的判断方法
+                    //并且该position通过判断
+                    if (isSticky != null && isSticky!!(position)) {
+                        return manager.spanCount
+                    }
                     val item = getItem(position)
-                    //整个粒度从小到大，高度定制span
                     //如果是头部
                     if (inHeaderList(position)) {
-                        //如果头部继承了YasuoHeaderItem，以YasuoHeaderItem.span为准
+                        //先判断是否继承基类
                         return if (item is YasuoHeaderItem) {
-                            item.span
+                            //item.sticky -> headerGridSpan -> item.span
+                            if (item.sticky) manager.spanCount else headerGridSpan?.invoke(position) ?: item.span
                         } else {
-                            //否则以spanEx为准，无任何设置时头部默认占满
-                            gridSpan?.invoke(position) ?: manager.spanCount
+                            //否则以headerGridSpan为准，无任何设置时头部默认占满
+                            headerGridSpan?.invoke(position) ?: manager.spanCount
                         }
                     }
                     //如果是尾部
                     if (inFooterList(position)) {
-                        //如果尾部继承了YasuoFooterItem，以YasuoFooterItem.span为准
+                        //先判断是否继承基类
                         return if (item is YasuoFooterItem) {
-                            item.span
+                            //item.sticky -> footerGridSpan -> item.span
+                            if (item.sticky) manager.spanCount else footerGridSpan?.invoke(position) ?: item.span
                         } else {
-                            //否则以spanEx为准，无任何设置时尾部默认占满
-                            gridSpan?.invoke(position) ?: manager.spanCount
+                            //否则以footerGridSpan为准，无任何设置时尾部默认占满
+                            footerGridSpan?.invoke(position) ?: manager.spanCount
                         }
                     }
                     //如果是中间列表
                     if (inItemList(position)) {
                         return when (item) {
-                            //如果中间列表继承了YasuoNormalItem，以YasuoNormalItem.span为准
-                            is YasuoNormalItem -> item.span
-                            //如果中间列表继承了YasuoFoldItem，以YasuoFoldItem.span为准
-                            is YasuoFoldItem -> item.span
+                            //如果中间列表继承了YasuoNormalItem
+                            is YasuoNormalItem -> if (item.sticky) manager.spanCount else itemGridSpan?.invoke(position) ?: item.span
+                            //如果中间列表继承了YasuoFoldItem
+                            is YasuoFoldItem -> if (item.sticky) manager.spanCount else itemGridSpan?.invoke(position) ?: item.span
                             //如果没有继承任何类
-                            //则以spanEx为准，无任何设置时中间列表默认一格
-                            else -> gridSpan?.invoke(position) ?: 1
+                            //则以itemGridSpan为准，无任何设置时中间列表默认一格
+                            else -> itemGridSpan?.invoke(position) ?: 1
                         }
                     }
-                    //如果以上都不是，那么只剩下loadMore，默认占满一行
-                    return manager.spanCount
+                    //如果以上都不是，默认占满1格
+                    return 1
                 }
             }
         }
@@ -506,6 +538,21 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      */
     abstract fun <L : YasuoVHListener<VH>> setHolderBindListener(type: Int, listener: L)
 
+    var isSticky: ((position: Int) -> Boolean)? = null
+    override fun isStickyHeader(position: Int): Boolean {
+        return isSticky?.invoke(position) ?: false
+    }
+/*
+    internal var stickyClickListener: StickyClickListener<VH>? = null
+    internal var stickyHolderCreateListener: StickyViewHolderCreateListener<VH>? = null
+    internal var stickyHolderBindListener: StickyViewHolderBindListener<VH>? = null
+    abstract fun getStickyId(position: Int): Long
+
+
+    abstract fun onCreateStickyViewHolder(parent: RecyclerView, position: Int): VH?
+
+
+   abstract fun onBindStickyViewHolder(holder: VH, position: Int)*/
 
     /******列表改变的监听******/
 
@@ -690,7 +737,7 @@ fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>, RV : RecyclerView> Adapter.atta
 fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setGridSpan(
     spanEx: (position: Int) -> Int
 ): Adapter {
-    this.gridSpan = spanEx
+    this.itemGridSpan = spanEx
     return this
 }
 
@@ -701,5 +748,12 @@ fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setStaggeredGridFullSpa
     staggeredGridFullSpan: (position: Int, viewType: Int) -> Boolean
 ): Adapter {
     this.staggeredGridFullSpan = staggeredGridFullSpan
+    return this
+}
+
+fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setSticky(
+    isSticky: (position: Int) -> Boolean
+): Adapter {
+    this.isSticky = isSticky
     return this
 }

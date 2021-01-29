@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.recyclerview.widget.GridLayoutManager
 import com.fusion_nex_gen.yasuorecyclerviewadapter.databinding.*
 import com.fusion_nex_gen.yasuorecyclerviewadapter.model.*
 import com.fusion_nex_gen.yasuorvadapter.*
@@ -16,6 +15,7 @@ import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.databinding.DefaultLoadMoreLayoutBinding
 import com.fusion_nex_gen.yasuorvadapter.listener.YasuoItemTouchHelperCallBack
 import com.fusion_nex_gen.yasuorvadapter.listener.attach
+import com.fusion_nex_gen.yasuorvadapter.sticky.StickyGridLayoutManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -55,9 +55,15 @@ class MainActivity : AppCompatActivity() {
             add(FooterTwoBean(MutableLiveData(Color.BLUE)))
         }
         val loadMoreItem = DefaultLoadMoreItem()
-        binding.myRV.layoutManager = GridLayoutManager(this, 3)
+        binding.myRV.layoutManager = StickyGridLayoutManager<YasuoRVAdapter>(this, 3)
         //普通findViewById用法
         binding.myRV.adapterViewBinding(this, this, list, headerList, footerList, true) {
+            setSticky {
+                return@setSticky it % 4 == 0
+            }
+            setGridSpan {
+                return@setGridSpan if (it % 4 == 0) 3 else 1
+            }
             YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
             holderBindLoadMore(R.layout.default_load_more_layout, loadMoreItem, DefaultLoadMoreLayoutBinding::class, {
                 DefaultLoadMoreLayoutBinding.bind(it)

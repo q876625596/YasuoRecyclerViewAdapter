@@ -6,5 +6,6 @@ open class YasuoFoldItem(
     var isExpand: Boolean = false,
     var autoExpand: Boolean = false,
     var span: Int = 1,
-    var parentHash: Int? = null
-)
+    var parentHash: Int? = null,
+    override var sticky: Boolean = false
+) : StickyItem

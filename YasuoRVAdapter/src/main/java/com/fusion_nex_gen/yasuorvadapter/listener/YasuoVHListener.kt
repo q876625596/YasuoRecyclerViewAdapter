@@ -1,5 +1,6 @@
 package com.fusion_nex_gen.yasuorvadapter.listener
 
+import android.view.View
 import androidx.databinding.ViewDataBinding
 import androidx.viewbinding.ViewBinding
 
@@ -85,4 +86,38 @@ interface YasuoDataBindingVHBindListener<in VH> : YasuoVHListener<VH> {
         binding: ViewDataBinding,
         payloads: List<Any>? = mutableListOf()
     )
+}
+
+
+/**
+ * 监听Sticky header item view的创建
+ */
+interface StickyViewHolderCreateListener<in VH> : YasuoVHListener<VH> {
+    /**
+     * @param holder
+     */
+    fun onCreateHeaderViewHolder(holder: VH)
+}
+
+/**
+ * 监听Sticky header item view的绑定
+ */
+interface StickyViewHolderBindListener<in VH> : YasuoVHListener<VH> {
+    /**
+     * @param holder
+     * @param position
+     */
+    fun onBindHeaderViewHolder(holder: VH, position: Int)
+}
+
+/**
+ * 监听Sticky header item view的点击事件
+ */
+interface StickyClickListener<in VH> : YasuoVHListener<VH> {
+    /**
+     * @param holder
+     * @param clickView
+     * @param position
+     */
+    fun onHeaderClick(holder: VH, clickView: View, position: Int)
 }

@@ -10,5 +10,6 @@ data class YasuoItemType(
     //item的绑定id
     val variableId: Int? = null,
     //创建ViewBinding
-    val createBindingFun:((view: View)->ViewBinding)? = null
-)
+    val createBindingFun: ((view: View) -> ViewBinding)? = null,
+    override var sticky: Boolean = false
+) : StickyItem
