@@ -143,6 +143,14 @@ fun <T : Any, Adapter : YasuoRVAdapter> Adapter.onHolderBindAndPayloads(
     return this
 }
 
+//TODO 改良api
+/*fun <T : Any, Adapter : YasuoRVAdapter> Adapter.holderBind(
+    kClass: KClass<T>,
+
+): YasuoItemType{
+return
+}*/
+
 /**
  * 建立数据类与布局文件之间的匹配关系
  * @param itemLayoutId itemView布局id

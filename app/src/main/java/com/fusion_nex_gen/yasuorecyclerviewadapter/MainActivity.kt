@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        //itemList
         val list = YasuoList<Any>()
         for (i in 0 until 40) {
             when (i % 7) {

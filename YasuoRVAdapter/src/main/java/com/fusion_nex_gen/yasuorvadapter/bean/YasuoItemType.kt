@@ -11,5 +11,7 @@ data class YasuoItemType(
     val variableId: Int? = null,
     //创建ViewBinding
     val createBindingFun: ((view: View) -> ViewBinding)? = null,
-    override var sticky: Boolean = false
-) : StickyItem
+    var sticky: Boolean = false,
+    var gridSpan: Int = 1,
+    var staggerFullSpan: Boolean = false
+)

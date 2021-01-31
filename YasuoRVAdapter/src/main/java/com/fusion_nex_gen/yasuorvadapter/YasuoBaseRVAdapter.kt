@@ -51,7 +51,9 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
 
     internal val dataInvalidation = Any()
 
-
+    /**
+     * 是否是折叠布局
+     */
     var isFold: Boolean = false
 
     /**
