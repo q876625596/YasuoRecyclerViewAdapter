@@ -1,6 +1,5 @@
 package com.fusion_nex_gen.yasuorvadapter.listener
 
-import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.YasuoItemTouchHelper
@@ -111,19 +110,19 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
         val fromPosition = viewHolder.bindingAdapterPosition
         val targetPosition = target.bindingAdapterPosition
 
-        var fromItem: YasuoFoldItem? = null
-        var targetItem: YasuoFoldItem? = null
+        val fromItem: YasuoFoldItem?
+        val targetItem: YasuoFoldItem?
         var parentItem: YasuoFoldItem? = null
+        var parentItemIndex = 0
         //如果拖动的Holder是折叠布局（父级或子级）
         val fromItemConfig = adapter.itemIdTypes[viewHolder.itemViewType] ?: throw RuntimeException("找不到对应Config")
         val targetItemConfig = adapter.itemIdTypes[target.itemViewType] ?: throw RuntimeException("找不到对应Config")
         when {
+            //如果两个都为折叠布局
             fromItemConfig.isFold && targetItemConfig.isFold -> {
                 fromItem = adapter.getItem(fromPosition) as YasuoFoldItem
                 targetItem = adapter.getItem(targetPosition) as YasuoFoldItem
                 //如果两个折叠布局不是同一个展开列表，或者不是同一级的情况，则不能交换
-                Log.e("fromItem.parentHash",fromItem.parentHash.toString())
-                Log.e("targetItem.parentHash",targetItem.parentHash.toString())
                 if (fromItem.parentHash != targetItem.parentHash) {
                     return false
                 }
@@ -134,11 +133,16 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
                 //如果拖拽Holder的父节点不为空，说明此时拖拽的是子级
                 if (fromItem.parentHash != null) {
                     //那么找到父级item，在下方使用
-                    parentItem = adapter.itemList.find {
-                        it.hashCode() == fromItem.parentHash
-                    } as YasuoFoldItem
+                    adapter.itemList.forEachIndexed { index, any ->
+                        if (any.hashCode() == fromItem.parentHash) {
+                            parentItem = any as YasuoFoldItem
+                            parentItemIndex = index
+                            return@forEachIndexed
+                        }
+                    }
                 }
             }
+            //如果只有目标Holder是折叠布局
             targetItemConfig.isFold -> {
                 targetItem = adapter.getItem(targetPosition) as YasuoFoldItem
                 //如果目标item是展开的，那么不能交换
@@ -193,20 +197,34 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
          }*/
         //交换item
         if (fromPosition < targetPosition) {
-            for (i in fromPosition until targetPosition) {
-                Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i + 1))
+            //如果是拖拽的Holder是折叠布局，并且父节点不为空
+            if (fromItemConfig.isFold && parentItem != null) {
+                for (i in fromPosition until targetPosition) {
+                    Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i + 1))
+                    //那么交换当前子级列表中的item
+                    Collections.swap(parentItem!!.list, adapter.getItemTruePosition(i) - parentItemIndex - 1, adapter.getItemTruePosition(i + 1) - parentItemIndex - 1)
+                }
+            } else {
+                for (i in fromPosition until targetPosition) {
+                    Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i + 1))
+                }
             }
         } else {
-            for (i in fromPosition downTo targetPosition + 1) {
-                Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i - 1))
+            //如果是拖拽的Holder是折叠布局，并且父节点不为空
+            if (fromItemConfig.isFold && parentItem != null) {
+                for (i in fromPosition downTo targetPosition + 1) {
+                    Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i - 1))
+                    //那么交换当前子级列表中的item
+                    Collections.swap(parentItem!!.list, adapter.getItemTruePosition(i) - parentItemIndex - 1, adapter.getItemTruePosition(i - 1) - parentItemIndex - 1)
+                }
+            } else {
+                for (i in fromPosition downTo targetPosition + 1) {
+                    Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i - 1))
+                }
             }
         }
         adapter.notifyItemMoved(fromPosition, targetPosition)
-        //如果是拖拽的Holder是折叠布局，并且父节点不为空
-        if (adapter.itemIdTypes[viewHolder.itemViewType]?.isFold == true && parentItem != null) {
-            //那么交换当前子级列表中的item
-            Collections.swap(parentItem.list, parentItem.list.indexOf(fromItem), parentItem.list.indexOf(targetItem))
-        }
+
 /*        if (adapter.isFold && parentItem != null) {
             //那么交换当前子级列表中的item
             Collections.swap(parentItem.list, parentItem.list.indexOf(fromItem), parentItem.list.indexOf(targetItem))

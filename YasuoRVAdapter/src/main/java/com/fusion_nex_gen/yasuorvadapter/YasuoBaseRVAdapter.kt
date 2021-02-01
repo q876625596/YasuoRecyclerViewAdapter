@@ -1,7 +1,6 @@
 package com.fusion_nex_gen.yasuorvadapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import androidx.databinding.ObservableList
 import androidx.recyclerview.widget.GridLayoutManager
@@ -41,20 +40,24 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         itemList: YasuoList<T>,
         headerItemList: YasuoList<T>,
         footerItemList: YasuoList<T>,
-        //isFold: Boolean = false,
+        loadMoreItem: T? = null,
     ) : this(context) {
         this.itemList = itemList
         this.headerList = headerItemList
         this.footerList = footerItemList
-        //this.isFold = isFold
+        this.loadMoreLayoutItem = loadMoreItem
     }
 
     internal val dataInvalidation = Any()
 
     /**
-     * 是否是折叠布局
+     * 是否全局都是折叠布局
+     * 如果不是局部折叠，可在所有bind方法前直接给此属性赋值为true
      */
-    //var isFold: Boolean = false
+    internal var isAllFold: Boolean = false
+    fun setAllFold() {
+        isAllFold = true
+    }
 
     /**
      * item列表
@@ -184,8 +187,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
     /**
      * 加载更多的布局类型
      */
-    internal var loadMoreLayoutId: Int? = null
-    fun getLoadMoreLayoutId() = loadMoreLayoutId
+    //var loadMoreLayoutConfig: Config? = null
 
     /**
      * 加载更多的布局类型数据实体
@@ -198,10 +200,10 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * @param loadMoreLayoutId 加载更多的布局类型
      * @param loadMoreLayoutItem 加载更多的布局类型数据实体
      */
-    fun setLoadMoreLayout(loadMoreLayoutId: Int, loadMoreLayoutItem: T) {
-        this.loadMoreLayoutId = loadMoreLayoutId
-        this.loadMoreLayoutItem = loadMoreLayoutItem
-    }
+//    fun setLoadMoreLayout(loadMoreLayoutId: Int, loadMoreLayoutItem: T) {
+//        this.loadMoreLayoutId = loadMoreLayoutId
+//        this.loadMoreLayoutItem = loadMoreLayoutItem
+//    }
 
 
     /**
@@ -219,7 +221,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * 设置了loadMore的布局与数据
      */
     fun hasLoadMore(): Boolean {
-        return loadMoreLayoutId != null && loadMoreLayoutItem != null
+        return loadMoreLayoutItem != null
     }
 
     /******item相关******/
@@ -334,12 +336,11 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
     override fun getItemViewType(position: Int): Int {
         return when {
             isEmptyLayoutMode() -> emptyLayoutId!!
-            inAllList(position) -> itemClassTypes[getItem(position)::class]?.itemLayoutId
+            inAllList(position) || hasLoadMore() -> itemClassTypes[getItem(position)::class]?.itemLayoutId
                 ?: throw RuntimeException(
                     "找不到viewType，position = ${position}，\n" +
                             "viewType not found,position = $position"
                 )
-            hasLoadMore() -> loadMoreLayoutId!!
             else -> throw RuntimeException(
                 "找不到viewType，position = ${position}，\n" +
                         "viewType not found,position = $position"
@@ -380,9 +381,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         item.isExpand = true
         //展开的同时给子级的parentHash赋值
         item.list.forEach {
-            Log.e("hasHash",item.hashCode().toString())
             if (it.parentHash == null) {
-                Log.e("it.parentHash",item.hashCode().toString())
                 it.parentHash = item.hashCode()
             }
         }
@@ -444,7 +443,8 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * 可重写此方法来添加header、footer，或者自定义loadMoreView、全屏布局的viewType
      */
     var staggeredGridFullSpan: (position: Int, viewType: Int) -> Boolean = { position, viewType ->
-        loadMoreLayoutId == viewType || emptyLayoutId == viewType
+        (loadMoreLayoutItem != null && itemClassTypes[loadMoreLayoutItem!!::class]?.itemLayoutId == viewType)
+                || emptyLayoutId == viewType
                 || inHeaderList(position) || inFooterList(position)
     }
 
@@ -765,7 +765,7 @@ fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH, YasuoBaseItemConfig<T, VH>>> Ada
     return this
 }
 
-fun <T, VH,Config:YasuoBaseItemConfig<T, VH>, Adapter : YasuoBaseRVAdapter<T, VH, Config>> Adapter.setSticky(
+fun <T, VH, Config : YasuoBaseItemConfig<T, VH>, Adapter : YasuoBaseRVAdapter<T, VH, Config>> Adapter.setSticky(
     isSticky: (position: Int) -> Boolean
 ): Adapter {
     this.isSticky = isSticky
