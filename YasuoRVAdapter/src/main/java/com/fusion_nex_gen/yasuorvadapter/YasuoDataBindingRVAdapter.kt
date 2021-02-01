@@ -11,13 +11,12 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.RecyclerView
-import com.fusion_nex_gen.yasuorvadapter.bean.YasuoItemType
+import com.fusion_nex_gen.yasuorvadapter.bean.YasuoItemDataBindingConfig
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.holder.YasuoDataBindingVH
 import com.fusion_nex_gen.yasuorvadapter.listener.YasuoVHListener
 import com.fusion_nex_gen.yasuorvadapter.listener.YasuoDataBindingVHBindListener
 import com.fusion_nex_gen.yasuorvadapter.listener.YasuoDataBindingVHCreateListener
-import kotlin.reflect.KClass
 
 /******使用viewDataBinding******/
 
@@ -35,10 +34,10 @@ inline fun RecyclerView.adapterDataBinding(
     itemList: YasuoList<Any>,
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-    isFold: Boolean = false,
+   // isFold: Boolean = false,
     rvListener: YasuoRVDataBindingAdapter.() -> YasuoRVDataBindingAdapter
 ): YasuoRVDataBindingAdapter {
-    return YasuoRVDataBindingAdapter(context, life, itemList, headerItemList, footerItemList, isFold).bindLife().rvListener()
+    return YasuoRVDataBindingAdapter(context, life, itemList, headerItemList, footerItemList).bindLife().rvListener()
         .attach(this)
 }
 
@@ -62,8 +61,7 @@ open class YasuoRVDataBindingAdapter(
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-    isFold: Boolean = false,
-) : YasuoBaseRVAdapter<Any, YasuoDataBindingVH<ViewDataBinding>>(context, itemList, headerItemList, footerItemList, isFold), LifecycleObserver {
+) : YasuoBaseRVAdapter<Any, YasuoDataBindingVH<ViewDataBinding>,YasuoItemDataBindingConfig<Any, YasuoDataBindingVH<ViewDataBinding>,ViewDataBinding>>(context, itemList, headerItemList, footerItemList), LifecycleObserver {
 
     /**
      * 如果为true，那么布局中的variableId默认为BR.item，可以提升性能
@@ -97,6 +95,7 @@ open class YasuoRVDataBindingAdapter(
         life.lifecycle.removeObserver(this)
     }
 
+/*
     //内部holder创建的监听集合
     private val innerHolderCreateListenerMap: SparseArray<YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>>> =
         SparseArray()
@@ -112,6 +111,7 @@ open class YasuoRVDataBindingAdapter(
     override fun <L : YasuoVHListener<YasuoDataBindingVH<ViewDataBinding>>> setHolderBindListener(type: Int, listener: L) {
         innerHolderBindListenerMap.put(type, listener as YasuoDataBindingVHBindListener<YasuoDataBindingVH<ViewDataBinding>>)
     }
+*/
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YasuoDataBindingVH<ViewDataBinding> {
@@ -133,23 +133,17 @@ open class YasuoRVDataBindingAdapter(
             }
         })
         //执行holder创建时的监听
-        innerHolderCreateListenerMap[viewType]?.onCreateViewHolder(holder, binding)
+        itemIdTypes[viewType]?.createListener?.invoke(binding,holder)
+        //innerHolderCreateListenerMap[viewType]?.onCreateViewHolder(holder, binding)
         return holder
     }
 
     override fun onBindViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, position: Int) {
         val item = getItem(position)
-        if (variableIdIsDefault) {
-            holder.binding.setVariable(BR.item, item)
-        } else {
-            //否则去查找自定义variableId
-            val itemType = itemTypes[item::class]
-                ?: throw RuntimeException("找不到相应类型的布局，请检查是否绑定布局，position = ${position}\nThe corresponding type of layout cannot be found, please check whether the layout is bound,position = $position")
-            if (itemType.variableId != null) {
-                holder.binding.setVariable(itemType.variableId, item)
-            }
-        }
-        innerHolderBindListenerMap[holder.itemViewType]?.onBindViewHolder(holder, holder.binding)
+        val itemType = itemClassTypes[item::class]
+            ?: throw RuntimeException("找不到相应类型的布局，请检查是否绑定布局，position = ${position}\nThe corresponding type of layout cannot be found, please check whether the layout is bound,position = $position")
+        holder.binding.setVariable(itemType.variableId, item)
+        itemType.bindListener?.invoke(holder.binding,holder)
         holder.binding.lifecycleOwner = life
         holder.binding.executePendingBindings()
     }
@@ -164,7 +158,7 @@ open class YasuoRVDataBindingAdapter(
  * @param bindingType ViewDataBinding::class
  * @param bindListener 绑定监听这个viewHolder的所有事件
  */
-fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.onHolderDataBindingAndPayloads(
+/*fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.onHolderDataBindingAndPayloads(
     itemLayoutId: Int,
     kClass: KClass<*>,
     bindingType: KClass<VB>,
@@ -172,7 +166,7 @@ fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.onHolder
     createListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>) -> Unit)? = null,
     bindListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>, payloads: List<Any>?) -> Unit)? = null
 ): Adapter {
-    itemTypes[kClass] = YasuoItemType(itemLayoutId, customItemBR)
+    itemClassTypes[kClass] = YasuoItemType(itemLayoutId, customItemBR)
     if (createListener != null) {
         setHolderCreateListener(itemLayoutId, object : YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>> {
             override fun onCreateViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding) {
@@ -188,7 +182,7 @@ fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.onHolder
         })
     }
     return this
-}
+}*/
 
 /**
  * 建立数据类与布局文件之间的匹配关系
@@ -197,7 +191,7 @@ fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.onHolder
  * @param bindingClass ViewDataBinding::class
  * @param bindListener 绑定监听这个viewHolder的所有事件
  */
-fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBind(
+/*fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBind(
     itemLayoutId: Int,
     itemClass: KClass<*>,
     bindingClass: KClass<VB>,
@@ -205,7 +199,7 @@ fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBi
     createListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>) -> Unit)? = null,
     bindListener: (VB.(holder: YasuoDataBindingVH<ViewDataBinding>) -> Unit)? = null
 ): Adapter {
-    itemTypes[itemClass] = YasuoItemType(itemLayoutId, customItemBR)
+    itemClassTypes[itemClass] = YasuoItemType(itemLayoutId, customItemBR)
     if (createListener != null) {
         setHolderCreateListener(itemLayoutId, object : YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>> {
             override fun onCreateViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding) {
@@ -221,7 +215,7 @@ fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBi
         })
     }
     return this
-}
+}*/
 
 /**
  * 建立loadMore数据类与布局文件之间的匹配关系
@@ -229,6 +223,7 @@ fun <VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBi
  * @param loadMoreLayoutItem 加载更多布局对应的实体
  * @param bindListener 绑定监听这个viewHolder的所有事件
  */
+/*
 fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBindLoadMore(
     loadMoreLayoutId: Int,
     loadMoreLayoutItem: T,
@@ -239,7 +234,7 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
 ): Adapter {
     this.loadMoreLayoutId = loadMoreLayoutId
     this.loadMoreLayoutItem = loadMoreLayoutItem
-    itemTypes[loadMoreLayoutItem::class] = YasuoItemType(loadMoreLayoutId, customItemBR)
+    itemClassTypes[loadMoreLayoutItem::class] = YasuoItemType(loadMoreLayoutId, customItemBR)
     if (createListener != null) {
         setHolderCreateListener(loadMoreLayoutId, object : YasuoDataBindingVHCreateListener<YasuoDataBindingVH<ViewDataBinding>> {
             override fun onCreateViewHolder(holder: YasuoDataBindingVH<ViewDataBinding>, binding: ViewDataBinding) {
@@ -255,4 +250,4 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
         })
     }
     return this
-}
+}*/

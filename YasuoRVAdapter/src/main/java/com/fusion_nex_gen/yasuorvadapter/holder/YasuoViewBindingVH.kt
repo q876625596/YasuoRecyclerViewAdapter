@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.fusion_nex_gen.yasuorvadapter.YasuoRVViewBindingAdapter
 
-class YasuoViewBindingVH(root: View) :
+open class YasuoViewBindingVH(root: View) :
     RecyclerView.ViewHolder(root) {
       lateinit var binding: ViewBinding
 

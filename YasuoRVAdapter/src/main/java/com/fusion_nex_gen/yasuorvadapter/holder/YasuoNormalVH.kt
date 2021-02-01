@@ -6,7 +6,7 @@ import androidx.viewbinding.ViewBinding
 import com.fusion_nex_gen.yasuorvadapter.YasuoRVViewBindingAdapter
 
 
-class YasuoVH(private val convertView: View) :
+open class YasuoNormalVH(private val convertView: View) :
     RecyclerView.ViewHolder(convertView) {
 
     internal lateinit var binding: ViewBinding

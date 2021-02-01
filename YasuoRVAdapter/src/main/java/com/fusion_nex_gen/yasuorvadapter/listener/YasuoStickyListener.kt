@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.fusion_nex_gen.yasuorvadapter.YasuoBaseRVAdapter
 
-fun <Adapter : YasuoBaseRVAdapter<*, *>> RecyclerView.onStickyListener(
+fun <Adapter : YasuoBaseRVAdapter<*, *,*>> RecyclerView.onStickyListener(
     adapter: Adapter,
     onSticky: YasuoStickyListener.(firstVisibleItemPosition: Int,firstCompletelyVisibleItemPosition: Int) -> Unit
 ) {
@@ -15,7 +15,7 @@ fun <Adapter : YasuoBaseRVAdapter<*, *>> RecyclerView.onStickyListener(
 }
 
 class YasuoStickyListener(
-    private val adapter: YasuoBaseRVAdapter<*, *>,
+    private val adapter: YasuoBaseRVAdapter<*, *,*>,
     private val onLoadMore: YasuoStickyListener.(firstVisibleItemPosition: Int,firstCompletelyVisibleItemPosition: Int) -> Unit
 ) :
     RecyclerView.OnScrollListener() {

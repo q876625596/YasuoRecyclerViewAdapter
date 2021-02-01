@@ -1,6 +1,7 @@
 package com.fusion_nex_gen.yasuorvadapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.databinding.ObservableList
 import androidx.recyclerview.widget.GridLayoutManager
@@ -8,7 +9,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.fusion_nex_gen.yasuorvadapter.bean.*
-import com.fusion_nex_gen.yasuorvadapter.listener.YasuoVHListener
 import com.fusion_nex_gen.yasuorvadapter.sticky.StickyCallBack
 import kotlin.reflect.KClass
 
@@ -27,7 +27,7 @@ import kotlin.reflect.KClass
  * TODO 8、横向滑动显示选项
  * TODO 9、新增一些额外的常用功能，比如结合下拉刷新之后显示一个一临时头部，提示刷新了多少条
  */
-abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context: Context) :
+abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config : YasuoBaseItemConfig<T, VH>>(context: Context) :
     RecyclerView.Adapter<VH>(), StickyCallBack {
 
     /**
@@ -41,12 +41,12 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         itemList: YasuoList<T>,
         headerItemList: YasuoList<T>,
         footerItemList: YasuoList<T>,
-        isFold: Boolean = false,
+        //isFold: Boolean = false,
     ) : this(context) {
         this.itemList = itemList
         this.headerList = headerItemList
         this.footerList = footerItemList
-        this.isFold = isFold
+        //this.isFold = isFold
     }
 
     internal val dataInvalidation = Any()
@@ -54,7 +54,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     /**
      * 是否是折叠布局
      */
-    var isFold: Boolean = false
+    //var isFold: Boolean = false
 
     /**
      * item列表
@@ -73,9 +73,18 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
 
 
     /**
-     * 所有列表类型的集合，实体类[KClass]作为key，类型[YasuoItemType]作为value
+     * 所有列表类型的集合，实体类[KClass]作为key，类型[YasuoBaseItemConfig]作为value
+     * 通常是这样获取：itemClassTypes[getItem(position)::class]
      */
-    val itemTypes: MutableMap<KClass<*>, YasuoItemType> = mutableMapOf()
+    val itemClassTypes: MutableMap<KClass<*>, Config> = mutableMapOf()
+
+    /**
+     * 所有列表类型的集合，layoutId作为key，类型[YasuoBaseItemConfig]作为value
+     * 相当于[itemClassTypes]的复制品，为的是能通过layoutId来获取[YasuoBaseItemConfig]
+     * 并不会增加太多内存，但这样会减少一些常用操作的耗时
+     * 通常是这样获取：itemIdTypes[getItemViewType]
+     */
+    val itemIdTypes: MutableMap<Int, Config> = mutableMapOf()
 
     /**
      * RV
@@ -142,7 +151,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         emptyLayoutItem?.apply {
             options()
         } ?: throw RuntimeException("emptyLayoutItem is null")
-        notifyItemChanged(0,dataInvalidation)
+        notifyItemChanged(0, dataInvalidation)
     }
 
     /**
@@ -325,7 +334,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
     override fun getItemViewType(position: Int): Int {
         return when {
             isEmptyLayoutMode() -> emptyLayoutId!!
-            inAllList(position) -> itemTypes[getItem(position)::class]?.itemLayoutId
+            inAllList(position) -> itemClassTypes[getItem(position)::class]?.itemLayoutId
                 ?: throw RuntimeException(
                     "找不到viewType，position = ${position}，\n" +
                             "viewType not found,position = $position"
@@ -371,7 +380,9 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
         item.isExpand = true
         //展开的同时给子级的parentHash赋值
         item.list.forEach {
+            Log.e("hasHash",item.hashCode().toString())
             if (it.parentHash == null) {
+                Log.e("it.parentHash",item.hashCode().toString())
                 it.parentHash = item.hashCode()
             }
         }
@@ -533,13 +544,13 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
      * 添加holder创建监听
      * innerHolderCreateListenerMap.put(type, listener)
      */
-    abstract fun <L : YasuoVHListener<VH>> setHolderCreateListener(type: Int, listener: L)
+    //abstract fun <L : YasuoVHListener<VH>> setHolderCreateListener(type: Int, listener: L)
 
     /**
      * 添加holder绑定监听
      * innerHolderBindListenerMap.put(type, listener)
      */
-    abstract fun <L : YasuoVHListener<VH>> setHolderBindListener(type: Int, listener: L)
+    //abstract fun <L : YasuoVHListener<VH>> setHolderBindListener(type: Int, listener: L)
 
     var isSticky: ((position: Int) -> Boolean)? = null
     override fun isStickyHeader(position: Int): Boolean {
@@ -728,7 +739,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder>(context
 /**
  * 绑定适配器
  */
-fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>, RV : RecyclerView> Adapter.attach(rv: RV): Adapter {
+fun <T, VH, Config : YasuoBaseItemConfig<T, VH>, Adapter : YasuoBaseRVAdapter<T, VH, Config>, RV : RecyclerView> Adapter.attach(rv: RV): Adapter {
     rv.adapter = this
     return this
 }
@@ -737,7 +748,7 @@ fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>, RV : RecyclerView> Adapter.atta
 /**
  * 当为GridLayoutManager的时候，设置item的占用比例
  */
-fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setGridSpan(
+fun <T, VH, Config : YasuoBaseItemConfig<T, VH>, Adapter : YasuoBaseRVAdapter<T, VH, Config>> Adapter.setGridSpan(
     spanEx: (position: Int) -> Int
 ): Adapter {
     this.itemGridSpan = spanEx
@@ -747,14 +758,14 @@ fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setGridSpan(
 /**
  * 当为StaggeredGridLayoutManager的时候，设置item的是否占满
  */
-fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setStaggeredGridFullSpan(
+fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH, YasuoBaseItemConfig<T, VH>>> Adapter.setStaggeredGridFullSpan(
     staggeredGridFullSpan: (position: Int, viewType: Int) -> Boolean
 ): Adapter {
     this.staggeredGridFullSpan = staggeredGridFullSpan
     return this
 }
 
-fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH>> Adapter.setSticky(
+fun <T, VH,Config:YasuoBaseItemConfig<T, VH>, Adapter : YasuoBaseRVAdapter<T, VH, Config>> Adapter.setSticky(
     isSticky: (position: Int) -> Boolean
 ): Adapter {
     this.isSticky = isSticky
