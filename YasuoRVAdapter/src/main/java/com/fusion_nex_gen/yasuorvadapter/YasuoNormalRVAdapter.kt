@@ -58,6 +58,7 @@ open class YasuoNormalRVAdapter(
     init {
         //如果是使用的ObservableArrayList，那么需要注册监听
         this.itemList.addOnListChangedCallback(itemListListener)
+        this.emptyList.addOnListChangedCallback(emptyListListener)
         this.headerList.addOnListChangedCallback(headerListListener)
         this.footerList.addOnListChangedCallback(footerListListener)
     }
@@ -65,6 +66,7 @@ open class YasuoNormalRVAdapter(
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemsRemoveListener() {
         this.itemList.removeOnListChangedCallback(itemListListener)
+        this.emptyList.removeOnListChangedCallback(emptyListListener)
         this.headerList.removeOnListChangedCallback(headerListListener)
         this.footerList.removeOnListChangedCallback(footerListListener)
     }
@@ -84,12 +86,12 @@ open class YasuoNormalRVAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YasuoNormalVH {
         val holder = YasuoNormalVH(inflater.inflate(viewType, parent, false))
-        itemIdTypes[viewType]?.createListener?.invoke(holder)
+        itemIdTypes[viewType]?.holderCreateListener?.invoke(holder)
         return holder
     }
 
     override fun onBindViewHolder(holder: YasuoNormalVH, position: Int) {
-        itemIdTypes[holder.itemViewType]?.bindListener?.invoke(holder, getItem(position))
+        itemIdTypes[holder.itemViewType]?.holderBindListener?.invoke(holder, getItem(position))
     }
 }
 
@@ -102,7 +104,7 @@ open class YasuoNormalRVAdapter(
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBind(
     itemLayoutId: Int,
     itemClass: KClass<T>,
-    execute: YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit
+    execute: (YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit)? = null
 ): Adapter {
     val itemType = YasuoItemNormalConfig<T, YasuoNormalVH>(itemLayoutId)
     if (isAllFold) {
@@ -110,7 +112,7 @@ fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBind(
     }
     itemClassTypes[itemClass] = itemType as YasuoItemNormalConfig<Any, YasuoNormalVH>
     itemIdTypes[itemLayoutId] = itemType
-    itemType.execute()
+    execute?.invoke(itemType)
     return this
 }
 
@@ -124,12 +126,12 @@ fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBind(
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindHeader(
     itemLayoutId: Int,
     itemClass: KClass<T>,
-    execute: YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit
+    execute: (YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit)? = null
 ): Adapter {
     val itemType = YasuoItemNormalConfig<T, YasuoNormalVH>(itemLayoutId)
     itemClassTypes[itemClass] = itemType as YasuoItemNormalConfig<Any, YasuoNormalVH>
     itemIdTypes[itemLayoutId] = itemType
-    itemType.execute()
+    execute?.invoke(itemType)
     return this
 }
 
@@ -143,29 +145,47 @@ fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindHeader(
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindFooter(
     itemLayoutId: Int,
     itemClass: KClass<T>,
-    execute: YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit
+    execute: (YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit)? = null
 ): Adapter {
     val itemType = YasuoItemNormalConfig<T, YasuoNormalVH>(itemLayoutId)
     itemClassTypes[itemClass] = itemType as YasuoItemNormalConfig<Any, YasuoNormalVH>
     itemIdTypes[itemLayoutId] = itemType
-    itemType.execute()
+    execute?.invoke(itemType)
     return this
 }
 
 /**
  * 建立loadMore数据类与布局文件之间的匹配关系
- * @param loadMoreLayoutId 加载更多布局id
+ * @param itemLayoutId itemView布局id
  * @param itemClass 对应实体类的Class
  * @param execute 后续对[YasuoItemNormalConfig]的执行操作
  */
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindLoadMore(
-    loadMoreLayoutId: Int,
+    itemLayoutId: Int,
     itemClass: KClass<T>,
-    execute: YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit
+    execute: (YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit)? = null
 ): Adapter {
-    val itemType = YasuoItemNormalConfig<T, YasuoNormalVH>(loadMoreLayoutId)
+    val itemType = YasuoItemNormalConfig<T, YasuoNormalVH>(itemLayoutId)
     itemClassTypes[itemClass] = itemType as YasuoItemNormalConfig<Any, YasuoNormalVH>
-    itemIdTypes[loadMoreLayoutId] = itemType
-    itemType.execute()
+    itemIdTypes[itemLayoutId] = itemType
+    execute?.invoke(itemType)
+    return this
+}
+
+/**
+ * 建立emptyLayout数据类与布局文件之间的匹配关系
+ * @param itemLayoutId itemView布局id
+ * @param itemClass 对应实体类的Class
+ * @param execute 后续对[YasuoItemNormalConfig]的执行操作
+ */
+fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindEmpty(
+    itemLayoutId: Int,
+    itemClass: KClass<T>,
+    execute: (YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit)? = null
+): Adapter {
+    val itemType = YasuoItemNormalConfig<T, YasuoNormalVH>(itemLayoutId)
+    itemClassTypes[itemClass] = itemType as YasuoItemNormalConfig<Any, YasuoNormalVH>
+    itemIdTypes[itemLayoutId] = itemType
+    execute?.invoke(itemType)
     return this
 }

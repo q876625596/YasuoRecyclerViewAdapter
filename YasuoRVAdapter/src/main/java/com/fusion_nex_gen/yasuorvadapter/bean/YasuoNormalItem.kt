@@ -2,6 +2,7 @@ package com.fusion_nex_gen.yasuorvadapter.bean
 
 
 open class YasuoNormalItem(
-    var span: Int = 1,
+    override var staggeredGridFullSpan: Boolean = false,
+    override var gridSpan: Int = 0,
     override var sticky: Boolean = false
-) : StickyItem
+) : YasuoBaseItem

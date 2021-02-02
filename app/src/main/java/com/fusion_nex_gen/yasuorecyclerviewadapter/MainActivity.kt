@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.fusion_nex_gen.yasuorecyclerviewadapter.databinding.*
 import com.fusion_nex_gen.yasuorecyclerviewadapter.model.*
 import com.fusion_nex_gen.yasuorvadapter.*
@@ -16,7 +17,7 @@ import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.listener.YasuoItemTouchHelperCallBack
 import com.fusion_nex_gen.yasuorvadapter.listener.attach
-import com.fusion_nex_gen.yasuorvadapter.sticky.StickyGridLayoutManager
+import com.fusion_nex_gen.yasuorvadapter.sticky.StickyStaggeredGridLayoutManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             when (i % 7) {
                 0 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.aaa))).apply {
                     this.list = YasuoList<YasuoFoldItem>().apply {
-                        add(TextBean(MutableLiveData("我是内部第1个text")).apply { span = 3 })
+                        add(TextBean(MutableLiveData("我是内部第1个text")).apply { gridSpan = 3 })
                         add(TextBean(MutableLiveData("我是内部第2个text")))
                         add(TextBean(MutableLiveData("我是内部第3个text")))
                         add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
@@ -57,25 +58,38 @@ class MainActivity : AppCompatActivity() {
             add(FooterTwoBean(MutableLiveData(Color.BLUE)))
         }
         val loadMoreItem = DefaultLoadMoreItem()
-        binding.myRV.layoutManager = StickyGridLayoutManager<YasuoNormalRVAdapter>(this, 3)
+        binding.myRV.layoutManager = StickyStaggeredGridLayoutManager<YasuoNormalRVAdapter>(3, StaggeredGridLayoutManager.VERTICAL)
         //普通findViewById用法
         binding.myRV.adapterBinding(this, this, list, headerList, footerList, loadMoreItem) {
             YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
-//            setSticky {
-//                return@setSticky it % 4 == 0
-//            }
-//            setGridSpan {
-//                return@setGridSpan if (it % 4 == 0) 3 else 1
-//            }
+            holderBindEmpty(R.layout.empty_layout_one, EmptyBeanOne::class) {
+                onHolderBind { holder, item ->
+                    holder.itemView.setOnClickListener {
+                        showEmptyLayout(EmptyBeanTwo(),true,true)
+                    }
+                }
+            }
+            holderBindEmpty(R.layout.empty_layout_two, EmptyBeanTwo::class) {
+                onHolderBind { holder, item ->
+                    holder.itemView.setOnClickListener {
+                        showEmptyLayout(EmptyBeanOne(),true,true)
+                    }
+                }
+            }
             holderBindLoadMore(R.layout.default_load_more_layout, DefaultLoadMoreItem::class) {
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.loadMoreText).apply {
                         text = item.text.value
+                        setOnClickListener {
+                            if (getEmptyLayoutItem() == null) {
+                                showEmptyLayout(EmptyBeanOne())
+                            }
+                        }
                     }
                 }
             }
             holderBindHeader(R.layout.header_layout_one, HeaderOneBean::class) {
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.headerText).apply {
                         text = item.headerOneText.value
                         setOnClickListener {
@@ -86,12 +100,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             holderBindHeader(R.layout.header_layout_two, HeaderTwoBean::class) {
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     holder.itemView.setBackgroundColor(item.headerOneBgColor.value!!)
                 }
             }
             holderBindFooter(R.layout.footer_layout_one, FooterOneBean::class) {
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.footerText).apply {
                         text = item.footerOneText.value
                         setOnClickListener {
@@ -102,21 +116,21 @@ class MainActivity : AppCompatActivity() {
             }
 
             holderBindFooter(R.layout.footer_layout_two, FooterTwoBean::class) {
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     holder.itemView.setBackgroundColor(item.footerTwoBgColor.value!!)
                 }
             }
             holderBind(R.layout.item_layout_text, TextBean::class) {
                 isFold = true
                 sticky = true
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.itemText).apply {
                         //如果未使用了LiveData，这样写
                         text = item.text.value
                         setOnClickListener {
                             Log.e("asas", "setOnClickListener")
                             if (item.parentHash != null) {
-                                removeFoldListItem(item)
+                                removeFoldChildListItem(item)
                             }
                             itemList.remove(item)
                         }
@@ -131,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             }
             holderBind(R.layout.item_layout_image, ImageBean::class) {
                 isFold = true
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     holder.getView<ImageView>(R.id.itemImage).apply {
                         setImageDrawable(item.image.value)
                         if (item.canClick.value == true) {

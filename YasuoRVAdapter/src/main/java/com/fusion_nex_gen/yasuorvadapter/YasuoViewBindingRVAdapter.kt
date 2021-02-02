@@ -63,6 +63,7 @@ open class YasuoRVViewBindingAdapter(
 
     init {
         this.itemList.addOnListChangedCallback(itemListListener)
+        this.emptyList.addOnListChangedCallback(emptyListListener)
         this.headerList.addOnListChangedCallback(headerListListener)
         this.footerList.addOnListChangedCallback(footerListListener)
     }
@@ -70,6 +71,7 @@ open class YasuoRVViewBindingAdapter(
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemListRemoveListener() {
         this.itemList.removeOnListChangedCallback(itemListListener)
+        this.emptyList.removeOnListChangedCallback(emptyListListener)
         this.headerList.removeOnListChangedCallback(headerListListener)
         this.footerList.removeOnListChangedCallback(footerListListener)
     }
@@ -93,13 +95,13 @@ open class YasuoRVViewBindingAdapter(
         val itemConfig = itemIdTypes[viewType]
         val binding = itemConfig?.createBindingFun?.invoke(holder.itemView) ?: throw RuntimeException("未配置viewBinding")
         holder.binding = binding
-        itemConfig.createListener?.invoke(binding, holder)
+        itemConfig.holderCreateListener?.invoke(binding, holder)
         return holder
     }
 
     override fun onBindViewHolder(holder: YasuoViewBindingVH, position: Int) {
         val item = getItem(position)
-        itemIdTypes[holder.itemViewType]?.bindListener?.invoke(holder.binding, holder, item)
+        itemIdTypes[holder.itemViewType]?.holderBindListener?.invoke(holder.binding, holder, item)
     }
 }
 
@@ -170,20 +172,40 @@ fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.hol
 
 /**
  * 建立loadMore数据类与布局文件之间的匹配关系
- * @param loadMoreLayoutId 加载更多布局id
+ * @param itemLayoutId itemView布局id
  * @param itemClass 对应实体类的Class
  * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
  * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
  */
 fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindLoadMore(
-    loadMoreLayoutId: Int,
+    itemLayoutId: Int,
     itemClass: KClass<T>,
     createBindingFun: (view: View) -> VB,
     execute: YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>.() -> Unit
 ): Adapter {
-    val itemType = YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>(loadMoreLayoutId, createBindingFun = createBindingFun)
+    val itemType = YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>(itemLayoutId, createBindingFun = createBindingFun)
     itemClassTypes[itemClass] = itemType as YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>
-    itemIdTypes[loadMoreLayoutId] = itemType
+    itemIdTypes[itemLayoutId] = itemType
+    itemType.execute()
+    return this
+}
+
+/**
+ * 建立empty数据类与布局文件之间的匹配关系
+ * @param itemLayoutId itemView布局id
+ * @param itemClass 对应实体类的Class
+ * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
+ * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
+ */
+fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindEmpty(
+    itemLayoutId: Int,
+    itemClass: KClass<T>,
+    createBindingFun: (view: View) -> VB,
+    execute: YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>.() -> Unit
+): Adapter {
+    val itemType = YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>(itemLayoutId, createBindingFun = createBindingFun)
+    itemClassTypes[itemClass] = itemType as YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>
+    itemIdTypes[itemLayoutId] = itemType
     itemType.execute()
     return this
 }

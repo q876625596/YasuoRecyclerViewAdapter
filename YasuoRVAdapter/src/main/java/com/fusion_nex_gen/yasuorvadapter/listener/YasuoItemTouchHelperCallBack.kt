@@ -237,7 +237,7 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
         val truePosition = adapter.getItemTruePosition(viewHolder.bindingAdapterPosition)
         val item = adapter.getItem(viewHolder.bindingAdapterPosition)
         //判断是否是折叠布局，如果是折叠布局，那么将折叠布局中的原始item也删除
-        adapter.removeFoldListItem(item)
+        adapter.removeFoldChildListItem(item)
         innerSwipeListener?.invoke(truePosition, direction)
         adapter.itemList.removeAt(truePosition)
     }

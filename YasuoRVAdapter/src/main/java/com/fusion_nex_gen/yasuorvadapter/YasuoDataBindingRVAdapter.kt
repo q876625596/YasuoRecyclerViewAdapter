@@ -67,14 +67,10 @@ open class YasuoRVDataBindingAdapter(
     loadMoreItem
 ), LifecycleObserver {
 
-    /**
-     * 如果为true，那么布局中的variableId默认为BR.item，可以提升性能
-     */
-    var variableIdIsDefault = true
-
     init {
         //如果是使用的ObservableArrayList，那么需要注册监听
         this.itemList.addOnListChangedCallback(itemListListener)
+        this.emptyList.addOnListChangedCallback(emptyListListener)
         this.headerList.addOnListChangedCallback(headerListListener)
         this.footerList.addOnListChangedCallback(footerListListener)
     }
@@ -82,6 +78,7 @@ open class YasuoRVDataBindingAdapter(
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun itemListRemoveListener() {
         this.itemList.removeOnListChangedCallback(itemListListener)
+        this.emptyList.removeOnListChangedCallback(emptyListListener)
         this.headerList.removeOnListChangedCallback(headerListListener)
         this.footerList.removeOnListChangedCallback(footerListListener)
     }
@@ -118,7 +115,7 @@ open class YasuoRVDataBindingAdapter(
             }
         })
         //执行holder创建时的监听
-        itemIdTypes[viewType]?.createListener?.invoke(binding, holder)
+        itemIdTypes[viewType]?.holderCreateListener?.invoke(binding, holder)
         return holder
     }
 
@@ -127,7 +124,7 @@ open class YasuoRVDataBindingAdapter(
         val itemType = itemClassTypes[item::class]
             ?: throw RuntimeException("找不到相应类型的布局，请检查是否绑定布局，position = ${position}\nThe corresponding type of layout cannot be found, please check whether the layout is bound,position = $position")
         holder.binding.setVariable(itemType.variableId, item)
-        itemType.bindListener?.invoke(holder.binding, holder)
+        itemType.holderBindListener?.invoke(holder.binding, holder)
         holder.binding.lifecycleOwner = life
         holder.binding.executePendingBindings()
     }
@@ -200,20 +197,40 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
 
 /**
  * 建立loadMore数据类与布局文件之间的匹配关系
- * @param loadMoreLayoutId 加载更多布局id
+ * @param itemLayoutId itemView布局id
  * @param itemClass 对应实体类的Class
  * @param bindingClass 布局对应的[ViewDataBinding]
  * @param execute 后续对[YasuoItemDataBindingConfig]的执行操作
  */
 fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBindLoadMore(
-    loadMoreLayoutId: Int,
+    itemLayoutId: Int,
     itemClass: KClass<T>,
     bindingClass: KClass<VB>,
     execute: (YasuoItemDataBindingConfig<T, YasuoDataBindingVH<VB>, VB>.() -> Unit)? = null
 ): Adapter {
-    val itemType = YasuoItemDataBindingConfig<T, YasuoDataBindingVH<VB>, VB>(loadMoreLayoutId)
+    val itemType = YasuoItemDataBindingConfig<T, YasuoDataBindingVH<VB>, VB>(itemLayoutId)
     itemClassTypes[itemClass] = itemType as YasuoItemDataBindingConfig<Any, YasuoDataBindingVH<ViewDataBinding>, ViewDataBinding>
-    itemIdTypes[loadMoreLayoutId] = itemType
+    itemIdTypes[itemLayoutId] = itemType
+    execute?.invoke(itemType)
+    return this
+}
+
+/**
+ * 建立Empty数据类与布局文件之间的匹配关系
+ * @param itemLayoutId itemView布局id
+ * @param itemClass 对应实体类的Class
+ * @param bindingClass 布局对应的[ViewDataBinding]
+ * @param execute 后续对[YasuoItemDataBindingConfig]的执行操作
+ */
+fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBindEmpty(
+    itemLayoutId: Int,
+    itemClass: KClass<T>,
+    bindingClass: KClass<VB>,
+    execute: (YasuoItemDataBindingConfig<T, YasuoDataBindingVH<VB>, VB>.() -> Unit)? = null
+): Adapter {
+    val itemType = YasuoItemDataBindingConfig<T, YasuoDataBindingVH<VB>, VB>(itemLayoutId)
+    itemClassTypes[itemClass] = itemType as YasuoItemDataBindingConfig<Any, YasuoDataBindingVH<ViewDataBinding>, ViewDataBinding>
+    itemIdTypes[itemLayoutId] = itemType
     execute?.invoke(itemType)
     return this
 }
