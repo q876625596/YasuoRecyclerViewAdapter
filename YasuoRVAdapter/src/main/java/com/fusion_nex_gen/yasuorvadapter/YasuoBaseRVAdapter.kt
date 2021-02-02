@@ -453,16 +453,18 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         //这里用于判断StaggeredGridLayoutManager的item是否占满一行
         val lp = holder.itemView.layoutParams
         if (lp != null && lp is StaggeredGridLayoutManager.LayoutParams) {
-            if (staggeredGridFullSpan(holder.bindingAdapterPosition, holder.itemViewType)) {
-                lp.isFullSpan = true
-            } else {
-                //如果是sticky
-                if (isSticky != null) {
-                    if (isSticky!!(holder.bindingAdapterPosition)) {
-                        lp.isFullSpan = true
-                    }
-                }
-            }
+            val itemConfig = itemIdTypes[holder.itemViewType]
+            lp.isFullSpan = itemConfig?.staggeredGridFullSpan ?: itemConfig?.sticky ?: false
+            /*      if (staggeredGridFullSpan(holder.bindingAdapterPosition, holder.itemViewType)) {
+                      lp.isFullSpan = true
+                  } else {
+                      //如果是sticky
+                      if (isSticky != null) {
+                          if (isSticky!!(holder.bindingAdapterPosition)) {
+                              lp.isFullSpan = true
+                          }
+                      }
+                  }*/
 
         }
     }
@@ -485,12 +487,14 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
                     if (position == getAllListSize()) {
                         return manager.spanCount
                     }
-                    //如果设置了sticky的判断方法
-                    //并且该position通过判断
-                    if (isSticky != null && isSticky!!(position)) {
+                    //TODO 修改各种span
+                    val item = getItem(position)
+                    val itemConfig = itemClassTypes[item::class]
+                        ?: throw RuntimeException("找不到对应Config")
+                    //如果设置了sticky，那么占满
+                    if (itemConfig.sticky) {
                         return manager.spanCount
                     }
-                    val item = getItem(position)
                     //如果是头部
                     if (inHeaderList(position)) {
                         //先判断是否继承基类
@@ -552,9 +556,9 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      */
     //abstract fun <L : YasuoVHListener<VH>> setHolderBindListener(type: Int, listener: L)
 
-    var isSticky: ((position: Int) -> Boolean)? = null
+    /*   var isSticky: ((position: Int) -> Boolean)? = null*/
     override fun isStickyHeader(position: Int): Boolean {
-        return isSticky?.invoke(position) ?: false
+        return itemClassTypes[getItem(position)::class]?.sticky ?: false
     }
 /*
     internal var stickyClickListener: StickyClickListener<VH>? = null
@@ -764,10 +768,11 @@ fun <T, VH, Adapter : YasuoBaseRVAdapter<T, VH, YasuoBaseItemConfig<T, VH>>> Ada
     this.staggeredGridFullSpan = staggeredGridFullSpan
     return this
 }
+/*
 
 fun <T, VH, Config : YasuoBaseItemConfig<T, VH>, Adapter : YasuoBaseRVAdapter<T, VH, Config>> Adapter.setSticky(
     isSticky: (position: Int) -> Boolean
 ): Adapter {
     this.isSticky = isSticky
     return this
-}
+}*/

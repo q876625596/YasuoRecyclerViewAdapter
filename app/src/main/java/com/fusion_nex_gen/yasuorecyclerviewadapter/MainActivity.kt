@@ -108,6 +108,7 @@ class MainActivity : AppCompatActivity() {
             }
             holderBind(R.layout.item_layout_text, TextBean::class) {
                 isFold = true
+                sticky = true
                 onBind { holder, item ->
                     holder.getView<TextView>(R.id.itemText).apply {
                         //如果未使用了LiveData，这样写
