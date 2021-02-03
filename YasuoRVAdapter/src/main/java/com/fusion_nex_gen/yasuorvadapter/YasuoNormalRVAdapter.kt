@@ -14,26 +14,29 @@ import kotlin.reflect.KClass
 
 /**
  * 绑定adapter
- * @param context Context 对象
- * @param context Context object
+ * Binding adapter
  * @param life LifecycleOwner object
+ * @param itemList [YasuoBaseRVAdapter.itemList]
+ * @param headerList [YasuoBaseRVAdapter.headerList]
+ * @param footerList [YasuoBaseRVAdapter.footerList]
  * @param rvListener 绑定Adapter实体之前需要做的操作
  * @param rvListener What to do before binding adapter entity
  */
 inline fun RecyclerView.adapterBinding(
     life: LifecycleOwner,
     itemList: YasuoList<Any>,
-    headerItemList: YasuoList<Any> = YasuoList(),
-    footerItemList: YasuoList<Any> = YasuoList(),
+    headerList: YasuoList<Any> = YasuoList(),
+    footerList: YasuoList<Any> = YasuoList(),
     rvListener: YasuoNormalRVAdapter.() -> YasuoNormalRVAdapter
 ): YasuoNormalRVAdapter {
-    return YasuoNormalRVAdapter(life, itemList, headerItemList, footerItemList).bindLife().rvListener().attach(this)
+    return YasuoNormalRVAdapter(life, itemList, headerList, footerList).bindLife().rvListener().attach(this)
 }
 
 /**
  * 绑定adapter
+ * Binding adapter
  * @param adapter Adapter实体
- * @param adapter Adapter实体 entity
+ * @param adapter Adapter entity
  * @param rvListener 绑定Adapter实体之前需要做的操作
  * @param rvListener What to do before binding adapter entity
  */
@@ -52,7 +55,6 @@ open class YasuoNormalRVAdapter(
 ) : YasuoBaseRVAdapter<Any, YasuoNormalVH, YasuoItemNormalConfig<Any, YasuoNormalVH>>(itemList, headerItemList, footerItemList), LifecycleObserver {
 
     init {
-        //如果是使用的ObservableArrayList，那么需要注册监听
         this.itemList.addOnListChangedCallback(itemListListener)
         this.emptyList.addOnListChangedCallback(emptyListListener)
         this.headerList.addOnListChangedCallback(headerListListener)
@@ -71,6 +73,7 @@ open class YasuoNormalRVAdapter(
 
     /**
      * 绑定生命周期，初始化adapter之后必须调用
+     * Binding life cycle, which must be called after initializing adapter
      */
     fun bindLife(): YasuoNormalRVAdapter {
         life.lifecycle.addObserver(this)
@@ -96,9 +99,13 @@ open class YasuoNormalRVAdapter(
 
 /**
  * 建立数据类与布局文件之间的匹配关系
+ * Establish the matching relationship between data class and layout file
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param execute 后续对[YasuoItemNormalConfig]的执行操作
+ * Subsequent operations on [YasuoItemNormalConfig]
  */
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBind(
     itemLayoutId: Int,
@@ -117,10 +124,15 @@ fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBind(
 
 /**
  * 建立数据类与布局文件之间的匹配关系，header
- * 本质上与[YasuoNormalRVAdapter.holderBind]没有区别，只是做一下名称上的区分
+ * Establish the matching relationship between data class and layout file,for header
+ * 本质上和[YasuoNormalRVAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoNormalRVAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param execute 后续对[YasuoItemNormalConfig]的执行操作
+ * Subsequent operations on [YasuoItemNormalConfig]
  */
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindHeader(
     itemLayoutId: Int,
@@ -136,10 +148,15 @@ fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindHeader(
 
 /**
  * 建立数据类与布局文件之间的匹配关系，footer
- * 本质上与[YasuoNormalRVAdapter.holderBind]没有区别，只是做一下名称上的区分
+ * Establish the matching relationship between data class and layout file,for footer
+ * 本质上和[YasuoNormalRVAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoNormalRVAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param execute 后续对[YasuoItemNormalConfig]的执行操作
+ * Subsequent operations on [YasuoItemNormalConfig]
  */
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindFooter(
     itemLayoutId: Int,
@@ -154,10 +171,16 @@ fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindFooter(
 }
 
 /**
- * 建立loadMore数据类与布局文件之间的匹配关系
+ * 建立数据类与布局文件之间的匹配关系，loadMore
+ * Establish the matching relationship between data class and layout file,for loadMore
+ * 本质上和[YasuoNormalRVAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoNormalRVAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param execute 后续对[YasuoItemNormalConfig]的执行操作
+ * Subsequent operations on [YasuoItemNormalConfig]
  */
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindLoadMore(
     itemLayoutId: Int,
@@ -172,10 +195,16 @@ fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindLoadMore(
 }
 
 /**
- * 建立emptyLayout数据类与布局文件之间的匹配关系
+ * 建立数据类与布局文件之间的匹配关系，emptyLayout
+ * Establish the matching relationship between data class and layout file,for emptyLayout
+ * 本质上和[YasuoNormalRVAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoNormalRVAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param execute 后续对[YasuoItemNormalConfig]的执行操作
+ * Subsequent operations on [YasuoItemNormalConfig]
  */
 fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderBindEmpty(
     itemLayoutId: Int,

@@ -15,29 +15,32 @@ import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.holder.YasuoDataBindingVH
 import kotlin.reflect.KClass
 
-/******使用viewDataBinding******/
+/******使用ViewDataBinding  Using ViewDataBinding******/
 
 /**
  * 绑定adapter
- * @param context Context 对象
- * @param context Context object
+ * Binding adapter
  * @param life LifecycleOwner object
+ * @param itemList [YasuoBaseRVAdapter.itemList]
+ * @param headerList [YasuoBaseRVAdapter.headerList]
+ * @param footerList [YasuoBaseRVAdapter.footerList]
  * @param rvListener 绑定Adapter实体之前需要做的操作
  * @param rvListener What to do before binding adapter entity
  */
 inline fun RecyclerView.adapterDataBinding(
     life: LifecycleOwner,
     itemList: YasuoList<Any>,
-    headerItemList: YasuoList<Any> = YasuoList(),
-    footerItemList: YasuoList<Any> = YasuoList(),
+    headerList: YasuoList<Any> = YasuoList(),
+    footerList: YasuoList<Any> = YasuoList(),
     rvListener: YasuoRVDataBindingAdapter.() -> YasuoRVDataBindingAdapter
 ): YasuoRVDataBindingAdapter {
-    return YasuoRVDataBindingAdapter(life, itemList, headerItemList, footerItemList).bindLife().rvListener()
+    return YasuoRVDataBindingAdapter(life, itemList, headerList, footerList).bindLife().rvListener()
         .attach(this)
 }
 
 /**
  * 绑定adapter
+ * Binding adapter
  * @param adapter Adapter实体
  * @param adapter Adapter实体 entity
  * @param rvListener 绑定Adapter实体之前需要做的操作
@@ -62,7 +65,6 @@ open class YasuoRVDataBindingAdapter(
 ), LifecycleObserver {
 
     init {
-        //如果是使用的ObservableArrayList，那么需要注册监听
         this.itemList.addOnListChangedCallback(itemListListener)
         this.emptyList.addOnListChangedCallback(emptyListListener)
         this.headerList.addOnListChangedCallback(headerListListener)
@@ -81,6 +83,7 @@ open class YasuoRVDataBindingAdapter(
 
     /**
      * 绑定生命周期，初始化adapter之后必须调用
+     * Binding life cycle, which must be called after initializing adapter
      */
     fun bindLife(): YasuoRVDataBindingAdapter {
         life.lifecycle.addObserver(this)
@@ -111,7 +114,6 @@ open class YasuoRVDataBindingAdapter(
                 }
             }
         })
-        //执行holder创建时的监听
         itemIdTypes[viewType]?.holderCreateListener?.invoke(binding, holder)
         return holder
     }
@@ -129,10 +131,15 @@ open class YasuoRVDataBindingAdapter(
 
 /**
  * 建立数据类与布局文件之间的匹配关系
+ * Establish the matching relationship between data class and layout file
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param bindingClass 布局对应的[ViewDataBinding]
+ * Layout corresponding [ViewDataBinding]
  * @param execute 后续对[YasuoItemDataBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemDataBindingConfig]
  */
 fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBind(
     itemLayoutId: Int,
@@ -152,11 +159,17 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
 
 /**
  * 建立数据类与布局文件之间的匹配关系，header
- * 本质上与[YasuoRVDataBindingAdapter.holderBind]没有区别，只是做一下名称上的区分
+ * Establish the matching relationship between data class and layout file,for header
+ * 本质上和[YasuoRVDataBindingAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoRVDataBindingAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param bindingClass 布局对应的[ViewDataBinding]
+ * Layout corresponding [ViewDataBinding]
  * @param execute 后续对[YasuoItemDataBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemDataBindingConfig]
  */
 fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBindHeader(
     itemLayoutId: Int,
@@ -173,11 +186,17 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
 
 /**
  * 建立数据类与布局文件之间的匹配关系，footer
- * 本质上与[YasuoRVDataBindingAdapter.holderBind]没有区别，只是做一下名称上的区分
+ * Establish the matching relationship between data class and layout file,for footer
+ * 本质上和[YasuoRVDataBindingAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoRVDataBindingAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param bindingClass 布局对应的[ViewDataBinding]
+ * Layout corresponding [ViewDataBinding]
  * @param execute 后续对[YasuoItemDataBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemDataBindingConfig]
  */
 fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBindFooter(
     itemLayoutId: Int,
@@ -193,11 +212,18 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
 }
 
 /**
- * 建立loadMore数据类与布局文件之间的匹配关系
+ * 建立数据类与布局文件之间的匹配关系，loadMore
+ * Establish the matching relationship between data class and layout file,for loadMore
+ * 本质上和[YasuoRVDataBindingAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoRVDataBindingAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param bindingClass 布局对应的[ViewDataBinding]
+ * Layout corresponding [ViewDataBinding]
  * @param execute 后续对[YasuoItemDataBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemDataBindingConfig]
  */
 fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBindLoadMore(
     itemLayoutId: Int,
@@ -213,11 +239,18 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
 }
 
 /**
- * 建立Empty数据类与布局文件之间的匹配关系
+ * 建立数据类与布局文件之间的匹配关系，emptyLayout
+ * Establish the matching relationship between data class and layout file,for emptyLayout
+ * 本质上和[YasuoRVDataBindingAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoRVDataBindingAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param bindingClass 布局对应的[ViewDataBinding]
+ * Layout corresponding [ViewDataBinding]
  * @param execute 后续对[YasuoItemDataBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemDataBindingConfig]
  */
 fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderBindEmpty(
     itemLayoutId: Int,

@@ -22,7 +22,7 @@ class StickyGridLayoutManager<T> : GridLayoutManager where T : RecyclerView.Adap
     private var mTranslationY = 0f
 
     // Header positions for the currently displayed list and their observer.
-    private val mHeaderPositions: MutableList<Int> = ArrayList(0)
+    val mHeaderPositions: MutableList<Int> = ArrayList(0)
     private val mHeaderPositionsObserver: AdapterDataObserver = HeaderPositionsAdapterDataObserver()
 
     // Sticky header's ViewHolder and dirty state.
@@ -220,6 +220,35 @@ class StickyGridLayoutManager<T> : GridLayoutManager where T : RecyclerView.Adap
         val vector = super.computeScrollVectorForPosition(targetPosition)
         attachStickyHeader()
         return vector
+    }
+
+
+    override fun findFirstVisibleItemPosition(): Int {
+        detachStickyHeader()
+        val position = super.findFirstVisibleItemPosition()
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findFirstCompletelyVisibleItemPosition(): Int {
+        detachStickyHeader()
+        val position = super.findFirstCompletelyVisibleItemPosition()
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findLastVisibleItemPosition(): Int {
+        detachStickyHeader()
+        val position = super.findLastVisibleItemPosition()
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findLastCompletelyVisibleItemPosition(): Int {
+        detachStickyHeader()
+        val position = super.findLastCompletelyVisibleItemPosition()
+        attachStickyHeader()
+        return position
     }
 
     override fun onFocusSearchFailed(

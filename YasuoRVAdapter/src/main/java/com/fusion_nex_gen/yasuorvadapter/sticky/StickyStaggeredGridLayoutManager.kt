@@ -221,6 +221,34 @@ class StickyStaggeredGridLayoutManager<T> : StaggeredGridLayoutManager where T :
         return vector
     }
 
+    override fun findFirstVisibleItemPositions(into: IntArray?): IntArray {
+        detachStickyHeader()
+        val position = super.findFirstVisibleItemPositions(into)
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findFirstCompletelyVisibleItemPositions(into: IntArray?): IntArray {
+        detachStickyHeader()
+        val position = super.findFirstCompletelyVisibleItemPositions(into)
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findLastCompletelyVisibleItemPositions(into: IntArray?): IntArray {
+        detachStickyHeader()
+        val position = super.findLastCompletelyVisibleItemPositions(into)
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findLastVisibleItemPositions(into: IntArray?): IntArray {
+        detachStickyHeader()
+        val position = super.findLastVisibleItemPositions(into)
+        attachStickyHeader()
+        return position
+    }
+
     override fun onFocusSearchFailed(
         focused: View, focusDirection: Int, recycler: Recycler,
         state: RecyclerView.State

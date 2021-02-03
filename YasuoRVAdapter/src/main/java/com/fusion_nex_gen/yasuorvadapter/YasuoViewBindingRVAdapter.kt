@@ -14,29 +14,32 @@ import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.holder.YasuoViewBindingVH
 import kotlin.reflect.KClass
 
-/******使用viewBinding******/
+/******使用ViewBinding  Using ViewBinding******/
 
 /**
  * 绑定adapter
- * @param context Context 对象
- * @param context Context object
+ * Binding adapter
  * @param life LifecycleOwner object
+ * @param itemList [YasuoBaseRVAdapter.itemList]
+ * @param headerList [YasuoBaseRVAdapter.headerList]
+ * @param footerList [YasuoBaseRVAdapter.footerList]
  * @param rvListener 绑定Adapter实体之前需要做的操作
  * @param rvListener What to do before binding adapter entity
  */
 inline fun RecyclerView.adapterViewBinding(
     life: LifecycleOwner,
     itemList: YasuoList<Any>,
-    headerItemList: YasuoList<Any> = YasuoList(),
-    footerItemList: YasuoList<Any> = YasuoList(),
+    headerList: YasuoList<Any> = YasuoList(),
+    footerList: YasuoList<Any> = YasuoList(),
     rvListener: YasuoRVViewBindingAdapter.() -> YasuoRVViewBindingAdapter
 ): YasuoRVViewBindingAdapter {
-    return YasuoRVViewBindingAdapter(life, itemList, headerItemList, footerItemList).bindLife().rvListener()
+    return YasuoRVViewBindingAdapter(life, itemList, headerList, footerList).bindLife().rvListener()
         .attach(this)
 }
 
 /**
  * 绑定adapter
+ * Binding adapter
  * @param adapter Adapter实体
  * @param adapter Adapter entity
  * @param rvListener 绑定Adapter实体之前需要做的操作
@@ -76,6 +79,7 @@ open class YasuoRVViewBindingAdapter(
 
     /**
      * 绑定生命周期，初始化adapter之后必须调用
+     * Binding life cycle, which must be called after initializing adapter
      */
     fun bindLife(): YasuoRVViewBindingAdapter {
         life.lifecycle.addObserver(this)
@@ -106,10 +110,15 @@ open class YasuoRVViewBindingAdapter(
 
 /**
  * 建立数据类与布局文件之间的匹配关系
+ * Establish the matching relationship between data class and layout file
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
+ * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
  * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemViewBindingConfig]
  */
 fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBind(
     itemLayoutId: Int,
@@ -129,11 +138,17 @@ fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.hol
 
 /**
  * 建立数据类与布局文件之间的匹配关系，header
- * 本质上与[YasuoRVViewBindingAdapter.holderBind]没有区别，只是做一下名称上的区分
+ * Establish the matching relationship between data class and layout file,for header
+ * 本质上和[YasuoRVViewBindingAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoRVViewBindingAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
+ * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
  * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemViewBindingConfig]
  */
 fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindHeader(
     itemLayoutId: Int,
@@ -150,11 +165,17 @@ fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.hol
 
 /**
  * 建立数据类与布局文件之间的匹配关系，footer
- * 本质上与[YasuoRVViewBindingAdapter.holderBind]没有区别，只是做一下名称上的区分
+ * Establish the matching relationship between data class and layout file,for footer
+ * 本质上和[YasuoRVViewBindingAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoRVViewBindingAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
+ * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
  * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemViewBindingConfig]
  */
 fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindFooter(
     itemLayoutId: Int,
@@ -170,11 +191,18 @@ fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.hol
 }
 
 /**
- * 建立loadMore数据类与布局文件之间的匹配关系
+ * 建立数据类与布局文件之间的匹配关系，loadMore
+ * Establish the matching relationship between data class and layout file,for loadMore
+ * 本质上和[YasuoRVViewBindingAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoRVViewBindingAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
+ * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
  * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemViewBindingConfig]
  */
 fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindLoadMore(
     itemLayoutId: Int,
@@ -190,11 +218,18 @@ fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.hol
 }
 
 /**
- * 建立empty数据类与布局文件之间的匹配关系
+ * 建立数据类与布局文件之间的匹配关系，emptyLayout
+ * Establish the matching relationship between data class and layout file,for emptyLayout
+ * 本质上和[YasuoRVViewBindingAdapter.holderBind]一样，只是名称不同
+ * Essentially and[YasuoRVViewBindingAdapter.holderBind]Same, just different names
  * @param itemLayoutId itemView布局id
+ * itemLayoutId
  * @param itemClass 对应实体类的Class
+ * Class corresponding to entity class
  * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
+ * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
  * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
+ * Subsequent operations on [YasuoItemViewBindingConfig]
  */
 fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindEmpty(
     itemLayoutId: Int,

@@ -220,6 +220,36 @@ class StickyLinearLayoutManager<T> : LinearLayoutManager where T : RecyclerView.
         return vector
     }
 
+
+    override fun findFirstVisibleItemPosition(): Int {
+        detachStickyHeader()
+        val position = super.findFirstVisibleItemPosition()
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findFirstCompletelyVisibleItemPosition(): Int {
+        detachStickyHeader()
+        val position = super.findFirstCompletelyVisibleItemPosition()
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findLastVisibleItemPosition(): Int {
+        detachStickyHeader()
+        val position = super.findLastVisibleItemPosition()
+        attachStickyHeader()
+        return position
+    }
+
+    override fun findLastCompletelyVisibleItemPosition(): Int {
+        detachStickyHeader()
+        val position = super.findLastCompletelyVisibleItemPosition()
+        attachStickyHeader()
+        return position
+    }
+
+
     override fun onFocusSearchFailed(
         focused: View, focusDirection: Int, recycler: Recycler,
         state: RecyclerView.State
