@@ -1,7 +1,7 @@
 package com.fusion_nex_gen.yasuorvadapter
 
-import android.content.Context
 import android.view.ViewGroup
+import androidx.core.util.set
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -21,15 +21,13 @@ import kotlin.reflect.KClass
  * @param rvListener What to do before binding adapter entity
  */
 inline fun RecyclerView.adapterBinding(
-    context: Context,
     life: LifecycleOwner,
     itemList: YasuoList<Any>,
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-    loadMoreItem: Any? = null,
     rvListener: YasuoNormalRVAdapter.() -> YasuoNormalRVAdapter
 ): YasuoNormalRVAdapter {
-    return YasuoNormalRVAdapter(context, life, itemList, headerItemList, footerItemList, loadMoreItem).bindLife().rvListener().attach(this)
+    return YasuoNormalRVAdapter(life, itemList, headerItemList, footerItemList).bindLife().rvListener().attach(this)
 }
 
 /**
@@ -47,13 +45,11 @@ inline fun RecyclerView.adapterBinding(
 }
 
 open class YasuoNormalRVAdapter(
-    context: Context,
     val life: LifecycleOwner,
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-    loadMoreItem: Any? = null,
-) : YasuoBaseRVAdapter<Any, YasuoNormalVH, YasuoItemNormalConfig<Any, YasuoNormalVH>>(context, itemList, headerItemList, footerItemList, loadMoreItem), LifecycleObserver {
+) : YasuoBaseRVAdapter<Any, YasuoNormalVH, YasuoItemNormalConfig<Any, YasuoNormalVH>>(itemList, headerItemList, footerItemList), LifecycleObserver {
 
     init {
         //如果是使用的ObservableArrayList，那么需要注册监听
@@ -61,6 +57,7 @@ open class YasuoNormalRVAdapter(
         this.emptyList.addOnListChangedCallback(emptyListListener)
         this.headerList.addOnListChangedCallback(headerListListener)
         this.footerList.addOnListChangedCallback(footerListListener)
+        this.loadMoreList.addOnListChangedCallback(loadMoreListListener)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -69,6 +66,7 @@ open class YasuoNormalRVAdapter(
         this.emptyList.removeOnListChangedCallback(emptyListListener)
         this.headerList.removeOnListChangedCallback(headerListListener)
         this.footerList.removeOnListChangedCallback(footerListListener)
+        this.loadMoreList.removeOnListChangedCallback(loadMoreListListener)
     }
 
     /**
@@ -85,7 +83,8 @@ open class YasuoNormalRVAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YasuoNormalVH {
-        val holder = YasuoNormalVH(inflater.inflate(viewType, parent, false))
+        initInflater(parent.context)
+        val holder = YasuoNormalVH(inflater!!.inflate(viewType, parent, false))
         itemIdTypes[viewType]?.holderCreateListener?.invoke(holder)
         return holder
     }

@@ -133,11 +133,14 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
                 //如果拖拽Holder的父节点不为空，说明此时拖拽的是子级
                 if (fromItem.parentHash != null) {
                     //那么找到父级item，在下方使用
-                    adapter.itemList.forEachIndexed { index, any ->
-                        if (any.hashCode() == fromItem.parentHash) {
-                            parentItem = any as YasuoFoldItem
-                            parentItemIndex = index
-                            return@forEachIndexed
+                    run out@{
+                        adapter.itemList.forEachIndexed { index, any ->
+                            if (any.hashCode() == fromItem.parentHash) {
+                                parentItem = any as YasuoFoldItem
+                                parentItemIndex = index
+                                //break
+                                return@out
+                            }
                         }
                     }
                 }

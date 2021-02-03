@@ -1,7 +1,7 @@
 package com.fusion_nex_gen.yasuorvadapter
 
-import android.content.Context
 import android.view.ViewGroup
+import androidx.core.util.set
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.OnRebindCallback
 import androidx.databinding.ViewDataBinding
@@ -26,15 +26,13 @@ import kotlin.reflect.KClass
  * @param rvListener What to do before binding adapter entity
  */
 inline fun RecyclerView.adapterDataBinding(
-    context: Context,
     life: LifecycleOwner,
     itemList: YasuoList<Any>,
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-    loadMoreItem: Any? = null,
     rvListener: YasuoRVDataBindingAdapter.() -> YasuoRVDataBindingAdapter
 ): YasuoRVDataBindingAdapter {
-    return YasuoRVDataBindingAdapter(context, life, itemList, headerItemList, footerItemList, loadMoreItem).bindLife().rvListener()
+    return YasuoRVDataBindingAdapter(life, itemList, headerItemList, footerItemList).bindLife().rvListener()
         .attach(this)
 }
 
@@ -53,18 +51,14 @@ inline fun RecyclerView.adapterDataBinding(
 }
 
 open class YasuoRVDataBindingAdapter(
-    context: Context,
     private val life: LifecycleOwner,
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-    loadMoreItem: Any? = null,
 ) : YasuoBaseRVAdapter<Any, YasuoDataBindingVH<ViewDataBinding>, YasuoItemDataBindingConfig<Any, YasuoDataBindingVH<ViewDataBinding>, ViewDataBinding>>(
-    context,
     itemList,
     headerItemList,
     footerItemList,
-    loadMoreItem
 ), LifecycleObserver {
 
     init {
@@ -73,6 +67,7 @@ open class YasuoRVDataBindingAdapter(
         this.emptyList.addOnListChangedCallback(emptyListListener)
         this.headerList.addOnListChangedCallback(headerListListener)
         this.footerList.addOnListChangedCallback(footerListListener)
+        this.loadMoreList.addOnListChangedCallback(loadMoreListListener)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -81,6 +76,7 @@ open class YasuoRVDataBindingAdapter(
         this.emptyList.removeOnListChangedCallback(emptyListListener)
         this.headerList.removeOnListChangedCallback(headerListListener)
         this.footerList.removeOnListChangedCallback(footerListListener)
+        this.loadMoreList.removeOnListChangedCallback(loadMoreListListener)
     }
 
     /**
@@ -97,7 +93,8 @@ open class YasuoRVDataBindingAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YasuoDataBindingVH<ViewDataBinding> {
-        val binding = DataBindingUtil.inflate<ViewDataBinding>(inflater, viewType, parent, false)
+        initInflater(parent.context)
+        val binding = DataBindingUtil.inflate<ViewDataBinding>(inflater!!, viewType, parent, false)
         val holder = YasuoDataBindingVH(binding)
         binding.addOnRebindCallback(object : OnRebindCallback<ViewDataBinding>() {
             override fun onPreBind(binding: ViewDataBinding): Boolean = let {

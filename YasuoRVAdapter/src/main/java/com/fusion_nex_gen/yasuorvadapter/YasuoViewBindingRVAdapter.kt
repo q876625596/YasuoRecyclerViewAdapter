@@ -1,8 +1,8 @@
 package com.fusion_nex_gen.yasuorvadapter
 
-import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.util.set
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -25,15 +25,13 @@ import kotlin.reflect.KClass
  * @param rvListener What to do before binding adapter entity
  */
 inline fun RecyclerView.adapterViewBinding(
-    context: Context,
     life: LifecycleOwner,
     itemList: YasuoList<Any>,
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-    loadMoreItem: Any? = null,
     rvListener: YasuoRVViewBindingAdapter.() -> YasuoRVViewBindingAdapter
 ): YasuoRVViewBindingAdapter {
-    return YasuoRVViewBindingAdapter(context, life, itemList, headerItemList, footerItemList, loadMoreItem).bindLife().rvListener()
+    return YasuoRVViewBindingAdapter(life, itemList, headerItemList, footerItemList).bindLife().rvListener()
         .attach(this)
 }
 
@@ -52,13 +50,11 @@ inline fun RecyclerView.adapterViewBinding(
 }
 
 open class YasuoRVViewBindingAdapter(
-    context: Context,
     private val life: LifecycleOwner,
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-    loadMoreItem: Any? = null,
-) : YasuoBaseRVAdapter<Any, YasuoViewBindingVH, YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>>(context, itemList, headerItemList, footerItemList, loadMoreItem),
+) : YasuoBaseRVAdapter<Any, YasuoViewBindingVH, YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>>(itemList, headerItemList, footerItemList),
     LifecycleObserver {
 
     init {
@@ -66,6 +62,7 @@ open class YasuoRVViewBindingAdapter(
         this.emptyList.addOnListChangedCallback(emptyListListener)
         this.headerList.addOnListChangedCallback(headerListListener)
         this.footerList.addOnListChangedCallback(footerListListener)
+        this.loadMoreList.addOnListChangedCallback(loadMoreListListener)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -74,6 +71,7 @@ open class YasuoRVViewBindingAdapter(
         this.emptyList.removeOnListChangedCallback(emptyListListener)
         this.headerList.removeOnListChangedCallback(headerListListener)
         this.footerList.removeOnListChangedCallback(footerListListener)
+        this.loadMoreList.removeOnListChangedCallback(loadMoreListListener)
     }
 
     /**
@@ -90,7 +88,8 @@ open class YasuoRVViewBindingAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YasuoViewBindingVH {
-        val holder = YasuoViewBindingVH(inflater.inflate(viewType, parent, false))
+        initInflater(parent.context)
+        val holder = YasuoViewBindingVH(inflater!!.inflate(viewType, parent, false))
         //执行holder创建时的监听
         val itemConfig = itemIdTypes[viewType]
         val binding = itemConfig?.createBindingFun?.invoke(holder.itemView) ?: throw RuntimeException("未配置viewBinding")

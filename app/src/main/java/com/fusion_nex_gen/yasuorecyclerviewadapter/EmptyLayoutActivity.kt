@@ -32,7 +32,7 @@ class EmptyLayoutActivity : AppCompatActivity() {
         }
         binding.myRV.layoutManager = LinearLayoutManager(this)
         //普通findViewById用法
-        binding.myRV.adapterBinding(this,this,list){
+        binding.myRV.adapterBinding(this,list){
             holderBind(R.layout.item_layout_text_data_binding, TextBean::class) {
 
             }

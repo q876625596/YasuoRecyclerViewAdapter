@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.fusion_nex_gen.yasuorvadapter.YasuoBaseRVAdapter
 
-fun <Adapter : YasuoBaseRVAdapter<*, *,*>> RecyclerView.onLoadMoreListener(
+fun <Adapter : YasuoBaseRVAdapter<*, *, *>> RecyclerView.onLoadMoreListener(
     adapter: Adapter,
     onLoadMore: YasuoLoadMoreListener.(lastVisiblePosition: Int) -> Unit
 ) {
@@ -14,7 +14,7 @@ fun <Adapter : YasuoBaseRVAdapter<*, *,*>> RecyclerView.onLoadMoreListener(
 }
 
 class YasuoLoadMoreListener(
-    private val adapter: YasuoBaseRVAdapter<*, *,*>,
+    private val adapter: YasuoBaseRVAdapter<*, *, *>,
     private val onLoadMore: YasuoLoadMoreListener.(lastVisiblePosition: Int) -> Unit
 ) :
     RecyclerView.OnScrollListener() {
@@ -47,11 +47,11 @@ class YasuoLoadMoreListener(
                 lastPosition = lastPositionArray[lastPositionArray.size - 1]
             }
         }
-        //时判断界面显示的最后item的position是否等于itemCount总数-1也就是最后一个item的position
+        //时判断界面显示的最后item的position是否等于所有列表item数之和，也就是最后一个loadMore的position
         //如果相等则说明已经滑动到最后了
-        if (lastPosition == recyclerView.layoutManager!!.itemCount - 1) {
+        if (adapter.inLoadMoreList(lastPosition)) {
             print("开始加载更多，最底部的item：position=${lastPosition}，已显示")
-            adapter.lockedLoadMoreListener = true
+            adapter.disableLoadMoreListener()
             this.onLoadMore(lastPosition)
         }
     }

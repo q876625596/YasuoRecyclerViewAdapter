@@ -2,6 +2,8 @@ package com.fusion_nex_gen.yasuorecyclerviewadapter
 
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,6 +19,7 @@ import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.listener.YasuoItemTouchHelperCallBack
 import com.fusion_nex_gen.yasuorvadapter.listener.attach
+import com.fusion_nex_gen.yasuorvadapter.listener.onLoadMoreListener
 import com.fusion_nex_gen.yasuorvadapter.sticky.StickyStaggeredGridLayoutManager
 
 class MainActivity : AppCompatActivity() {
@@ -32,11 +35,25 @@ class MainActivity : AppCompatActivity() {
             when (i % 7) {
                 0 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.aaa))).apply {
                     this.list = YasuoList<YasuoFoldItem>().apply {
-                        add(TextBean(MutableLiveData("我是内部第1个text")).apply { gridSpan = 3 })
-                        add(TextBean(MutableLiveData("我是内部第2个text")))
-                        add(TextBean(MutableLiveData("我是内部第3个text")))
+                        add(TextBean(MutableLiveData("我是一级内部第1个text")).apply { gridSpan = 3 })
+                        add(TextBean(MutableLiveData("我是一级内部第2个text")))
+                        add(TextBean(MutableLiveData("我是一级内部第3个text")))
                         add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
-                            canClick.value = true
+                            this.list = YasuoList<YasuoFoldItem>().apply {
+                                add(TextBean(MutableLiveData("我是二级内部第1个text")).apply { gridSpan = 3 })
+                                add(TextBean(MutableLiveData("我是二级内部第2个text")))
+                                add(TextBean(MutableLiveData("我是二级内部第3个text")))
+                                add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
+                                    this.list = YasuoList<YasuoFoldItem>().apply {
+                                        add(TextBean(MutableLiveData("我是三级内部第1个text")).apply { gridSpan = 3 })
+                                        add(TextBean(MutableLiveData("我是三级内部第2个text")))
+                                        add(TextBean(MutableLiveData("我是三级内部第3个text")))
+                                        add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
+                                            canClick.value = true
+                                        })
+                                    }
+                                })
+                            }
                         })
                     }
                 })
@@ -60,19 +77,31 @@ class MainActivity : AppCompatActivity() {
         val loadMoreItem = DefaultLoadMoreItem()
         binding.myRV.layoutManager = StickyStaggeredGridLayoutManager<YasuoNormalRVAdapter>(3, StaggeredGridLayoutManager.VERTICAL)
         //普通findViewById用法
-        binding.myRV.adapterBinding(this, this, list, headerList, footerList, loadMoreItem) {
+        binding.myRV.adapterBinding(this, list, headerList, footerList) {
+            showLoadMoreLayout(loadMoreItem)
             YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
+            binding.myRV.onLoadMoreListener(this) {
+                if (getItemListTrueSize() < 50) {
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        itemList.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.bbb))))
+                        itemList.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.ccc))))
+                        itemList.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.ddd))))
+                        itemList.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))))
+                        enableLoadMoreListener()
+                    }, 1000L)
+                }
+            }
             holderBindEmpty(R.layout.empty_layout_one, EmptyBeanOne::class) {
                 onHolderBind { holder, item ->
                     holder.itemView.setOnClickListener {
-                        showEmptyLayout(EmptyBeanTwo(),true,true)
+                        showEmptyLayout(EmptyBeanTwo(), true, true)
                     }
                 }
             }
             holderBindEmpty(R.layout.empty_layout_two, EmptyBeanTwo::class) {
                 onHolderBind { holder, item ->
                     holder.itemView.setOnClickListener {
-                        showEmptyLayout(EmptyBeanOne(),true,true)
+                        itemList.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.aaa))))
                     }
                 }
             }
@@ -80,11 +109,9 @@ class MainActivity : AppCompatActivity() {
                 onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.loadMoreText).apply {
                         text = item.text.value
-                        setOnClickListener {
-                            if (getEmptyLayoutItem() == null) {
-                                showEmptyLayout(EmptyBeanOne())
-                            }
-                        }
+                    }
+                    holder.itemView.setOnClickListener {
+                        showEmptyLayout(EmptyBeanOne())
                     }
                 }
             }
