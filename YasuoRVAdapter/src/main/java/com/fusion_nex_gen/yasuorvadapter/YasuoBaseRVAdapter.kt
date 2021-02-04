@@ -420,19 +420,6 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
     /****** 折叠布局  Fold layout ******/
 
     /**
-     * 是否所有布局都是折叠布局
-     * [enableAllFold]方法需要在holderBind前调用
-     * 设置该属性后，无需在每个holderBind中单独设置[YasuoBaseItemConfig.isFold]
-     * Are all layouts Foldd
-     * The [enableAllFold] method needs to be called before holderBind.
-     * After setting this property, you do not need to set it separately in each holderBind [YasuoBaseItemConfig.isFold]
-     */
-    internal var isAllFold: Boolean = false
-    fun enableAllFold() {
-        isAllFold = true
-    }
-
-    /**
      * 展开/折叠某个item
      * Expand/Fold an item
      * @param item 需要展开的item

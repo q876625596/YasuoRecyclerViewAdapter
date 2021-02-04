@@ -10,20 +10,18 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.recyclerview.widget.GridLayoutManager
 import com.fusion_nex_gen.yasuorecyclerviewadapter.databinding.*
 import com.fusion_nex_gen.yasuorecyclerviewadapter.model.*
 import com.fusion_nex_gen.yasuorvadapter.*
 import com.fusion_nex_gen.yasuorvadapter.bean.DefaultLoadMoreItem
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
+import com.fusion_nex_gen.yasuorvadapter.databinding.DefaultLoadMoreLayoutBinding
+import com.fusion_nex_gen.yasuorvadapter.databinding.DefaultLoadMoreLayoutDataBindingBinding
 import com.fusion_nex_gen.yasuorvadapter.listener.YasuoItemTouchHelperCallBack
 import com.fusion_nex_gen.yasuorvadapter.listener.attach
 import com.fusion_nex_gen.yasuorvadapter.listener.onLoadMoreListener
 import com.fusion_nex_gen.yasuorvadapter.sticky.StickyGridLayoutManager
-import com.mikepenz.itemanimators.AlphaCrossFadeAnimator
-import com.mikepenz.itemanimators.ScaleUpAnimator
-import com.mikepenz.itemanimators.SlideDownAlphaAnimator
 import com.mikepenz.itemanimators.SlideLeftAlphaAnimator
 
 class MainActivity : AppCompatActivity() {
@@ -65,10 +63,12 @@ class MainActivity : AppCompatActivity() {
                         itemList.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))))
                         enableLoadMoreListener()
                     }, 1000L)
+                } else {
+                    showLoadMoreLayout(DefaultLoadMoreItem().apply { text.value = "Complete!" })
                 }
             }
             //绑定空布局1
-            holderBindEmpty(R.layout.empty_layout_one, EmptyBeanOne::class) {
+            holderConfig(R.layout.empty_layout_one, EmptyBeanOne::class) {
                 onHolderBind { holder, item ->
                     holder.itemView.setOnClickListener {
                         showEmptyLayout(EmptyBeanTwo(), true, true)
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定空布局2
-            holderBindEmpty(R.layout.empty_layout_two, EmptyBeanTwo::class) {
+            holderConfig(R.layout.empty_layout_two, EmptyBeanTwo::class) {
                 onHolderBind { holder, item ->
                     holder.itemView.setOnClickListener {
                         enableLoadMoreListener()
@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定加载更多布局
-            holderBindLoadMore(R.layout.default_load_more_layout, DefaultLoadMoreItem::class) {
+            holderConfig(R.layout.default_load_more_layout, DefaultLoadMoreItem::class) {
                 onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.loadMoreText).apply {
                         text = item.text.value
@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定header1
-            holderBindHeader(R.layout.header_layout_one, HeaderOneBean::class) {
+            holderConfig(R.layout.header_layout_one, HeaderOneBean::class) {
                 onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.headerText).apply {
                         text = item.headerOneText.value
@@ -107,13 +107,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定header2
-            holderBindHeader(R.layout.header_layout_two, HeaderTwoBean::class) {
+            holderConfig(R.layout.header_layout_two, HeaderTwoBean::class) {
                 onHolderBind { holder, item ->
                     holder.itemView.setBackgroundColor(item.headerOneBgColor.value!!)
                 }
             }
             //绑定footer1
-            holderBindFooter(R.layout.footer_layout_one, FooterOneBean::class) {
+            holderConfig(R.layout.footer_layout_one, FooterOneBean::class) {
                 onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.footerText).apply {
                         text = item.footerOneText.value
@@ -124,13 +124,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定footer2
-            holderBindFooter(R.layout.footer_layout_two, FooterTwoBean::class) {
+            holderConfig(R.layout.footer_layout_two, FooterTwoBean::class) {
                 onHolderBind { holder, item ->
                     holder.itemView.setBackgroundColor(item.footerTwoBgColor.value!!)
                 }
             }
             //绑定文本布局
-            holderBind(R.layout.item_layout_text, TextBean::class) {
+            holderConfig(R.layout.item_layout_text, TextBean::class) {
                 isFold = true
                 sticky = true
                 onHolderBind { holder, item ->
@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定展开第一级文本布局
-            holderBind(R.layout.item_layout_text_inner_1, TextBeanInnerOne::class) {
+            holderConfig(R.layout.item_layout_text_inner_1, TextBeanInnerOne::class) {
                 isFold = true
                 gridSpan = 3
                 staggeredGridFullSpan = true
@@ -168,7 +168,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定展开第二级文本布局
-            holderBind(R.layout.item_layout_text_inner_2, TextBeanInnerTwo::class) {
+            holderConfig(R.layout.item_layout_text_inner_2, TextBeanInnerTwo::class) {
                 isFold = true
                 gridSpan = 3
                 staggeredGridFullSpan = true
@@ -182,7 +182,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定展开第三级文本布局
-            holderBind(R.layout.item_layout_text_inner_3, TextBeanInnerThree::class) {
+            holderConfig(R.layout.item_layout_text_inner_3, TextBeanInnerThree::class) {
                 isFold = true
                 gridSpan = 3
                 staggeredGridFullSpan = true
@@ -196,7 +196,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //绑定图片布局
-            holderBind(R.layout.item_layout_image, ImageBean::class) {
+            holderConfig(R.layout.item_layout_image, ImageBean::class) {
                 //设置可展开
                 isFold = true
                 onHolderBind { holder, item ->
@@ -210,7 +210,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         //viewBinding的用法
-        /*binding.myRV.adapterViewBinding(this, this, list, headerList, footerList) {
+        binding.myRV.adapterViewBinding(this, list, headerList, footerList) {
             YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
 //            setSticky {
 //                return@setSticky it % 4 == 0
@@ -218,17 +218,17 @@ class MainActivity : AppCompatActivity() {
 //            setGridSpan {
 //                return@setGridSpan if (it % 4 == 0) 3 else 1
 //            }
-            holderBindLoadMore(R.layout.default_load_more_layout, DefaultLoadMoreItem::class,{
-                    DefaultLoadMoreLayoutBinding.bind(it)
-                }) {
-                onBind { holder, item ->
+            holderConfig(R.layout.default_load_more_layout, DefaultLoadMoreItem::class, {
+                DefaultLoadMoreLayoutBinding.bind(it)
+            }) {
+                onHolderBind { holder, item ->
                     loadMoreText.text = item.text.value
                 }
             }
-            holderBindHeader(R.layout.header_layout_one_ex, HeaderOneBean::class,{
-                    HeaderLayoutOneExBinding.bind(it)
-                }) {
-                onBind { holder, item ->
+            holderConfig(R.layout.header_layout_one, HeaderOneBean::class, {
+                HeaderLayoutOneBinding.bind(it)
+            }) {
+                onHolderBind { holder, item ->
                     headerText.text = item.headerOneText.value
                     headerText.setOnClickListener {
                         headerList.add(HeaderOneBean(MutableLiveData("我是header${headerList.size}，点击我新增header")))
@@ -236,17 +236,17 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            holderBindHeader(R.layout.header_layout_two_ex, HeaderTwoBean::class, {
-                HeaderLayoutTwoExBinding.bind(it)
+            holderConfig(R.layout.header_layout_two, HeaderTwoBean::class, {
+                HeaderLayoutTwoBinding.bind(it)
             }) {
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     root.setBackgroundColor(item.headerOneBgColor.value!!)
                 }
             }
-            holderBindFooter(R.layout.footer_layout_one_ex, FooterOneBean::class,  {
-                FooterLayoutOneExBinding.bind(it)
+            holderConfig(R.layout.footer_layout_one, FooterOneBean::class, {
+                FooterLayoutOneBinding.bind(it)
             }) {
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     footerText.text = item.footerOneText.value
                     footerText.setOnClickListener {
                         footerList.add(FooterOneBean(MutableLiveData("我是footer${footerList.size}，点击我新增footer")))
@@ -254,24 +254,24 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            holderBindFooter(R.layout.footer_layout_two_ex, FooterTwoBean::class,  {
-                FooterLayoutTwoExBinding.bind(it)
+            holderConfig(R.layout.footer_layout_two, FooterTwoBean::class, {
+                FooterLayoutTwoBinding.bind(it)
             }) {
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     root.setBackgroundColor(item.footerTwoBgColor.value!!)
                 }
             }
-            holderBind(R.layout.item_layout_text_ex, TextBean::class, {
-                ItemLayoutTextExBinding.bind(it)
+            holderConfig(R.layout.item_layout_text, TextBean::class, {
+                ItemLayoutTextBinding.bind(it)
             }) {
                 isFold = true
-                onBind { holder, item ->
+                onHolderBind { holder, item ->
                     //如果未使用了LiveData，这样写
-                    text.text = item.text.value
-                    text.setOnClickListener {
+                    itemText.text = item.text.value
+                    itemText.setOnClickListener {
                         Log.e("asas", "setOnClickListener")
                         if (item.parentHash != null) {
-                            removeFoldListItem(item)
+                            removeFoldChildListItem(item)
                         }
                         itemList.remove(item)
                     }
@@ -286,92 +286,78 @@ class MainActivity : AppCompatActivity() {
 //                }
                 }
             }
-            holderBind(R.layout.item_layout_image_ex, ImageBean::class, {
-                ItemLayoutImageExBinding.bind(it)
+            holderConfig(R.layout.item_layout_image, ImageBean::class, {
+                ItemLayoutImageBinding.bind(it)
             }) {
                 isFold = true
-                onBind { holder, item ->
-                    image.setImageDrawable(item.image.value)
-                    if (item.canClick.value == true) {
-                        image.setOnClickListener {
-                            item.image.value = ContextCompat.getDrawable(this@MainActivity, R.drawable.ccc)
-                            image.setImageDrawable(item.image.value)
-                        }
-                    } else {
-                        image.setOnClickListener {
-                            expandOrFoldItem(item)
-                        }
+                onHolderBind { holder, item ->
+                    itemImage.setImageDrawable(item.image.value)
+                    itemImage.setOnClickListener {
+                        expandOrFoldItem(item)
                     }
                 }
             }
-        }*/
+        }
         //dataBinding的用法
-        /*binding.myRV.adapterDataBinding(this, this, list, headerList, footerList) {
+        binding.myRV.adapterDataBinding(this, list, headerList, footerList) {
             YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
-            *//*          setSticky {
-                          return@setSticky it % 4 == 0
-                      }*//*
-            *//*   setGridSpan {
-                   return@setGridSpan if (it % 4 == 0) 3 else 1
-               }*//*
-            holderBindLoadMore(R.layout.default_load_more_layout_data_binding, loadMoreItem, DefaultLoadMoreLayoutDataBindingBinding::class) {
-                onBind { holder ->
+//                      setSticky {
+//                          return@setSticky it % 4 == 0
+//                      }
+//               setGridSpan {
+//                   return@setGridSpan if (it % 4 == 0) 3 else 1
+//               }
+            holderConfig(R.layout.default_load_more_layout_data_binding, DefaultLoadMoreItem::class, DefaultLoadMoreLayoutDataBindingBinding::class) {
+                onHolderBind { holder ->
 
                 }
             }
-            holderBindHeader(R.layout.header_layout_one_data_binding, HeaderOneBean::class, HeaderLayoutOneDataBindingBinding::class) {
-                onBind { holder ->
+            holderConfig(R.layout.header_layout_one_data_binding, HeaderOneBean::class, HeaderLayoutOneDataBindingBinding::class) {
+                onHolderBind { holder ->
                     headerText.setOnClickListener {
                         headerList.add(HeaderOneBean(MutableLiveData("我是header${headerList.size}，点击我新增header")))
                     }
                 }
             }
 
-            holderBindHeader(R.layout.header_layout_two_data_binding, HeaderTwoBean::class, HeaderLayoutTwoDataBindingBinding::class) {
-                onBind { holder ->
+            holderConfig(R.layout.header_layout_two_data_binding, HeaderTwoBean::class, HeaderLayoutTwoDataBindingBinding::class) {
+                onHolderBind { holder ->
 
                 }
             }
-            holderBindFooter(R.layout.footer_layout_one_data_binding, FooterOneBean::class, FooterLayoutOneDataBindingBinding::class) {
-                onBind { holder ->
+            holderConfig(R.layout.footer_layout_one_data_binding, FooterOneBean::class, FooterLayoutOneDataBindingBinding::class) {
+                onHolderBind { holder ->
                     footerText.setOnClickListener {
                         footerList.add(FooterOneBean(MutableLiveData("我是footer${footerList.size}，点击我新增footer")))
                     }
                 }
             }
 
-            holderBindFooter(R.layout.footer_layout_two_data_binding, FooterTwoBean::class, FooterLayoutTwoDataBindingBinding::class) {
-                onBind { holder ->
+            holderConfig(R.layout.footer_layout_two_data_binding, FooterTwoBean::class, FooterLayoutTwoDataBindingBinding::class) {
+                onHolderBind { holder ->
                 }
             }
-            holderBind(R.layout.item_layout_text_data_binding, TextBean::class, ItemLayoutTextDataBindingBinding::class) {
+            holderConfig(R.layout.item_layout_text_data_binding, TextBean::class, ItemLayoutTextDataBindingBinding::class) {
                 isFold = true
-                onBind { holder ->
+                onHolderBind { holder ->
                     itemText.setOnClickListener {
                         Log.e("asas", "setOnClickListener")
                         if (item!!.parentHash != null) {
-                            removeFoldListItem(item!!)
+                            removeFoldChildListItem(item!!)
                         }
                         itemList.remove(item!!)
                     }
                 }
             }
-            holderBind(R.layout.item_layout_image_data_binding, ImageBean::class, ItemLayoutImageDataBindingBinding::class) {
+            holderConfig(R.layout.item_layout_image_data_binding, ImageBean::class, ItemLayoutImageDataBindingBinding::class) {
                 isFold = true
-                onBind { holder ->
-                    if (item!!.canClick.value == true) {
-                        itemImage.setOnClickListener {
-                            item!!.image.value = ContextCompat.getDrawable(this@MainActivity, R.drawable.ccc)
-                            itemImage.setImageDrawable(item!!.image.value)
-                        }
-                    } else {
-                        itemImage.setOnClickListener {
-                            expandOrFoldItem(item!!)
-                        }
+                onHolderBind { holder ->
+                    itemImage.setOnClickListener {
+                        expandOrFoldItem(item!!)
                     }
                 }
             }
-        }*/
+        }
 
     }
 

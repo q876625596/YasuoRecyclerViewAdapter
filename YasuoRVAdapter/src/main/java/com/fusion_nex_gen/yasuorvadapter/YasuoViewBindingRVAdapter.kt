@@ -120,37 +120,7 @@ open class YasuoRVViewBindingAdapter(
  * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
  * Subsequent operations on [YasuoItemViewBindingConfig]
  */
-fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBind(
-    itemLayoutId: Int,
-    itemClass: KClass<T>,
-    createBindingFun: (view: View) -> VB,
-    execute: (YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>.() -> Unit)? = null
-): Adapter {
-    val itemType = YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>(itemLayoutId, createBindingFun = createBindingFun)
-    if (isAllFold) {
-        itemType.isFold = true
-    }
-    itemClassTypes[itemClass] = itemType as YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>
-    itemIdTypes[itemLayoutId] = itemType
-    execute?.invoke(itemType)
-    return this
-}
-
-/**
- * 建立数据类与布局文件之间的匹配关系，header
- * Establish the matching relationship between data class and layout file,for header
- * 本质上和[YasuoRVViewBindingAdapter.holderBind]一样，只是名称不同
- * Essentially and[YasuoRVViewBindingAdapter.holderBind]Same, just different names
- * @param itemLayoutId itemView布局id
- * itemLayoutId
- * @param itemClass 对应实体类的Class
- * Class corresponding to entity class
- * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
- * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
- * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
- * Subsequent operations on [YasuoItemViewBindingConfig]
- */
-fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindHeader(
+fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderConfig(
     itemLayoutId: Int,
     itemClass: KClass<T>,
     createBindingFun: (view: View) -> VB,
@@ -160,86 +130,5 @@ fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.hol
     itemClassTypes[itemClass] = itemType as YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>
     itemIdTypes[itemLayoutId] = itemType
     execute?.invoke(itemType)
-    return this
-}
-
-/**
- * 建立数据类与布局文件之间的匹配关系，footer
- * Establish the matching relationship between data class and layout file,for footer
- * 本质上和[YasuoRVViewBindingAdapter.holderBind]一样，只是名称不同
- * Essentially and[YasuoRVViewBindingAdapter.holderBind]Same, just different names
- * @param itemLayoutId itemView布局id
- * itemLayoutId
- * @param itemClass 对应实体类的Class
- * Class corresponding to entity class
- * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
- * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
- * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
- * Subsequent operations on [YasuoItemViewBindingConfig]
- */
-fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindFooter(
-    itemLayoutId: Int,
-    itemClass: KClass<T>,
-    createBindingFun: (view: View) -> VB,
-    execute: (YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>.() -> Unit)? = null
-): Adapter {
-    val itemType = YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>(itemLayoutId, createBindingFun = createBindingFun)
-    itemClassTypes[itemClass] = itemType as YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>
-    itemIdTypes[itemLayoutId] = itemType
-    execute?.invoke(itemType)
-    return this
-}
-
-/**
- * 建立数据类与布局文件之间的匹配关系，loadMore
- * Establish the matching relationship between data class and layout file,for loadMore
- * 本质上和[YasuoRVViewBindingAdapter.holderBind]一样，只是名称不同
- * Essentially and[YasuoRVViewBindingAdapter.holderBind]Same, just different names
- * @param itemLayoutId itemView布局id
- * itemLayoutId
- * @param itemClass 对应实体类的Class
- * Class corresponding to entity class
- * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
- * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
- * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
- * Subsequent operations on [YasuoItemViewBindingConfig]
- */
-fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindLoadMore(
-    itemLayoutId: Int,
-    itemClass: KClass<T>,
-    createBindingFun: (view: View) -> VB,
-    execute: YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>.() -> Unit
-): Adapter {
-    val itemType = YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>(itemLayoutId, createBindingFun = createBindingFun)
-    itemClassTypes[itemClass] = itemType as YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>
-    itemIdTypes[itemLayoutId] = itemType
-    itemType.execute()
-    return this
-}
-
-/**
- * 建立数据类与布局文件之间的匹配关系，emptyLayout
- * Establish the matching relationship between data class and layout file,for emptyLayout
- * 本质上和[YasuoRVViewBindingAdapter.holderBind]一样，只是名称不同
- * Essentially and[YasuoRVViewBindingAdapter.holderBind]Same, just different names
- * @param itemLayoutId itemView布局id
- * itemLayoutId
- * @param itemClass 对应实体类的Class
- * Class corresponding to entity class
- * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
- * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
- * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
- * Subsequent operations on [YasuoItemViewBindingConfig]
- */
-fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderBindEmpty(
-    itemLayoutId: Int,
-    itemClass: KClass<T>,
-    createBindingFun: (view: View) -> VB,
-    execute: YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>.() -> Unit
-): Adapter {
-    val itemType = YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>(itemLayoutId, createBindingFun = createBindingFun)
-    itemClassTypes[itemClass] = itemType as YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>
-    itemIdTypes[itemLayoutId] = itemType
-    itemType.execute()
     return this
 }
