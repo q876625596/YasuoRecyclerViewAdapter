@@ -18,14 +18,15 @@ import kotlin.reflect.KClass
  *
  * TODO 开发计划
  * 1、List，Grid，StaggeredGrid类型的正常布局及多布局的基础配置，dataBinding配置及DSL
- * 2、动画的高可配置(采用recyclerView的itemAnimator方案，详见mikepenz/ItemAnimators库)
- * 3、空白页/头部/尾部
- * 4、加载更多
- * 5、折叠布局
- * 6、拖拽、横向滑动删除
+ * 2、空白页/头部/尾部
+ * 3、加载更多
+ * 4、折叠布局（支持多级折叠）
+ * 5、拖拽、横向滑动删除
+ * 6、动画的高可配置(采用recyclerView的itemAnimator方案，详见mikepenz/ItemAnimators库)
  * 7、吸顶(采用qiujayen/sticky-layoutmanager的方案，低耦合adapter和item，最低限度的修改代码)
- * TODO 8、横向滑动显示选项
- * TODO 9、新增一些额外的常用功能，比如结合下拉刷新之后显示一个一临时头部，提示刷新了多少条
+ * TODO 8、万能高可配置的ItemDecoration
+ * TODO 9、横向滑动显示选项
+ * TODO 10、新增一些额外的常用功能，比如结合下拉刷新之后显示一个一临时头部，提示刷新了多少条
  */
 abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config : YasuoBaseItemConfig<T, VH>>
     (

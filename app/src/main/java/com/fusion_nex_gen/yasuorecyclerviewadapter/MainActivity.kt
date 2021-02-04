@@ -2,34 +2,53 @@ package com.fusion_nex_gen.yasuorecyclerviewadapter
 
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.GridLayoutManager
 import com.fusion_nex_gen.yasuorecyclerviewadapter.databinding.*
 import com.fusion_nex_gen.yasuorecyclerviewadapter.model.*
 import com.fusion_nex_gen.yasuorvadapter.*
-import com.fusion_nex_gen.yasuorvadapter.bean.DefaultLoadMoreItem
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
-import com.fusion_nex_gen.yasuorvadapter.databinding.DefaultLoadMoreLayoutBinding
-import com.fusion_nex_gen.yasuorvadapter.databinding.DefaultLoadMoreLayoutDataBindingBinding
-import com.fusion_nex_gen.yasuorvadapter.listener.YasuoItemTouchHelperCallBack
-import com.fusion_nex_gen.yasuorvadapter.listener.attach
-import com.fusion_nex_gen.yasuorvadapter.listener.onLoadMoreListener
-import com.fusion_nex_gen.yasuorvadapter.sticky.StickyGridLayoutManager
-import com.mikepenz.itemanimators.SlideLeftAlphaAnimator
+import com.fusion_nex_gen.yasuorvadapter.decoration.DecorationForHorizontalList
+import com.fusion_nex_gen.yasuorvadapter.decoration.DecorationMode
+import com.fusion_nex_gen.yasuorvadapter.decoration.DrawableBean
 
 class MainActivity : AppCompatActivity() {
 
+    lateinit var binding: ActivityMainBinding
+    fun findViewByIdMode() {
+        val list = YasuoList<Any>().apply {
+            for (i in 0 until 20) {
+                add(TextBean(MutableLiveData("I am text item!")))
+            }
+        }
+        binding.myRV.addItemDecoration(DecorationForHorizontalList.build {
+            decorationMode { DecorationMode.MODE_CHILD }
+            firstDecoration {
+                DrawableBean(this@MainActivity, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp)
+            }
+            decorations(R.layout.item_layout_text) {
+                DrawableBean(this@MainActivity, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp)
+            }
+        })
+        binding.myRV.layoutManager = GridLayoutManager(this, 3)
+        binding.myRV.adapterBinding(this, list) {
+            holderConfig(R.layout.item_layout_text, TextBean::class) {
+                onHolderBind { holder, item ->
+                    holder.getView<TextView>(R.id.itemText).apply {
+                        text = item.text.value
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         //itemList
         val list = initList()
@@ -43,11 +62,12 @@ class MainActivity : AppCompatActivity() {
             add(FooterOneBean(MutableLiveData("我是footer1，点击我新增footer")))
             add(FooterTwoBean(MutableLiveData(Color.BLUE)))
         }
+        findViewByIdMode()
         //binding.myRV.layoutManager = GridLayoutManager(this, 3)
-        binding.myRV.layoutManager = StickyGridLayoutManager<YasuoNormalRVAdapter>(this, 3)
-        binding.myRV.itemAnimator = SlideLeftAlphaAnimator()
+        //binding.myRV.layoutManager = StickyGridLayoutManager<YasuoNormalRVAdapter>(this, 3)
+        //binding.myRV.itemAnimator = SlideLeftAlphaAnimator()
         //普通findViewById用法
-        binding.myRV.adapterBinding(this, list, headerList, footerList) {
+        /*binding.myRV.adapterBinding(this, list, headerList, footerList) {
             //设置可以拖拽和侧滑删除
             YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
             //显示加载更多布局
@@ -99,7 +119,10 @@ class MainActivity : AppCompatActivity() {
             holderConfig(R.layout.header_layout_one, HeaderOneBean::class) {
                 onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.headerText).apply {
-                        text = item.headerOneText.value
+                        item.headerOneText.removeObservers(this@MainActivity)
+                        item.headerOneText.observe(this@MainActivity) {
+                            text = it ?: ""
+                        }
                         setOnClickListener {
                             headerList.add(HeaderOneBean(MutableLiveData("我是header${headerList.size}，点击我新增header")))
                         }
@@ -208,9 +231,9 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
+        }*/
         //viewBinding的用法
-        binding.myRV.adapterViewBinding(this, list, headerList, footerList) {
+        /*binding.myRV.adapterViewBinding(this, list, headerList, footerList) {
             YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
 //            setSticky {
 //                return@setSticky it % 4 == 0
@@ -297,9 +320,9 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
+        }*/
         //dataBinding的用法
-        binding.myRV.adapterDataBinding(this, list, headerList, footerList) {
+        /*binding.myRV.adapterDataBinding(this, list, headerList, footerList) {
             YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
 //                      setSticky {
 //                          return@setSticky it % 4 == 0
@@ -357,7 +380,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
+        }*/
 
     }
 
