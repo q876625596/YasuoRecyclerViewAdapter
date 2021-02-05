@@ -113,8 +113,8 @@ fun <T : Any, Adapter : YasuoNormalRVAdapter> Adapter.holderConfig(
     execute: (YasuoItemNormalConfig<T, YasuoNormalVH>.() -> Unit)? = null
 ): Adapter {
     val itemType = YasuoItemNormalConfig<T, YasuoNormalVH>(itemLayoutId)
+    execute?.invoke(itemType)
     itemClassTypes[itemClass] = itemType as YasuoItemNormalConfig<Any, YasuoNormalVH>
     itemIdTypes[itemLayoutId] = itemType
-    execute?.invoke(itemType)
     return this
 }

@@ -24,7 +24,7 @@ import kotlin.reflect.KClass
  * 5、拖拽、横向滑动删除
  * 6、动画的高可配置(采用recyclerView的itemAnimator方案，详见mikepenz/ItemAnimators库)
  * 7、吸顶(采用qiujayen/sticky-layoutmanager的方案，低耦合adapter和item，最低限度的修改代码)
- * TODO 8、万能高可配置的ItemDecoration
+ * 8、万能高可配置的ItemDecoration
  * TODO 9、横向滑动显示选项
  * TODO 10、新增一些额外的常用功能，比如结合下拉刷新之后显示一个一临时头部，提示刷新了多少条
  */

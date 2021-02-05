@@ -11,7 +11,8 @@ class DrawableBean {
     var rightDrawable: Drawable? = null
     var bottomDrawable: Drawable? = null
 
-    constructor(leftDrawable: Drawable? = null,
+    constructor(
+        leftDrawable: Drawable? = null,
                 topDrawable: Drawable? = null,
                 rightDrawable: Drawable? = null,
                 bottomDrawable: Drawable? = null) {
@@ -29,7 +30,8 @@ class DrawableBean {
         }
     }
 
-    constructor(context: Context, leftDrawableRes: Int = 0,
+    constructor(context: Context,
+                leftDrawableRes: Int = 0,
                 topDrawableRes: Int = 0,
                 rightDrawableRes: Int = 0,
                 bottomDrawableRes: Int = 0) {

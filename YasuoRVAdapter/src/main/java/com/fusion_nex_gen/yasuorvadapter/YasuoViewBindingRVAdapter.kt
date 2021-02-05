@@ -127,8 +127,8 @@ fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.hol
     execute: (YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>.() -> Unit)? = null
 ): Adapter {
     val itemType = YasuoItemViewBindingConfig<T, YasuoViewBindingVH, VB>(itemLayoutId, createBindingFun = createBindingFun)
+    execute?.invoke(itemType)
     itemClassTypes[itemClass] = itemType as YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>
     itemIdTypes[itemLayoutId] = itemType
-    execute?.invoke(itemType)
     return this
 }

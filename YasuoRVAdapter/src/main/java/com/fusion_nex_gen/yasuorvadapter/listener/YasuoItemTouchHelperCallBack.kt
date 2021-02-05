@@ -7,69 +7,75 @@ import com.fusion_nex_gen.yasuorvadapter.YasuoBaseRVAdapter
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
 import java.util.*
 
-fun <T : Any, RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<T, VH, *>> YasuoItemTouchHelperCallBack<VH, Adapter>.attach(
+fun <T : Any, RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<T, VH, *>> Adapter.enableDragOrSwipe(
     rv: RV,
-    onDisableDragOrSwipe: ((item: T, actionState: Int) -> Boolean)? = null
+    isLongPressDragEnable: Boolean = true,
+    isItemViewSwipeEnable: Boolean = false,
+    disableLayoutType: IntArray = intArrayOf(),
+    onDisableDragOrSwipe: ((item: T, actionState: Int) -> Boolean)? = null,
+    innerDragListener: ((from: Int, target: Int) -> Unit)? = null,
+    innerSwipeListener: ((position: Int, direction: Int) -> Boolean)? = null,
 ): ItemTouchHelper {
-    adapter.itemTouchHelper = object : YasuoItemTouchHelper(this) {
-        //拖拽/侧滑判断
-        private fun judgeHolder(selected: RecyclerView.ViewHolder?, actionState: Int) {
-            requireNotNull(selected) { "Must pass a ViewHolder when dragging" }
-            //如果该holder是折叠模式
-            if (adapter.itemIdTypes[selected.itemViewType]?.isFold == true) {
-                val item = adapter.getItem(selected.bindingAdapterPosition) as YasuoFoldItem
-                //如果选中的item已展开
-                if (item.isExpand) {
-                    //可以实现监听，根据返回值判断是否可以继续拖拽或者侧滑
-                    if (onDisableDragOrSwipe?.invoke(item as T, actionState) == true) {
-                        return
+    itemTouchHelper =
+        object : YasuoItemTouchHelper(YasuoItemTouchHelperCallBack(this, isLongPressDragEnable, isItemViewSwipeEnable, disableLayoutType, innerDragListener, innerSwipeListener)) {
+            //拖拽/侧滑判断
+            private fun judgeHolder(selected: RecyclerView.ViewHolder?, actionState: Int) {
+                requireNotNull(selected) { "Must pass a ViewHolder when dragging" }
+                //如果该holder是折叠模式
+                if (itemIdTypes[selected.itemViewType]?.isFold == true) {
+                    val item = getItem(selected.bindingAdapterPosition) as YasuoFoldItem
+                    //如果选中的item已展开
+                    if (item.isExpand) {
+                        //可以实现监听，根据返回值判断是否可以继续拖拽或者侧滑
+                        if (onDisableDragOrSwipe?.invoke(item as T, actionState) == true) {
+                            return
+                        }
+                        //如果可以，那么先收起已经展开的子级
+                        expandOrFoldItem(item)
                     }
-                    //如果可以，那么先收起已经展开的子级
-                    adapter.expandOrFoldItem(item)
+                }
+                /*      if (adapter.isFold) {
+                          val position = selected.bindingAdapterPosition
+                          val item = adapter.getItem(position) as YasuoFoldItem
+                          //如果选中的item已展开
+                          if (item.isExpand) {
+                              //可以实现监听，根据返回值判断是否可以继续拖拽或者侧滑
+                              if (onDisableDragOrSwipe?.invoke(item, actionState) == true) {
+                                  return
+                              }
+                              //如果可以，那么先收起已经展开的子级
+                              adapter.expandOrFoldItem(item)
+                          }
+                      }*/
+                //如果是拖拽，为了防止ObservableList自带的notify影响，先移除itemList监听
+                if (actionState == ACTION_STATE_DRAG) {
+                    itemList.removeOnListChangedCallback(itemListListener)
                 }
             }
-            /*      if (adapter.isFold) {
-                      val position = selected.bindingAdapterPosition
-                      val item = adapter.getItem(position) as YasuoFoldItem
-                      //如果选中的item已展开
-                      if (item.isExpand) {
-                          //可以实现监听，根据返回值判断是否可以继续拖拽或者侧滑
-                          if (onDisableDragOrSwipe?.invoke(item, actionState) == true) {
-                              return
-                          }
-                          //如果可以，那么先收起已经展开的子级
-                          adapter.expandOrFoldItem(item)
-                      }
-                  }*/
-            //如果是拖拽，为了防止ObservableList自带的notify影响，先移除itemList监听
-            if (actionState == ACTION_STATE_DRAG) {
-                adapter.itemList.removeOnListChangedCallback(adapter.itemListListener)
-            }
-        }
 
-        override fun select(selected: RecyclerView.ViewHolder?, actionState: Int) {
-            if (actionState == ACTION_STATE_DRAG || actionState == ACTION_STATE_SWIPE) {
-                judgeHolder(selected, actionState)
+            override fun select(selected: RecyclerView.ViewHolder?, actionState: Int) {
+                if (actionState == ACTION_STATE_DRAG || actionState == ACTION_STATE_SWIPE) {
+                    judgeHolder(selected, actionState)
+                }
+                if (actionState == ACTION_STATE_IDLE) {
+                    itemList.addOnListChangedCallback(itemListListener)
+                }
+                super.select(selected, actionState)
             }
-            if (actionState == ACTION_STATE_IDLE) {
-                adapter.itemList.addOnListChangedCallback(adapter.itemListListener)
+
+            override fun startDrag(viewHolder: RecyclerView.ViewHolder) {
+                judgeHolder(viewHolder, ACTION_STATE_DRAG)
+                super.startDrag(viewHolder)
             }
-            super.select(selected, actionState)
-        }
 
-        override fun startDrag(viewHolder: RecyclerView.ViewHolder) {
-            judgeHolder(viewHolder, ACTION_STATE_DRAG)
-            super.startDrag(viewHolder)
+            override fun startSwipe(viewHolder: RecyclerView.ViewHolder) {
+                judgeHolder(viewHolder, ACTION_STATE_SWIPE)
+                super.startSwipe(viewHolder)
+            }
+        }.apply {
+            attachToRecyclerView(rv)
         }
-
-        override fun startSwipe(viewHolder: RecyclerView.ViewHolder) {
-            judgeHolder(viewHolder, ACTION_STATE_SWIPE)
-            super.startSwipe(viewHolder)
-        }
-    }.apply {
-        attachToRecyclerView(rv)
-    }
-    return adapter.itemTouchHelper!!
+    return itemTouchHelper!!
 }
 
 class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<*, VH, *>>(
