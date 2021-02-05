@@ -26,17 +26,9 @@ import com.mikepenz.itemanimators.SlideLeftAlphaAnimator
 class MainActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityMainBinding
+
     fun findViewByIdMode() {
         //数据源
-/*        val list = YasuoList<Any>().apply {
-            for (i in 0 until 20) {
-                if (i % 4 == 1) {
-                    add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))))
-                } else {
-                    add(TextBean(MutableLiveData("I am text item!")))
-                }
-            }
-        }*/
         val list = YasuoList<Any>().apply {
             for (i in 0 until 20) {
                 add(TextBean(MutableLiveData("I am text item ${i}！")))
@@ -77,15 +69,6 @@ class MainActivity : AppCompatActivity() {
 
     fun viewBindingMode() {
         //数据源
-/*        val list = YasuoList<Any>().apply {
-            for (i in 0 until 20) {
-                if (i % 4 == 1) {
-                    add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))))
-                } else {
-                    add(TextBean(MutableLiveData("I am text item!")))
-                }
-            }
-        }*/
         val list = YasuoList<Any>().apply {
             for (i in 0 until 20) {
                 add(TextBean(MutableLiveData("I am text item ${i}！")))
@@ -121,15 +104,6 @@ class MainActivity : AppCompatActivity() {
 
     fun dataBindingMode() {
         //数据源
-/*        val list = YasuoList<Any>().apply {
-            for (i in 0 until 20) {
-                if (i % 4 == 1) {
-                    add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))))
-                } else {
-                    add(TextBean(MutableLiveData("I am text item!")))
-                }
-            }
-        }*/
         val list = YasuoList<Any>().apply {
             for (i in 0 until 20) {
                 add(TextBean(MutableLiveData("I am text item ${i}！")))
@@ -168,44 +142,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         //itemList
-        val list = YasuoList<Any>()
-        for (i in 0 until 40) {
-            when (i % 7) {
-                0 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.aaa))).apply {
-                    this.list = YasuoList<YasuoFoldItem>().apply {
-                        add(TextBeanInnerOne(MutableLiveData("我是一级内部第1个text")))
-                        add(TextBeanInnerOne(MutableLiveData("我是一级内部第2个text")))
-                        add(TextBeanInnerOne(MutableLiveData("我是一级内部第3个text")).apply {
-                            this.list = YasuoList<YasuoFoldItem>().apply {
-                                add(TextBeanInnerTwo(MutableLiveData("我是二级内部第1个text")))
-                                add(TextBeanInnerTwo(MutableLiveData("我是二级内部第2个text")))
-                                add(TextBeanInnerTwo(MutableLiveData("我是二级内部第3个text")).apply {
-                                    this.list = YasuoList<YasuoFoldItem>().apply {
-                                        add(TextBeanInnerThree(MutableLiveData("我是三级内部第1个text")))
-                                        add(TextBeanInnerThree(MutableLiveData("我是三级内部第2个text")))
-                                        add(TextBeanInnerThree(MutableLiveData("我是三级内部第3个text")))
-                                    }
-                                })
-                            }
-                        })
-                    }
-                })
-                1 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.bbb))))
-                2 -> list.add(TextBean(MutableLiveData("我是第${i + 1}个text")))
-                3 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.ddd))))
-                4 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.mipmap.ic_launcher))))
-                5 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
-                    //给某个item单独设置
-                    //瀑布流占满一行
-                    staggeredGridFullSpan = true
-                    //网格布局占比
-                    gridSpan = 3
-                    //吸顶，注意，吸顶会默认占满一行
-                    sticky = true
-                })
-                6 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.ccc))))
-            }
-        }
+        val list = initList()
         //headerList
         val headerList = YasuoList<Any>().apply {
             add(HeaderOneBean(MutableLiveData("我是header1，点击我新增header")))
@@ -216,7 +153,6 @@ class MainActivity : AppCompatActivity() {
             add(FooterOneBean(MutableLiveData("我是footer1，点击我新增footer")))
             add(FooterTwoBean(MutableLiveData(Color.BLUE)))
         }
-        //binding.myRV.layoutManager = GridLayoutManager(this, 3)
         //设置列表为吸顶模式
         binding.myRV.layoutManager = StickyGridLayoutManager<YasuoNormalRVAdapter>(this, 3)
         //更换动画
@@ -224,7 +160,7 @@ class MainActivity : AppCompatActivity() {
         //普通findViewById用法
         /*binding.myRV.adapterBinding(this, list, headerList, footerList) {
             //设置可以拖拽和侧滑删除
-            YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
+            enableDragOrSwipe(binding.myRV, isLongPressDragEnable = true, isItemViewSwipeEnable = true)
             //显示加载更多布局
             showLoadMoreLayout(DefaultLoadMoreItem())
             //设置加载更多的监听
@@ -529,7 +465,9 @@ class MainActivity : AppCompatActivity() {
         }
         //dataBinding的用法
         /*binding.myRV.adapterDataBinding(this, list, headerList, footerList) {
-            YasuoItemTouchHelperCallBack(this, isItemViewSwipeEnable = true).attach(binding.myRV)
+            enableDragOrSwipe(binding.myRV, isLongPressDragEnable = true, isItemViewSwipeEnable = true)
+            //展示加载更多
+            showLoadMoreLayout(DefaultLoadMoreItem())
             holderConfig(R.layout.default_load_more_layout_data_binding, DefaultLoadMoreItem::class, DefaultLoadMoreLayoutDataBindingBinding::class) {
                 onHolderBind { holder ->
 
@@ -610,9 +548,17 @@ class MainActivity : AppCompatActivity() {
                 1 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.bbb))))
                 2 -> list.add(TextBean(MutableLiveData("我是第${i + 1}个text")))
                 3 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.ddd))))
-                4 -> list.add(TextBean(MutableLiveData("我是第${i + 1}个text")))
-                5 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))))
-                6 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))))
+                4 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.mipmap.ic_launcher))))
+                5 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
+                    //给某个item单独设置
+                    //瀑布流占满一行
+                    staggeredGridFullSpan = true
+                    //网格布局占比
+                    gridSpan = 3
+                    //吸顶，注意，吸顶会默认占满一行
+                    sticky = true
+                })
+                6 -> list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.ccc))))
             }
         }
         return list
