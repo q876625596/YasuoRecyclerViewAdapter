@@ -10,11 +10,14 @@ import com.fusion_nex_gen.yasuorvadapter.sticky.StickyGridLayoutManager
 import com.fusion_nex_gen.yasuorvadapter.sticky.StickyLinearLayoutManager
 import com.fusion_nex_gen.yasuorvadapter.sticky.StickyStaggeredGridLayoutManager
 
-fun <Adapter : YasuoBaseRVAdapter<*, *, *>> RecyclerView.onLoadMoreListener(
-    adapter: Adapter,
+/**
+ * 设置加载更多的监听
+ */
+fun <RV : RecyclerView, Adapter : YasuoBaseRVAdapter<*, *, *>> Adapter.onLoadMoreListener(
+    rv: RV,
     onLoadMore: YasuoLoadMoreListener.(lastVisiblePosition: Int) -> Unit
 ) {
-    addOnScrollListener(YasuoLoadMoreListener(adapter, onLoadMore))
+    rv.addOnScrollListener(YasuoLoadMoreListener(this, onLoadMore))
 }
 
 class YasuoLoadMoreListener(

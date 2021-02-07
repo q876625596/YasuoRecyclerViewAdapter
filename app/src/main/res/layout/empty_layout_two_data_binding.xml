@@ -15,9 +15,10 @@
         android:background="@color/teal_700">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="我是空布局2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:text="I am empty layout 2. Click me to add an item and set lockedLoadMoreListener to false\n我是空布局2，点击我，新增一个item并将lockedLoadMoreListener设置为false"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

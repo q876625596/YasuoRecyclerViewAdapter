@@ -145,8 +145,14 @@ class MainActivity : AppCompatActivity() {
         val list = initList()
         //headerList
         val headerList = YasuoList<Any>().apply {
-            add(HeaderOneBean(MutableLiveData("我是header1，点击我新增header")))
-            add(HeaderTwoBean(MutableLiveData(Color.RED)))
+            add(HeaderOneBean(MutableLiveData("我是header1，点击我新增header")).apply {
+                gridSpan = 3
+                staggeredGridFullSpan = true
+            })
+            add(HeaderTwoBean(MutableLiveData(Color.RED)).apply {
+                gridSpan = 2
+                staggeredGridFullSpan = false
+            })
         }
         //footerList
         val footerList = YasuoList<Any>().apply {
@@ -330,7 +336,7 @@ class MainActivity : AppCompatActivity() {
             //展示加载更多
             showLoadMoreLayout(DefaultLoadMoreItem())
             //设置加载更多的监听
-            binding.myRV.onLoadMoreListener(this) {
+            onLoadMoreListener(binding.myRV) {
                 //当itemList的真实数量小于50的时候，模拟加载更多数据
                 if (getItemListTrueSize() < 50) {
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -341,8 +347,24 @@ class MainActivity : AppCompatActivity() {
                         //解开监听锁
                         enableLoadMoreListener()
                     }, 1000L)
-                } else {//
-                    showLoadMoreLayout(DefaultLoadMoreItem().apply { text.value = "Complete!" })
+                } else {
+                    showLoadMoreLayout(DefaultLoadMoreItem().apply { text.value = "Click me, keep header and footer and jump to empty Layout 1\n点击我，保留header和footer并跳转空布局1" })
+                }
+            }
+            //绑定空布局1
+            holderConfig(R.layout.empty_layout_one, EmptyBeanOne::class, { EmptyLayoutOneBinding.bind(it) }) {
+                onHolderBind { holder, item ->
+                    holder.itemView.setOnClickListener {
+                        showEmptyLayout(EmptyBeanTwo(), true, true)
+                    }
+                }
+            }
+            //绑定空布局2
+            holderConfig(R.layout.empty_layout_two, EmptyBeanTwo::class, { EmptyLayoutTwoBinding.bind(it) }) {
+                onHolderBind { holder, item ->
+                    holder.itemView.setOnClickListener {
+                        itemList.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.aaa))))
+                    }
                 }
             }
             //配置加载更多的holder
@@ -351,12 +373,17 @@ class MainActivity : AppCompatActivity() {
             }) {
                 onHolderBind { holder, item ->
                     loadMoreText.text = item.text.value
+                    holder.itemView.setOnClickListener {
+                        showEmptyLayout(EmptyBeanOne())
+                    }
                 }
             }
             //配置header1
             holderConfig(R.layout.header_layout_one, HeaderOneBean::class, {
                 HeaderLayoutOneBinding.bind(it)
             }) {
+                gridSpan = 2
+                staggeredGridFullSpan = false
                 onHolderBind { holder, item ->
                     headerText.text = item.headerOneText.value
                     headerText.setOnClickListener {

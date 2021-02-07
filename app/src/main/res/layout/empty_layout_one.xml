@@ -8,7 +8,8 @@
     <TextView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:text="我是空布局1"
+        android:gravity="center"
+        android:text="I am empty Layout 1, click me, clear header and footer and switch to empty layout 2\n我是空布局1，点击我，清空header和footer并切换空布局2"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

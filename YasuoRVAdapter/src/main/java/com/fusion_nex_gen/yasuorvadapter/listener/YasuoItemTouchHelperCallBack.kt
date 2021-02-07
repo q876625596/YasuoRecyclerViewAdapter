@@ -7,17 +7,34 @@ import com.fusion_nex_gen.yasuorvadapter.YasuoBaseRVAdapter
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
 import java.util.*
 
+/**
+ * 设置item是否可拖拽、滑动删除
+ */
 fun <T : Any, RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<T, VH, *>> Adapter.enableDragOrSwipe(
     rv: RV,
     isLongPressDragEnable: Boolean = true,
     isItemViewSwipeEnable: Boolean = false,
+    dragDirection: Int =
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+    swipeDirection: Int = ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
     disableLayoutType: IntArray = intArrayOf(),
     onDisableDragOrSwipe: ((item: T, actionState: Int) -> Boolean)? = null,
     innerDragListener: ((from: Int, target: Int) -> Unit)? = null,
     innerSwipeListener: ((position: Int, direction: Int) -> Boolean)? = null,
 ): ItemTouchHelper {
     itemTouchHelper =
-        object : YasuoItemTouchHelper(YasuoItemTouchHelperCallBack(this, isLongPressDragEnable, isItemViewSwipeEnable, disableLayoutType, innerDragListener, innerSwipeListener)) {
+        object : YasuoItemTouchHelper(
+            YasuoItemTouchHelperCallBack(
+                this,
+                isLongPressDragEnable,
+                isItemViewSwipeEnable,
+                dragDirection,
+                swipeDirection,
+                disableLayoutType,
+                innerDragListener,
+                innerSwipeListener
+            )
+        ) {
             //拖拽/侧滑判断
             private fun judgeHolder(selected: RecyclerView.ViewHolder?, actionState: Int) {
                 requireNotNull(selected) { "Must pass a ViewHolder when dragging" }
@@ -82,13 +99,14 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
     val adapter: Adapter,
     val isLongPressDragEnable: Boolean = true,
     val isItemViewSwipeEnable: Boolean = false,
+    val dragDirection: Int =
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+    val swipeDirection: Int = ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
     val disableLayoutType: IntArray = intArrayOf(),
     val innerDragListener: ((from: Int, target: Int) -> Unit)? = null,
     val innerSwipeListener: ((position: Int, direction: Int) -> Boolean)? = null
 ) : ItemTouchHelper.Callback() {
-    var dragDirection: Int =
-        ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-    var swipeDirection: Int = ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+
 
     //禁用默认的长按，使用 setOnLongClickListener来监听长按
     override fun isLongPressDragEnabled(): Boolean = isLongPressDragEnable

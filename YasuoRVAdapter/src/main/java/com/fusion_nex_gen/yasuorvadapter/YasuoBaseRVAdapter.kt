@@ -122,6 +122,9 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * 并将loadMore的监听锁定，[lockedLoadMoreListener] = true
      * Set an empty layout, which forces the [itemList] to be empty,
      * And lock the monitoring of loadMore, [lockedLoadMoreListener] = true
+     * @param emptyItem 空布局的实体
+     * @param clearHeader 是否清空header
+     * @param clearFooter 是否清空footer
      */
     fun showEmptyLayout(emptyItem: T, clearHeader: Boolean = false, clearFooter: Boolean = false) {
         //先锁定loadMoreListener
@@ -327,7 +330,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
     fun getLoadMoreTruePosition(position: Int) = position - footerList.size - emptyList.size - headerList.size - itemList.size
 
     /**
-     * 判断position只包含在[headerList]内
+     * 判断position在[headerList]内
      * Judge that position is contained in [headerList]
      * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
@@ -336,7 +339,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
     }
 
     /**
-     * 判断position只包含在[itemList]内
+     * 判断position在[itemList]内
      * Judge that position is contained in [itemList]
      * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
@@ -345,7 +348,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
     }
 
     /**
-     * 判断position只包含在[emptyList]内
+     * 判断position在[emptyList]内
      * Judge that position is contained in [emptyList]
      * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
