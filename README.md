@@ -10,14 +10,23 @@
 
 #### 1、功能特色
 **①、List，Grid，StaggeredGrid类型的正常布局及多布局**
+
 **②、空白页/头部/尾部**
+
 **③、加载更多**
+
 **④、折叠布局（支持多级折叠）**
+
 **⑤、拖拽、横向滑动删除**
+
 **⑥、附送两个ItemDecoration，可根据不同需求选择**
+
 **⑦、采用ObservableList作为数据源，无需手动notify**
+
 **⑧、支持findViewById，ViewBinding，DataBinding三种模式，可根据你现有项目模式或喜好随意更换！**
+
 **⑨、动画的高可配置(综合考虑后采用recyclerView的itemAnimator方案，如有需要请自行依赖mikepenz大神的[ItemAnimators](https://github.com/mikepenz/ItemAnimators)库)**
+
 **⑩、吸顶(采用[sticky-layoutmanager](https://github.com/qiujayen/sticky-layoutmanager)的方案，低耦合adapter和item，由于原库的position获取有一些bug，便将其集成到本项目中并修复了bug)**
 
 #### 2、依赖，最新版本请看[github](https://github.com/q876625596/YasuoRecyclerViewAdapter)或者[jitpack](https://jitpack.io/#q876625596/YasuoRecyclerViewAdapter)
