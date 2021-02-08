@@ -28,23 +28,23 @@ import kotlin.reflect.KClass
  * TODO 9、横向滑动显示选项
  * TODO 10、新增一些额外的常用功能，比如结合下拉刷新之后显示一个一临时头部，提示刷新了多少条
  */
-abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config : YasuoBaseItemConfig<T, VH>>
+abstract class YasuoBaseRVAdapter<VH : RecyclerView.ViewHolder, Config : YasuoBaseItemConfig<VH>>
     (
     /**
      * item列表
      * Item list
      */
-    val itemList: YasuoList<T>,
+    val itemList: YasuoList<Any>,
     /**
      * 头部列表
      * Header list
      */
-    val headerList: YasuoList<T>,
+    val headerList: YasuoList<Any>,
     /**
      * 尾部列表
      * Footer list
      */
-    val footerList: YasuoList<T>,
+    val footerList: YasuoList<Any>,
 ) :
     RecyclerView.Adapter<VH>(), StickyCallBack {
 
@@ -103,7 +103,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * There will be at most one item in the list
      * The use of list storage is to maintain uniformity
      */
-    val emptyList: YasuoList<T> = YasuoList()
+    val emptyList: YasuoList<Any> = YasuoList()
 
     /**
      * 判断当前是否是显示空布局状态
@@ -126,7 +126,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * @param clearHeader 是否清空header
      * @param clearFooter 是否清空footer
      */
-    fun showEmptyLayout(emptyItem: T, clearHeader: Boolean = false, clearFooter: Boolean = false) {
+    fun showEmptyLayout(emptyItem: Any, clearHeader: Boolean = false, clearFooter: Boolean = false) {
         //先锁定loadMoreListener
         //Lock loadMoreListener first
         lockedLoadMoreListener = true
@@ -167,7 +167,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * There will be at most one item in the list
      * The use of list storage is to maintain uniformity
      */
-    val loadMoreList: YasuoList<T> = YasuoList()
+    val loadMoreList: YasuoList<Any> = YasuoList()
 
     /**
      * 锁定加载更多的监听，如果为true，那么不再触发监听
@@ -186,7 +186,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * 调用此方法手动刷新loadMore显示的内容
      * Call this method to refresh the content displayed by loadMore manually
      */
-    fun showLoadMoreLayout(loadMoreItem: T) {
+    fun showLoadMoreLayout(loadMoreItem: Any) {
         if (loadMoreList.isEmpty()) {
             loadMoreList.add(loadMoreItem)
         } else {
@@ -380,7 +380,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * Get item through [position]
      * @param position [RecyclerView.ViewHolder.getBindingAdapterPosition]
      */
-    open fun getItem(position: Int): T {
+    open fun getItem(position: Int): Any {
         return when {
             inHeaderList(position) -> headerList[getHeaderTruePosition(position)]
             inItemList(position) -> itemList[getItemTruePosition(position)]
@@ -452,8 +452,8 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         }
         //获取该item在itemList中的位置
         //Gets the position of the item in the itemList
-        val position = itemList.indexOf(item as T)
-        itemList.addAll(position + 1, item.list as YasuoList<T>)
+        val position = itemList.indexOf(item)
+        itemList.addAll(position + 1, item.list)
     }
 
     /**
@@ -467,7 +467,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
     private fun foldChild(item: YasuoFoldItem): Boolean {
         //先获取该item在itemList中的位置
         //First get the position of the item in the itemList
-        val position = itemList.indexOf(item as T)
+        val position = itemList.indexOf(item)
         //如果已经展开，那么收起
         //If it's already unfolded, fold it up
         if (item.isExpand) {
@@ -491,23 +491,44 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * @param childItem 需要删除的子级item
      * Child items to be deleted
      */
-    fun removeFoldChildListItem(childItem: Any) {
+    internal fun removeFoldItem(childItem: Any) {
         //首先判断该item是否继承于FoldItem
         //如果不是继承于YasuoFoldItem，那么不做其他操作
         if (childItem !is YasuoFoldItem) {
             return
         }
-        //如果该子级item的parentHash为空，那么表示该item没有被展开显示过，那么抛出异常提示不能使用该方法删除
+        //如果该子级item的parentHash为空，那么表示该item没有被展开显示过或者为父级，那么不做其他操作
         if (childItem.parentHash == null) {
-            throw RuntimeException(
-                "不要使用此方法删除列表中未显示的子item，\n" +
-                        "Do not use this method to delete child items that are not displayed in the list"
-            )
+            return
         }
         //如果找到该子项，那么删除
         (itemList.find {
             it.hashCode() == childItem.parentHash
         } as? YasuoFoldItem)?.list?.remove(childItem)
+    }
+
+    /**
+     * 移除一个item的同时移除其折叠列表相同的item
+     * @param childItem 需要移除的item
+     * @param foldList 需要同步移除的折叠布局，如果这个item是折叠布局的子item，可以快速同步移除，否则将会去查询该item属于哪一个父级item
+     */
+    fun removeAndFoldListItem(childItem: Any, foldList: YasuoList<YasuoFoldItem>? = null) {
+        itemList.remove(childItem)
+        foldList?.remove(childItem) ?: apply {
+            removeFoldItem(childItem)
+        }
+    }
+
+    /**
+     * 新增一个item的同时在折叠列表中也新增相同的item
+     * @param childItem 新增的item
+     * @param foldList 需要新增的折叠列表
+     */
+    fun addAndFoldListItem(childItem: Any, foldList: YasuoList<YasuoFoldItem>) {
+        itemList.add(childItem)
+        if (childItem is YasuoFoldItem) {
+            foldList.add(childItem)
+        }
     }
 
     /******布局占比相关******/
@@ -748,19 +769,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * [headerList]改变的监听
      * Monitoring of [headerList] changes
      */
-    val headerListListener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
-        override fun onChanged(contributorViewModels: ObservableList<T>) {
+    val headerListListener = object : ObservableList.OnListChangedCallback<ObservableList<Any>>() {
+        override fun onChanged(contributorViewModels: ObservableList<Any>) {
             notifyDataSetChanged()
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeChanged(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             notifyItemRangeChanged(i, i1)
             afterDataChangeListener?.invoke()
         }
 
         override fun onItemRangeInserted(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int
         ) {
@@ -769,7 +790,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         }
 
         override fun onItemRangeMoved(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int,
             i2: Int
@@ -778,7 +799,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeRemoved(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeRemoved(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
@@ -792,19 +813,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * [itemList]改变的监听
      * Monitoring of [itemList] changes
      */
-    val itemListListener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
-        override fun onChanged(contributorViewModels: ObservableList<T>) {
+    val itemListListener = object : ObservableList.OnListChangedCallback<ObservableList<Any>>() {
+        override fun onChanged(contributorViewModels: ObservableList<Any>) {
             notifyDataSetChanged()
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeChanged(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             notifyItemRangeChanged(i + headerList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
         override fun onItemRangeInserted(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int
         ) {
@@ -817,7 +838,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         }
 
         override fun onItemRangeMoved(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int,
             i2: Int
@@ -826,7 +847,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeRemoved(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeRemoved(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
@@ -840,19 +861,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * [emptyList]改变的监听
      * Monitoring of [emptyList] changes
      */
-    val emptyListListener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
-        override fun onChanged(contributorViewModels: ObservableList<T>) {
+    val emptyListListener = object : ObservableList.OnListChangedCallback<ObservableList<Any>>() {
+        override fun onChanged(contributorViewModels: ObservableList<Any>) {
             notifyDataSetChanged()
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeChanged(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             notifyItemRangeChanged(i + headerList.size + itemList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
         override fun onItemRangeInserted(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int
         ) {
@@ -861,7 +882,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         }
 
         override fun onItemRangeMoved(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int,
             i2: Int
@@ -870,7 +891,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeRemoved(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeRemoved(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
@@ -884,19 +905,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * [footerList]改变的监听
      * Monitoring of [footerList] changes
      */
-    val footerListListener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
-        override fun onChanged(contributorViewModels: ObservableList<T>) {
+    val footerListListener = object : ObservableList.OnListChangedCallback<ObservableList<Any>>() {
+        override fun onChanged(contributorViewModels: ObservableList<Any>) {
             notifyDataSetChanged()
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeChanged(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             notifyItemRangeChanged(i + headerList.size + itemList.size + emptyList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
         override fun onItemRangeInserted(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int
         ) {
@@ -905,7 +926,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         }
 
         override fun onItemRangeMoved(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int,
             i2: Int
@@ -914,7 +935,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeRemoved(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeRemoved(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
@@ -928,19 +949,19 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
      * [loadMoreList]改变的监听
      * Monitoring of [loadMoreList] changes
      */
-    val loadMoreListListener = object : ObservableList.OnListChangedCallback<ObservableList<T>>() {
-        override fun onChanged(contributorViewModels: ObservableList<T>) {
+    val loadMoreListListener = object : ObservableList.OnListChangedCallback<ObservableList<Any>>() {
+        override fun onChanged(contributorViewModels: ObservableList<Any>) {
             notifyDataSetChanged()
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeChanged(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeChanged(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             notifyItemRangeChanged(i + headerList.size + itemList.size + emptyList.size + footerList.size, i1)
             afterDataChangeListener?.invoke()
         }
 
         override fun onItemRangeInserted(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int
         ) {
@@ -949,7 +970,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
         }
 
         override fun onItemRangeMoved(
-            contributorViewModels: ObservableList<T>,
+            contributorViewModels: ObservableList<Any>,
             i: Int,
             i1: Int,
             i2: Int
@@ -958,7 +979,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
             afterDataChangeListener?.invoke()
         }
 
-        override fun onItemRangeRemoved(contributorViewModels: ObservableList<T>, i: Int, i1: Int) {
+        override fun onItemRangeRemoved(contributorViewModels: ObservableList<Any>, i: Int, i1: Int) {
             if (contributorViewModels.isEmpty()) {
                 notifyDataSetChanged()
             } else {
@@ -1004,7 +1025,7 @@ abstract class YasuoBaseRVAdapter<T : Any, VH : RecyclerView.ViewHolder, Config 
  * 绑定适配器
  * Bind Adapter
  */
-fun <T, VH, Config : YasuoBaseItemConfig<T, VH>, Adapter : YasuoBaseRVAdapter<T, VH, Config>, RV : RecyclerView> Adapter.attach(rv: RV): Adapter {
+fun <VH, Config : YasuoBaseItemConfig<VH>, Adapter : YasuoBaseRVAdapter<VH, Config>, RV : RecyclerView> Adapter.attach(rv: RV): Adapter {
     rv.adapter = this
     return this
 }

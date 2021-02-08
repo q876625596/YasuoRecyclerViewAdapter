@@ -57,7 +57,7 @@ open class YasuoRVViewBindingAdapter(
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-) : YasuoBaseRVAdapter<Any, YasuoViewBindingVH, YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>>(itemList, headerItemList, footerItemList),
+) : YasuoBaseRVAdapter<YasuoViewBindingVH, YasuoItemViewBindingConfig<Any, YasuoViewBindingVH, ViewBinding>>(itemList, headerItemList, footerItemList),
     LifecycleObserver {
 
     init {

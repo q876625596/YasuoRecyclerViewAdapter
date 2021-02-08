@@ -6,4 +6,4 @@ import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
 
 data class ImageBean(
     val image: MutableLiveData<Drawable>,
-) : YasuoFoldItem(autoExpand = true)
+) : YasuoFoldItem()

@@ -10,7 +10,7 @@ import java.util.*
 /**
  * 设置item是否可拖拽、滑动删除
  */
-fun <T : Any, RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<T, VH, *>> Adapter.enableDragOrSwipe(
+fun <RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<VH, *>> Adapter.enableDragOrSwipe(
     rv: RV,
     isLongPressDragEnable: Boolean = true,
     isItemViewSwipeEnable: Boolean = false,
@@ -18,7 +18,7 @@ fun <T : Any, RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBa
         ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
     swipeDirection: Int = ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
     disableLayoutType: IntArray = intArrayOf(),
-    onDisableDragOrSwipe: ((item: T, actionState: Int) -> Boolean)? = null,
+    onDisableDragOrSwipe: ((item: Any, actionState: Int) -> Boolean)? = null,
     innerDragListener: ((from: Int, target: Int) -> Unit)? = null,
     innerSwipeListener: ((position: Int, direction: Int) -> Boolean)? = null,
 ): ItemTouchHelper {
@@ -44,7 +44,7 @@ fun <T : Any, RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBa
                     //如果选中的item已展开
                     if (item.isExpand) {
                         //可以实现监听，根据返回值判断是否可以继续拖拽或者侧滑
-                        if (onDisableDragOrSwipe?.invoke(item as T, actionState) == true) {
+                        if (onDisableDragOrSwipe?.invoke(item, actionState) == true) {
                             return
                         }
                         //如果可以，那么先收起已经展开的子级
@@ -95,7 +95,7 @@ fun <T : Any, RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBa
     return itemTouchHelper!!
 }
 
-class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<*, VH, *>>(
+class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<VH, *>>(
     val adapter: Adapter,
     val isLongPressDragEnable: Boolean = true,
     val isItemViewSwipeEnable: Boolean = false,
@@ -263,9 +263,8 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val truePosition = adapter.getItemTruePosition(viewHolder.bindingAdapterPosition)
         val item = adapter.getItem(viewHolder.bindingAdapterPosition)
-        //判断是否是折叠布局，如果是折叠布局，那么将折叠布局中的原始item也删除
-        adapter.removeFoldChildListItem(item)
         innerSwipeListener?.invoke(truePosition, direction)
-        adapter.itemList.removeAt(truePosition)
+        //判断是否是折叠布局，如果是折叠布局，那么将折叠布局中的原始item也删除
+        adapter.removeAndFoldListItem(item)
     }
 }

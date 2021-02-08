@@ -58,7 +58,7 @@ open class YasuoRVDataBindingAdapter(
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-) : YasuoBaseRVAdapter<Any, YasuoDataBindingVH<ViewDataBinding>, YasuoItemDataBindingConfig<Any, YasuoDataBindingVH<ViewDataBinding>, ViewDataBinding>>(
+) : YasuoBaseRVAdapter<YasuoDataBindingVH<ViewDataBinding>, YasuoItemDataBindingConfig<YasuoDataBindingVH<ViewDataBinding>, ViewDataBinding>>(
     itemList,
     headerItemList,
     footerItemList,
@@ -145,11 +145,11 @@ fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter
     itemLayoutId: Int,
     itemClass: KClass<T>,
     bindingClass: KClass<VB>,
-    execute: (YasuoItemDataBindingConfig<T, YasuoDataBindingVH<VB>, VB>.() -> Unit)? = null
+    execute: (YasuoItemDataBindingConfig<YasuoDataBindingVH<VB>, VB>.() -> Unit)? = null
 ): Adapter {
-    val itemType = YasuoItemDataBindingConfig<T, YasuoDataBindingVH<VB>, VB>(itemLayoutId)
+    val itemType = YasuoItemDataBindingConfig<YasuoDataBindingVH<VB>, VB>(itemLayoutId)
     execute?.invoke(itemType)
-    itemClassTypes[itemClass] = itemType as YasuoItemDataBindingConfig<Any, YasuoDataBindingVH<ViewDataBinding>, ViewDataBinding>
+    itemClassTypes[itemClass] = itemType as YasuoItemDataBindingConfig<YasuoDataBindingVH<ViewDataBinding>, ViewDataBinding>
     itemIdTypes[itemLayoutId] = itemType
     return this
 }

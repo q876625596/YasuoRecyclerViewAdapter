@@ -10,7 +10,7 @@ import com.fusion_nex_gen.yasuorvadapter.holder.YasuoNormalVH
 import com.fusion_nex_gen.yasuorvadapter.holder.YasuoViewBindingVH
 
 //存储一个类型的各种属性
-open class YasuoBaseItemConfig<T : Any, VH : RecyclerView.ViewHolder>(
+open class YasuoBaseItemConfig<VH : RecyclerView.ViewHolder>(
     //item的布局id
     open val itemLayoutId: Int,
     //该类型布局是否吸顶
@@ -19,13 +19,14 @@ open class YasuoBaseItemConfig<T : Any, VH : RecyclerView.ViewHolder>(
     //如果是支持折叠的布局，一定要把这个属性设置为true，
     open val isFold: Boolean = false,
     //该类型布局在grid中的占比
+    //为0时不判断该属性
     open var gridSpan: Int = 0,
     //该类型布局在staggeredGrid中是否占满
     open var staggeredGridFullSpan: Boolean = false,
 )
 
 //存储一个类型的各种属性
-data class YasuoItemDataBindingConfig<T : Any, VH : YasuoDataBindingVH<VB>, VB : ViewDataBinding>(
+data class YasuoItemDataBindingConfig<VH : YasuoDataBindingVH<VB>, VB : ViewDataBinding>(
     //item的布局id
     override val itemLayoutId: Int,
     //该类型布局是否吸顶
@@ -34,9 +35,11 @@ data class YasuoItemDataBindingConfig<T : Any, VH : YasuoDataBindingVH<VB>, VB :
     //如果是支持折叠的布局，一定要把这个属性设置为true，
     override var isFold: Boolean = false,
     //该类型布局在grid中的占比
+    //为0时不判断该属性
     override var gridSpan: Int = 0,
     //该类型布局在staggeredGrid中是否占满
     override var staggeredGridFullSpan: Boolean = false,
+    //xml中对应的数据id
     var variableId: Int = BR.item,
     //该类型Holder创建时的监听
     var holderCreateListener: (VB.(holder: YasuoDataBindingVH<VB>) -> Unit)? = null,
@@ -44,7 +47,7 @@ data class YasuoItemDataBindingConfig<T : Any, VH : YasuoDataBindingVH<VB>, VB :
     var holderBindListener: (VB.(holder: YasuoDataBindingVH<VB>) -> Unit)? = null,
     ////该类型的Holder绑定时的监听，带payloads
     var holderBindAndPayloadsListener: (VB.(holder: YasuoDataBindingVH<VB>, payloads: List<Any>?) -> Unit)? = null
-) : YasuoBaseItemConfig<T, VH>(itemLayoutId, sticky, isFold, gridSpan, staggeredGridFullSpan) {
+) : YasuoBaseItemConfig<VH>(itemLayoutId, sticky, isFold, gridSpan, staggeredGridFullSpan) {
     fun onHolderCreate(createListener: VB.(holder: YasuoDataBindingVH<VB>) -> Unit) {
         this.holderCreateListener = createListener
     }
@@ -68,6 +71,7 @@ data class YasuoItemNormalConfig<T : Any, VH : YasuoNormalVH>(
     //如果是支持折叠的布局，一定要把这个属性设置为true，
     override var isFold: Boolean = false,
     //该类型布局在grid中的占比
+    //为0时不判断该属性
     override var gridSpan: Int = 0,
     //该类型布局在staggeredGrid中是否占满
     override var staggeredGridFullSpan: Boolean = false,
@@ -77,7 +81,7 @@ data class YasuoItemNormalConfig<T : Any, VH : YasuoNormalVH>(
     var holderBindListener: ((holder: YasuoNormalVH, item: T) -> Unit)? = null,
     ////该类型的Holder绑定时的监听，带payloads
     var holderBindAndPayloadsListener: ((holder: YasuoNormalVH, item: T, payloads: List<Any>?) -> Unit)? = null
-) : YasuoBaseItemConfig<T, VH>(itemLayoutId, sticky, isFold, gridSpan, staggeredGridFullSpan) {
+) : YasuoBaseItemConfig<VH>(itemLayoutId, sticky, isFold, gridSpan, staggeredGridFullSpan) {
     fun onHolderCreate(createListener: (holder: YasuoNormalVH) -> Unit) {
         this.holderCreateListener = createListener
     }
@@ -100,9 +104,11 @@ data class YasuoItemViewBindingConfig<T : Any, VH : YasuoViewBindingVH, VB : Vie
     //如果是支持折叠的布局，一定要把这个属性设置为true，
     override var isFold: Boolean = false,
     //该类型布局在grid中的占比
+    //为0时不判断该属性
     override var gridSpan: Int = 0,
     //该类型布局在staggeredGrid中是否占满
     override var staggeredGridFullSpan: Boolean = false,
+    //ViewBinding的创建方法
     var createBindingFun: (view: View) -> VB,
     //该类型Holder创建时的监听
     var holderCreateListener: (VB.(holder: YasuoViewBindingVH) -> Unit)? = null,
@@ -110,7 +116,7 @@ data class YasuoItemViewBindingConfig<T : Any, VH : YasuoViewBindingVH, VB : Vie
     var holderBindListener: (VB.(holder: YasuoViewBindingVH, item: T) -> Unit)? = null,
     ////该类型的Holder绑定时的监听，带payloads
     var holderBindAndPayloadsListener: (VB.(holder: YasuoViewBindingVH, item: T, payloads: List<Any>?) -> Unit)? = null
-) : YasuoBaseItemConfig<T, VH>(itemLayoutId, sticky, isFold, gridSpan, staggeredGridFullSpan) {
+) : YasuoBaseItemConfig<VH>(itemLayoutId, sticky, isFold, gridSpan, staggeredGridFullSpan) {
     fun onHolderCreate(createListener: VB.(holder: YasuoViewBindingVH) -> Unit) {
         this.holderCreateListener = createListener
     }

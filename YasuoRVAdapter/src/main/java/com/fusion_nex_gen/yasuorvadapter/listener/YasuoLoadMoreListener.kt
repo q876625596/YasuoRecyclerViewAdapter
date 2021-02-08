@@ -13,7 +13,7 @@ import com.fusion_nex_gen.yasuorvadapter.sticky.StickyStaggeredGridLayoutManager
 /**
  * 设置加载更多的监听
  */
-fun <RV : RecyclerView, Adapter : YasuoBaseRVAdapter<*, *, *>> Adapter.onLoadMoreListener(
+fun <RV : RecyclerView, Adapter : YasuoBaseRVAdapter<*, *>> Adapter.onLoadMoreListener(
     rv: RV,
     onLoadMore: YasuoLoadMoreListener.(lastVisiblePosition: Int) -> Unit
 ) {
@@ -21,7 +21,7 @@ fun <RV : RecyclerView, Adapter : YasuoBaseRVAdapter<*, *, *>> Adapter.onLoadMor
 }
 
 class YasuoLoadMoreListener(
-    private val adapter: YasuoBaseRVAdapter<*, *, *>,
+    private val adapter: YasuoBaseRVAdapter<*, *>,
     private val onLoadMore: YasuoLoadMoreListener.(lastVisiblePosition: Int) -> Unit
 ) :
     RecyclerView.OnScrollListener() {

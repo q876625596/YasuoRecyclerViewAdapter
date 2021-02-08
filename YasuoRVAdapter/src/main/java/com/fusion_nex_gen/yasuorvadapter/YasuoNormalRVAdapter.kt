@@ -52,7 +52,7 @@ open class YasuoNormalRVAdapter(
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
     footerItemList: YasuoList<Any> = YasuoList(),
-) : YasuoBaseRVAdapter<Any, YasuoNormalVH, YasuoItemNormalConfig<Any, YasuoNormalVH>>(itemList, headerItemList, footerItemList), LifecycleObserver {
+) : YasuoBaseRVAdapter<YasuoNormalVH, YasuoItemNormalConfig<Any, YasuoNormalVH>>(itemList, headerItemList, footerItemList), LifecycleObserver {
 
     init {
         this.itemList.addOnListChangedCallback(itemListListener)

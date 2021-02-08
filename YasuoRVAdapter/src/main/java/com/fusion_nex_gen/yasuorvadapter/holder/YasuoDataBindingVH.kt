@@ -4,10 +4,10 @@ import android.view.View
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 
-class YasuoDataBindingVH<out T : ViewDataBinding>(val binding: T) :
+class YasuoDataBindingVH<out VDB : ViewDataBinding>(val binding: VDB) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun <T : View> getView(viewId: Int): T {
+    fun <V : View> getView(viewId: Int): V {
         return binding.root.findViewById(viewId)
     }
 
