@@ -289,7 +289,7 @@ list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, 
 | staggeredGridFullSpan | 该item在staggeredGrid中是否占满 | false |
 
 ## 三、结语
-首先感谢大家的阅读，马上就要过年了，在这里也祝大家**新年快乐**，希望这个库能够对你们有所帮助。如果你喜欢**[YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter)**这个库，希望能在github上给一个start，作为我进步的动力！
+首先感谢大家的阅读，马上就要过年了，在这里也祝大家**新年快乐**，希望这个库能够对你们有所帮助。如果你喜欢**[YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter)**这个库，希望能在github上给一个star，作为我进步的动力！
 如果他有不足或需要新增的功能，可以向我提issue或添加我的qq:876625596
 
 # [License](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/LICENSE)
