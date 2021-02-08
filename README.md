@@ -61,8 +61,7 @@ dependencies {
 
 **如果想直接Ctrl CV代码，快速上手的同学，请直接移步[sample](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/app/src/main/java/com/fusion_nex_gen/yasuorecyclerviewadapter/MainActivity.kt)**
 
-![吸顶.gif](/q876625596/GenjiDialogV2/raw/master/image/show_on_window.gif)
-![加载更多.gif](https://upload-images.jianshu.io/upload_images/3106054-8288fd89ce3c35ed.gif?imageMogr2/auto-orient/strip) ![空布局，header，footer.gif](https://upload-images.jianshu.io/upload_images/3106054-154d54fa4cb550c3.gif?imageMogr2/auto-orient/strip) ![折叠.gif](https://upload-images.jianshu.io/upload_images/3106054-d6cac74b56459e4a.gif?imageMogr2/auto-orient/strip) ![拖拽，侧滑删除.gif](https://upload-images.jianshu.io/upload_images/3106054-1a1bad944b878496.gif?imageMogr2/auto-orient/strip)
+![吸顶.gif](https://upload-images.jianshu.io/upload_images/3106054-7d8cd2f661c479e2.gif?imageMogr2/auto-orient/strip) ![加载更多.gif](https://upload-images.jianshu.io/upload_images/3106054-8288fd89ce3c35ed.gif?imageMogr2/auto-orient/strip) ![空布局，header，footer.gif](https://upload-images.jianshu.io/upload_images/3106054-154d54fa4cb550c3.gif?imageMogr2/auto-orient/strip) ![折叠.gif](https://upload-images.jianshu.io/upload_images/3106054-d6cac74b56459e4a.gif?imageMogr2/auto-orient/strip) ![拖拽，侧滑删除.gif](https://upload-images.jianshu.io/upload_images/3106054-1a1bad944b878496.gif?imageMogr2/auto-orient/strip)
 
 
 #### 3、详细介绍
