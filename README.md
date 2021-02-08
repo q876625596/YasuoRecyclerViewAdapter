@@ -4,6 +4,8 @@
 ![图片来自：https://www.zcool.com.cn/work/ZNDU0NzA2MTY=.html](https://upload-images.jianshu.io/upload_images/3106054-959a3c4c2c450a78.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ## 一、前言
 **YasuoRecyclerViewAdapter！让你在Android中快乐的实现列表！**
+[掘金](https://juejin.cn/post/6926784485623087117)
+[简书](https://www.jianshu.com/p/7b062942ee26)
 
 ## 二、正片
 简单介绍一下这个库：**[YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter)** ，为什么要取名为Yasuo，因为亚索==快乐！这个库就是为了让大家在写代码的时候感受到快乐而存在的！
