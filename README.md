@@ -3,26 +3,7 @@
 
 ![图片来自：https://www.zcool.com.cn/work/ZNDU0NzA2MTY=.html](https://upload-images.jianshu.io/upload_images/3106054-959a3c4c2c450a78.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ## 一、前言
-自从我开始做安卓开发以来，我就得了一种病，**Adapter编写焦虑症**。在现如今的安卓App开发中，大家用得最多的ViewGroup，那一定是身为老大哥的RecyclerView，单布局列表，多布局列表，网格列表，瀑布流列表，折叠列表，吸顶列表，甚至一个无需滚动的页面，出于屏幕高度适配考虑，都有可能做成列表形式。这足以证明RecyclerView在实际开发中的重要性。
-
-那么这样一个如此重要的组件，通常情况下我们需要怎么实现呢？
-
-**第一步**：在布局中添加RecyclerVIew
-**第二步**：创建item布局及其实体类
-**第三步**：继承**RecyclerView.Adapter**类，编写自定义Adapter
-**第四步**：绑定Adapter到RecyclerView
-
-以上便是实现一个完整的列表所需的步骤，其中第三步可谓是整个流程中最为复杂的，目前的一些三方库，在一定程度上简化了第三步，让开发者在继承了他们自定义的Adapter之后，可以少些很大一部分的代码，从而提升开发效率，我以前也是用过这些优秀的库，比如安卓界使用最广泛[BRVAH](https://github.com/CymChad/BaseRecyclerViewAdapterHelper)，为开发者们大大减少了开发时间，让大家有时间回家陪陪家人，首先在这里感谢各位大佬的贡献。
-
-但是，由于我接触kotlin比较早，2016年7月开始从事Android开发，2017年初开始接触kotlin，然后在17年5月google开始正式钦定kotlin之后便开始正式使用kotlin做项目，从那时起，我就被kotlin的dsl所吸引，便开始尝试将这些优秀的第三方库进行dsl的改造，奈何当时的能力不足，这种几乎重写的改造宣告失败。既然大型改造不行，那我能不能去找一些别人写好的adapter dsl呢？于是经过我的不断搜索，终于在github上找到了一些库，比如[kotlin-adapter](https://github.com/wuhenzhizao/kotlin-adapter)和[Yasha](https://github.com/ssseasonnn/Yasha)。
-
-这两个都是优秀的库，曾经我也在项目中使用过他们，但是渐渐地我发现他们已经无法满足我的一些需求了，我便开始尝试写一个自己用的库。当时这个库还是存在于我的私有项目中，我在项目中遇到的问题就可以及时改，直到19年的上半年为止，这个库基本可以用于大多数日常开发，当时我就考虑将它进行一些完善工作后开源，但是世事难料，由于工作原因，19年的7月，我去了一趟柬埔寨，没错，就是程序员们口诛笔伐的东南亚国家之一。
-
-去那边之后，因为人手问题，我不得不学习了vue开发，flutter开发，以及后端开发，几乎没有时间来搞这个库的开源工作。时间到了20年的9月，由于工作安排，又回到了重庆，又经过几个月的忙碌后，终于在最近抽出了一些时间，来继续进行作业。
-
-当我重新审视这个库的时候，我发现了很多可以优化的点，这代表我这一年多是在进步，我很高兴，然后花了两三周的空余时间将其优化完善，新增一些功能后，我决定在今天将它发布出来，希望大家能够喜欢。
-
-不好意思，前言有点啰嗦，但依旧不妨碍后续的精彩。
+**YasuoRecyclerViewAdapter！让你在Android中快乐的实现列表！**
 
 ## 二、正片
 简单介绍一下这个库：**[YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter)** ，为什么要取名为Yasuo，因为亚索==快乐！这个库就是为了让大家在写代码的时候感受到快乐而存在的！
