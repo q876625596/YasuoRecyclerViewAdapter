@@ -440,7 +440,7 @@ class MainActivity : AppCompatActivity() {
         }
         //dataBinding的用法
         //dataBinding mode
-        binding.myRV.adapterDataBinding(this, list, headerList, footerList) {
+        /*binding.myRV.adapterDataBinding(this, list, headerList, footerList) {
             //设置可以拖拽和侧滑删除
             //Settings can be deleted by dragging and sliding
             enableDragOrSwipe(binding.myRV, isLongPressDragEnable = true, isItemViewSwipeEnable = true)
@@ -594,7 +594,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
+        }*/
 
     }
 
