@@ -53,7 +53,7 @@ dependencies {
 
 **如果想直接Ctrl CV代码，快速上手的同学，请直接移步[sample](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/app/src/main/java/com/fusion_nex_gen/yasuorecyclerviewadapter/MainActivity.kt)**
 
-![吸顶.gif](https://upload-images.jianshu.io/upload_images/3106054-7d8cd2f661c479e2.gif?imageMogr2/auto-orient/strip) ![加载更多.gif](https://upload-images.jianshu.io/upload_images/3106054-8288fd89ce3c35ed.gif?imageMogr2/auto-orient/strip) ![空布局，header，footer.gif](https://upload-images.jianshu.io/upload_images/3106054-154d54fa4cb550c3.gif?imageMogr2/auto-orient/strip) ![折叠.gif](https://upload-images.jianshu.io/upload_images/3106054-d6cac74b56459e4a.gif?imageMogr2/auto-orient/strip) ![拖拽，侧滑删除.gif](https://upload-images.jianshu.io/upload_images/3106054-1a1bad944b878496.gif?imageMogr2/auto-orient/strip)
+![吸顶.gif](https://user-images.githubusercontent.com/20555239/107305126-53123f00-6abd-11eb-9bbe-7ef0d85e8c7e.gif) ![加载更多.gif](https://user-images.githubusercontent.com/20555239/107305175-6d4c1d00-6abd-11eb-9ce8-c322f731a17b.gif) ![空布局，header，footer.gif](https://user-images.githubusercontent.com/20555239/107305208-7dfc9300-6abd-11eb-9f95-4c403cae05c4.gif) ![折叠.gif](https://user-images.githubusercontent.com/20555239/107305232-8a80eb80-6abd-11eb-8e98-0d379c8ee07d.gif) ![拖拽，侧滑删除.gif](https://user-images.githubusercontent.com/20555239/107305255-979dda80-6abd-11eb-961f-54c576ae56dc.gif)
 
 
 #### 3、详细介绍
