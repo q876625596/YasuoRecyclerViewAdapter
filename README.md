@@ -1,37 +1,41 @@
 # YasuoRecyclerViewAdapter
-一个能让你感受到快乐的RecyclerViewAdapter库
+A RecyclerViewAdapter library that can make you feel happy
 
-![图片来自：https://www.zcool.com.cn/work/ZNDU0NzA2MTY=.html](https://upload-images.jianshu.io/upload_images/3106054-959a3c4c2c450a78.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-## 一、前言
-**YasuoRecyclerViewAdapter！让你在Android中快乐的实现列表！**
+[![](https://jitpack.io/v/q876625596/YasuoRecyclerViewAdapter.svg)](https://jitpack.io/#q876625596/YasuoRecyclerViewAdapter)
+
+**[Language]** English | [中文文档](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/README_CN.md)
+
+![Image from：https://www.zcool.com.cn/work/ZNDU0NzA2MTY=.html](https://upload-images.jianshu.io/upload_images/3106054-959a3c4c2c450a78.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+## Ⅰ、Preface
+**YasuoRecyclerViewAdapter ! Let you happy realization list in Android !**
 [掘金](https://juejin.cn/post/6926784485623087117)
 [简书](https://www.jianshu.com/p/7b062942ee26)
 
-## 二、正片
-简单介绍一下这个库：**[YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter)** ，为什么要取名为Yasuo，因为亚索==快乐！这个库就是为了让大家在写代码的时候感受到快乐而存在的！
+## Ⅱ、Main
+Here's a brief introduction to this library：**[YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter)** ，Why Yasuo, because Yasuo = = happy! This library is for everyone to feel happy when writing code!
 
-#### 1、功能特色
-**①、List，Grid，StaggeredGrid类型的正常布局及多布局**
+#### 1、Functional features
+**①、Normal layout and multi layout of list, grid and stageredgrid**
 
-**②、空白页/头部/尾部**
+**②、EmptyLayout/Header/Footer**
 
-**③、加载更多**
+**③、LoadMore**
 
-**④、折叠布局（支持多级折叠）**
+**④、 Folding layout  (support multi-level fold) **
 
-**⑤、拖拽、横向滑动删除**
+**⑤、Drag, slide delete**
 
-**⑥、附送两个ItemDecoration，可根据不同需求选择**
+**⑥、Two ItemDecoration are attached, which can be selected according to different needs**
 
-**⑦、采用ObservableList作为数据源，无需手动notify**
+**⑦、The ObservableList is used as the data source without manual notify**
 
-**⑧、支持findViewById，ViewBinding，DataBinding三种模式，可根据你现有项目模式或喜好随意更换！**
+**⑧、Support findViewById, ViewBinding, DataBinding three modes, according to your existing project mode or preferences to change!**
 
-**⑨、动画的高可配置(综合考虑后采用recyclerView的itemAnimator方案，如有需要请自行依赖mikepenz大神的[ItemAnimators](https://github.com/mikepenz/ItemAnimators)库)**
+**⑨、Highly configurable animation (after comprehensive consideration, the itemanimator scheme of recyclerview is adopted. If necessary, please rely on the [ItemAnimators](https://github.com/mikepenz/ItemAnimators) Library of mikepenz)**
 
-**⑩、吸顶(采用[sticky-layoutmanager](https://github.com/qiujayen/sticky-layoutmanager)的方案，低耦合adapter和item，由于原库的position获取有一些bug，便将其集成到本项目中并修复了bug)**
+**⑩、Stick header (using [sticky-layoutmanager](https://github.com/qiujayen/sticky-layoutmanager) Because there are some bugs in the position acquisition of the original library, we integrate them into this project and fix the bugs.)**
 
-#### 2、依赖，最新版本请看[github](https://github.com/q876625596/YasuoRecyclerViewAdapter)或者[jitpack](https://jitpack.io/#q876625596/YasuoRecyclerViewAdapter)
+#### 2、For the latest version, please see [jitpack](https://jitpack.io/#q876625596/YasuoRecyclerViewAdapter)
 
 ``` groovy
 allprojects {
@@ -51,30 +55,30 @@ dependencies {
 #### 2、示例展示
 
 
-**如果想直接Ctrl CV代码，快速上手的同学，请直接移步[sample](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/app/src/main/java/com/fusion_nex_gen/yasuorecyclerviewadapter/MainActivity.kt)**
+**If you want to use Ctrl + CV code directly, please move [sample](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/app/src/main/java/com/fusion_nex_gen/yasuorecyclerviewadapter/MainActivity.kt) directly**
 
-![吸顶.gif](https://user-images.githubusercontent.com/20555239/107305126-53123f00-6abd-11eb-9bbe-7ef0d85e8c7e.gif) ![加载更多.gif](https://user-images.githubusercontent.com/20555239/107305175-6d4c1d00-6abd-11eb-9ce8-c322f731a17b.gif) ![空布局，header，footer.gif](https://user-images.githubusercontent.com/20555239/107305208-7dfc9300-6abd-11eb-9f95-4c403cae05c4.gif) ![折叠.gif](https://user-images.githubusercontent.com/20555239/107305232-8a80eb80-6abd-11eb-8e98-0d379c8ee07d.gif) ![拖拽，侧滑删除.gif](https://user-images.githubusercontent.com/20555239/107305255-979dda80-6abd-11eb-961f-54c576ae56dc.gif)
+![sticky.gif](https://user-images.githubusercontent.com/20555239/107305126-53123f00-6abd-11eb-9bbe-7ef0d85e8c7e.gif) ![loadMore.gif](https://user-images.githubusercontent.com/20555239/107305175-6d4c1d00-6abd-11eb-9ce8-c322f731a17b.gif) ![emptyLayout，header，footer.gif](https://user-images.githubusercontent.com/20555239/107305208-7dfc9300-6abd-11eb-9f95-4c403cae05c4.gif) ![fold.gif](https://user-images.githubusercontent.com/20555239/107305232-8a80eb80-6abd-11eb-8e98-0d379c8ee07d.gif) ![drag,swipr delete.gif](https://user-images.githubusercontent.com/20555239/107305255-979dda80-6abd-11eb-961f-54c576ae56dc.gif)
 
 
-#### 3、详细介绍
+#### 3、Detailed introduction
 
-##### 1）数据源
-必须使用[YasuoList](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/YasuoRVAdapter/src/main/java/com/fusion_nex_gen/yasuorvadapter/bean/YasuoList.kt)或其子类作为数据源，YasuoList继承自ObservableArrayList，新增了部分常用方法，并在adapter内部做了监听处理，因此使用该类型数据源可以不用手动notify
+##### 1）Data source
+You must use [YasuoList](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/YasuoRVAdapter/src/main/java/com/fusion_nex_gen/yasuorvadapter/bean/YasuoList.kt) or its subclass as the data source. Yasuolist inherits from observablearraylist, adds some common methods, and listens inside the adapter. Therefore, you can use this type of data source without manually notifying
 
-##### 2）简单写法（单布局/多布局/header/footer）
+##### 2）Simple writing（Single layout/Multi layout/Header/Footer）
 
 ``` kotlin
     fun findViewByIdMode(){
-        //数据源
+        //data source
         val list = YasuoList<Any>()
         val headerList = YasuoList<Any>()
         val footerList = YasuoList<Any>()
         binding.myRV.layoutManager = GridLayoutManager(this, 3)
-        //findViewById模式
+        //findViewById mode
         binding.myRV.adapterBinding(this,list){
             //do something
-            //绑定文本布局
-            //只需要给对应的布局配置holderConfig，即可实现多布局，header，footer
+            //Binding text layout
+            //Just configure holderConfig for the corresponding layout to realize multi layout, header and footer
             holderConfig(R.layout.item_layout_text, TextBean::class) {
                 onHolderBind { holder, item ->
                     holder.getView<TextView>(R.id.itemText).apply {
@@ -83,35 +87,35 @@ dependencies {
                 }
             }
         }
-        //ViewBinding模式
+        //ViewBinding mode
         binding.myRV.adapterViewBinding(this,list){
             //do something
-            //配置文本布局
-            //只需要给对应的布局配置holderConfig，即可实现多布局，header，footer
+            //Binding text layout
+            //Just configure holderConfig for the corresponding layout to realize multi layout, header and footer
             holderConfig(R.layout.item_layout_text, TextBean::class, { ItemLayoutTextBinding.bind(it) }) {
                 onHolderBind { holder, item ->
                     itemText.text = item.text.value
                 }
             }
         }
-        //DataBinding模式
+        //DataBinding mode
         binding.myRV.adapterDataBinding(this,list){
             //do something
-            //配置文本布局
-            //只需要给对应的布局配置holderConfig，即可实现多布局，header，footer
+            //Binding text layout
+            //Just configure holderConfig for the corresponding layout to realize multi layout, header and footer
             holderConfig(R.layout.item_layout_text_data_binding, TextBean::class, ItemLayoutTextDataBindingBinding::class) {
                 onHolderBind { holder ->
-                    //dataBInding模式已在xml中绑定了数据，无需手动设置
+                    //The databinding schema has already bound data in XML, so there is no need to set it manually
                 }
             }
         }
     }
 ```
 
-以上三种模式的差异就只有这么一点，相互切换也相当的方便。
+There is only one difference between the above three modes, and it is quite convenient to switch between them.
 
-##### 3）空布局
-空布局的使用也非常简单，先将空布局的holderConfig配置之后，再调用**adapter.showEmptyLayout**就行了。
+##### 3）Empty Layout
+The use of empty layout is also very simple. First configure the holderConfig of empty layout, and then call** adapter.showEmptyLayout **That's it.
 
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
@@ -120,176 +124,176 @@ dependencies {
                 onHolderBind { holder, item ->
                     itemText.text = item.text.value
                     itemText.setOnClickListener {
-                        showEmptyLayout(/*空布局实体*/EmptyBeanTwo(), /*是否清空header*/true, /*是否清空footer*/true)
+                        showEmptyLayout(/*Empty layout entity*/EmptyBeanTwo(), /*Clear header*/true, /*Clear footer*/true)
                     }
                 }
             }
         }
 ```
 
-##### 4）对布局设置占比
-设置占比有两种方式，第一种，给一种类型的布局设置占比：
+##### 4）Set span for layout
+There are two ways to set the proportion. The first is to set the proportion for one type of layout：
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
             //do something
             holderConfig(R.layout.item_layout_text, TextBean::class, { ItemLayoutTextBinding.bind(it) }) {
                 //do something
-                //给某个itemViewType的布局统一设置
-                //瀑布流占满一行
+                //Set the layout of an itemViewType uniformly
+                //The staggeredGridLayouytManager filled the line
                 staggeredGridFullSpan = true
-                //网格布局占比
+                //gridLayoutManager Span
                 gridSpan = 3
             }
         }
 ```
-第二种，针对某个item单独设置占比：
+Second, set the proportion of an item separately：
 ``` kotlin
         list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
-                    //给某个item单独设置
-                    //瀑布流占满一行
+                    //To set an item individually
+                    //The staggeredGridLayouytManager filled the line
                     staggeredGridFullSpan = true
-                    //网格布局占比
+                    //gridLayoutManager Span
                     gridSpan = 3
         }
 ```
-**判断优先级：单个item设置 > 类型设置**
+**Judging priority: single item setting > type setting**
 
-##### 5）加载更多
-加载更多和空布局类似，也是先将加载更多布局的holderConfig配置之后，再调用**adapter.showLoadMoreLayout**使空布局显示出来，最后添加**adapter.onLoadMoreListener**监听即可。
+##### 5）LoadMore
+Loading more layouts is similar to loading empty layouts. After loading the holderConfig configuration of more layouts, call ** adapter.showLoadMoreLayout ** Make the empty layout display and add it at last ** adapter.onLoadMoreListener ** Just monitor.
 
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
-            //展示加载更多
+            //Show load more
             showLoadMoreLayout(DefaultLoadMoreItem())
-            //设置加载更多的监听
+            //Set to load more listeners
             onLoadMoreListener(binding.myRV) {
-                //请求数据...
+                //Request data...
             }
             //do something
         }
 ```
 
-##### 6）拖拽/侧滑删除
-只需要使用**adapter.enableDragOrSwipe**即可启用拖拽，同时也可以设置监听，设置手势方向，以及对某些特定布局禁用等
+##### 6）Drag / swipe delete
+Just use** adapter.enableDragOrSwipe **You can enable drag and drop, set monitor, set gesture direction, and disable certain layouts
 
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
-            //拖拽/侧滑删除
+            //Drag / swipe delete
             enableDragOrSwipe(binding.myRV, isLongPressDragEnable = true, isItemViewSwipeEnable = true)
             //do something
         }
 ```
 
-##### 7）吸顶
-首先设置layoutManager：**StickyLinearLayoutManager**，**StickyGridLayoutManager**，**StickyStaggeredGridLayoutManager**
-吸顶有两种方式，第一种，对某一个类型的布局设置吸顶
+##### 7）Sticky header
+First, set the layout manager: * * stickylinear layout manager * *, * * stickygridlayout manager * *, * * stickystaged GridLayout manager**
+There are two ways of Sticky header. The first is to set Sticky header for a certain type of layout
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
             //do something
             holderConfig(R.layout.item_layout_text, TextBean::class, { ItemLayoutTextBinding.bind(it) }) {
-                //给某个itemViewType的布局统一设置
-                //吸顶，注意，吸顶会默认占满一行
+                //Set the layout of an itemViewType uniformly
+                //Sticky header. Note that sticky header will fill one line by default
                 sticky = true
                 //do something
             }
         }
 ```
-第二种，针对某个item设置吸顶
+Second, set the Sticky header for an item
 ``` kotlin
 list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, R.drawable.eee))).apply {
-        //给某个item单独设置
-        //吸顶，注意，吸顶会默认占满一行
+        //To set an item individually
+        //Sticky header. Note that sticky header will fill one line by default
         sticky = true
 }
 ```
 
-**判断优先级：单个item设置 > 类型设置**
+**Judging priority: single item setting > type setting**
 
-##### 8）折叠布局
-折叠布局需要数据类继承[YasuoFoldItem](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/YasuoRVAdapter/src/main/java/com/fusion_nex_gen/yasuorvadapter/bean/YasuoFoldItem.kt)，之后只需要使用**adapter.expandOrFoldItem**来展开/收起即可，支持多级折叠，如果需要删除或添加折叠布局中的某个item，建议使用**adapter.removeAndFoldListItem**和**adapter.addAndFoldListItem**方法
+##### 8）Folding layout
+Folding layout requires data class to inherit [YasuoFoldItem](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/YasuoRVAdapter/src/main/java/com/fusion_nex_gen/yasuorvadapter/bean/YasuoFoldItem.kt), and then only need to use** adapter.expandOrFoldItem **It supports multi-level folding. If you need to delete or add an item in the folding layout, it is recommended to use** adapter.removeAndFoldListItem **And** adapter.addAndFoldListItem **Methods
 
-##### 9）动画配置
-动画采用mikepenz大神的[ItemAnimators](https://github.com/mikepenz/ItemAnimators)库，如有需要，请先自行依赖该库。
+##### 9）Animation configuration
+The animation uses mikepenz's [ItemAnimators](https://github.com/mikepenz/ItemAnimators) library. If necessary, please rely on this library.
 ``` kotlin
         binding.myRV.itemAnimator = SlideLeftAlphaAnimator()
 ```
 
-##### 10）附送的itemDecoration
-支持为每条边单独设置样式
+##### 10）Attached itemDecoration
+It supports setting styles for each edge individually
 ``` kotlin
         binding.myRV.addYasuoDecoration {
             setDecoration(R.layout.item_layout_text, this@MainActivity, defaultRes)
             setDecoration(R.layout.item_layout_image, this@MainActivity, defaultRes)
         }
 ```
-额外附一个span相等的网格布局专用空白分隔ItemDecoration
+An additional span equal grid layout space is attached to separate itemDecoration
 ``` kotlin
         binding.myRV.addItemDecoration(GridSpacingItemDecoration(3, 20, true))
 ```
 
-#### 4、api展示
+#### 4、API display
 
-##### 1）adapter可配置属性/方法一览
-| 属性名/方法名 | 介绍 |默认值|
+##### 1）List of adapter configurable properties / methods
+| Property name / method name | introduce |Default value |
 | ------ | ------ | ------ |
-| itemList | 主体列表 | YasuoList<T>() |
-| headerList | 头部列表 | YasuoList<T>() |
-| footerList | 尾部列表 | YasuoList<T>() |
-| showLoadMoreLayout(loadMoreItem: T) | 配置并显示加载更多布局 | ------ |
-| removeLoadMore() | 移除加载更多布局 | ------ |
-| enableLoadMoreListener() | 启用列表滚动到底部时加载更多的监听 | ------ |
-| disableLoadMoreListener() | 禁用列表滚动到底部时加载更多的监听 | ------ |
-| isShowEmptyLayout() | 判断当前是否是显示空布局状态 | ------ |
-| showEmptyLayout(emptyItem: T, clearHeader: Boolean = false, clearFooter: Boolean = false) | 判断当前是否是显示空布局状态 | ------ |
-| expandOrFoldItem(item: YasuoFoldItem) | 展开/折叠某个item | ------ |
-| removeAndFoldListItem(childItem: Any, foldList: YasuoList<YasuoFoldItem>? = null) | 移除一个item的同时移除其折叠列表的相同item | ------ |
-| getAllListSize() | 获取全部列表的长度 | ------ |
-| getItemListTrueSize() | 获取[itemList]的实际长度 | ------ |
-| getHeaderListTrueSize() | 获取[headerList]的实际长度 | ------ |
-| getFooterListTrueSize() | 获取[footerList]的实际长度 | ------ |
-| getHeaderTruePosition(position: Int) | 获取[headerList]的真实position | ------ |
-| getItemTruePosition(position: Int) | 获取[itemList]的真实position | ------ |
-| getFooterTruePosition(position: Int) | 获取[footerList]的真实position | ------ |
-| inHeaderList(position: Int) | 判断position在[headerList]内 | ------ |
-| inItemList(position: Int) | 判断position在[itemList]内 | ------ |
-| inFooterList(position: Int) | 判断position在[footerList]内 | ------ |
-| setAfterDataChangeListener(listener: () -> Unit) | 列表数据发生改变后的监听，在notify之后触发 | ------ |
-| enableDragOrSwipe(...) | 设置item是否可拖拽、滑动删除 | ------ |
-| onLoadMoreListener(...) | 设置加载更多的监听 | ------ |
-| holderConfig(...) | 配置holder，建立数据类与布局文件之间的匹配关系 | ------ |
+| itemList | main list | YasuoList<T>() |
+| headerList | header list | YasuoList<T>() |
+| footerList | footer list | YasuoList<T>() |
+| showLoadMoreLayout() | Configure and show loading more layouts | ------ |
+| removeLoadMore() | Remove load more layouts | ------ |
+| enableLoadMoreListener() | Enable list scrolling to the bottom to load more listeners | ------ |
+| disableLoadMoreListener() | Disable list scrolling to the bottom when loading more listeners | ------ |
+| isShowEmptyLayout() | Determine whether the current display is empty layout state | ------ |
+| showEmptyLayout() | Configure and display empty layouts | ------ |
+| expandOrFoldItem() | Expand / fold an item | ------ |
+| removeAndFoldListItem() | Remove an item and remove the same item in its collapsed list at the same time | ------ |
+| getAllListSize() | Gets the length of all lists | ------ |
+| getItemListTrueSize() | Get the actual length of [itemList] | ------ |
+| getHeaderListTrueSize() | Get the actual length of [headerList] | ------ |
+| getFooterListTrueSize() | Get the actual length of [footerList] | ------ |
+| getHeaderTruePosition() | Get the real position of [headerList] | ------ |
+| getItemTruePosition() | Get the real position of [itemList] | ------ |
+| getFooterTruePosition() | Get the real position of [footerList] | ------ |
+| inHeaderList() | Judge that position is in [headerList] | ------ |
+| inItemList() | Judge that position is in [itemList] | ------ |
+| inFooterList() | Judge that position is in [footerList] | ------ |
+| setAfterDataChangeListener() | After the list data changes, the monitor will be triggered after notify | ------ |
+| enableDragOrSwipe() | Set whether the item can be dragged or deleted by sliding | ------ |
+| onLoadMoreListener() | Set to load more listeners | ------ |
+| holderConfig() | Configure holder to establish the matching relationship between data class and layout file | ------ |
 
 
-##### 2）holderConfig可配置属性/方法一览
-| 属性名/方法名 | 介绍 |默认值|
+##### 2）Overview of holderConfig configurable properties / methods
+| Property name / method name | introduce |Default value |
 | ------ | ------ | ------ |
-| sticky | 该类型布局是否吸顶 | false |
-| isFold | 该类型布局是否支持展开折叠 | false |
-| gridSpan | 该类型布局在grid中的占比 | 0 |
-| staggeredGridFullSpan | 该类型布局在staggeredGrid中是否占满 | false |
-| holderCreateListener | 该类型Holder创建时的监听 | null |
-| holderBindListener | 该类型的Holder绑定时的监听 | null |
-| createBindingFun | ViewBinding的创建方法，仅ViewBinding模式 | null |
-| variableId | xml中对应的数据id，仅DataBinding模式 | BR.item |
+| sticky | Is this type of layout a sticky header | false |
+| isFold | Whether this type of layout supports expand/fold | false |
+| gridSpan | The proportion of this type of layout in Grid | 0 |
+| staggeredGridFullSpan | Is this type of layout full in the staggeedgrid | false |
+| holderCreateListener | Listen when the type holder is created | null |
+| holderBindListener | The type of holder is used to listen when binding | null |
+| createBindingFun | The creation method of viewbinding is only viewbinding mode | null |
+| variableId | The corresponding data ID in XML is only in the data binding mode | BR.item |
 
-##### 3）YasuoNormalItem可配置属性/方法一览
-| 属性名/方法名 | 介绍 |默认值|
+##### 3）Overview of YasuoNormalItem configurable properties / methods
+| Property name / method name | introduce |Default value |
 | ------ | ------ | ------ |
-| sticky | 该item是否吸顶 | false |
-| gridSpan | 该item在grid中的占比 | 0 |
-| staggeredGridFullSpan | 该item在staggeredGrid中是否占满 | false |
+| sticky | Is this type of layout a sticky header | false |
+| gridSpan | The proportion of this type of layout in Grid | 0 |
+| staggeredGridFullSpan | Is this type of layout full in the staggeedgrid | false |
 
-##### 4）YasuoNormalItem可配置属性/方法一览
-| 属性名/方法名 | 介绍 |默认值|
+##### 4）Overview of YasuoFoldItem configurable properties / methods
+| Property name / method name | introduce |Default value |
 | ------ | ------ | ------ |
-| list | 下一级列表 | YasuoList<YasuoFoldItem>() |
-| isExpand | 是否已展开 | false |
-| parentHash | 父级hash，展开后才会赋值 | false |
-| sticky | 该item是否吸顶 | false |
-| gridSpan | 该item在grid中的占比 | 0 |
-| staggeredGridFullSpan | 该item在staggeredGrid中是否占满 | false |
+| list | Next level list | YasuoList<YasuoFoldItem>() |
+| isExpand | Expanded | false |
+| parentHash | Parent hash, which will be assigned after expansion | false |
+| sticky | Is this type of layout a sticky header | false |
+| gridSpan | The proportion of this type of layout in Grid | 0 |
+| staggeredGridFullSpan | Is this type of layout full in the staggeedgrid | false |
 
-## 三、结语
-首先感谢大家的阅读，马上就要过年了，在这里也祝大家**新年快乐**，希望这个库能够对你们有所帮助。如果你喜欢**[YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter)**这个库，希望能在github上给一个star，作为我进步的动力！
-如果他有不足或需要新增的功能，可以向我提issue或添加我的qq:876625596
+## Ⅲ、Epilogue
+First of all, thank you for your reading. The new year is coming soon. I also wish you a happy new year. I hope this library can help you. If you like * * [YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter) * * this library, I hope to give you a star on GitHub as a driving force for my progress!
+If he has deficiencies or needs new functions, he can ask me issue or add my QQ: 876625596
 
 # [License](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/LICENSE)
