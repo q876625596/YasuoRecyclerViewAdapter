@@ -394,9 +394,9 @@ class StickyStaggeredGridLayoutManager<T> : StaggeredGridLayoutManager where T :
     private fun measureAndLayout(stickyHeader: View?) {
         measureChildWithMargins(stickyHeader!!, 0, 0)
         if (orientation == VERTICAL) {
-            stickyHeader.layout(paddingLeft, 0, width - paddingRight, stickyHeader.measuredHeight)
+            stickyHeader.layout(paddingLeft + getLeftDecorationWidth(stickyHeader), 0, width - paddingRight - getRightDecorationWidth(stickyHeader), stickyHeader.measuredHeight)
         } else {
-            stickyHeader.layout(0, paddingTop, stickyHeader.measuredWidth, height - paddingBottom)
+            stickyHeader.layout(0, paddingTop + getTopDecorationHeight(stickyHeader), stickyHeader.measuredWidth, height - paddingBottom - getBottomDecorationHeight(stickyHeader))
         }
     }
 
