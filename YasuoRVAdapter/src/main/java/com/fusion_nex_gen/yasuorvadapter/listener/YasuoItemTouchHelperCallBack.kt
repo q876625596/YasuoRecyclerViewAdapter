@@ -9,6 +9,7 @@ import java.util.*
 
 /**
  * 设置item是否可拖拽、滑动删除
+ * Set whether the item can be dragged or deleted by sliding
  */
 fun <RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapter<VH, *>> Adapter.enableDragOrSwipe(
     rv: RV,
@@ -35,36 +36,31 @@ fun <RV : RecyclerView, VH : RecyclerView.ViewHolder, Adapter : YasuoBaseRVAdapt
                 innerSwipeListener
             )
         ) {
-            //拖拽/侧滑判断
+            /**
+             * 拖拽/侧滑判断
+             * Drag / sideslip judgment
+             */
             private fun judgeHolder(selected: RecyclerView.ViewHolder?, actionState: Int) {
                 requireNotNull(selected) { "Must pass a ViewHolder when dragging" }
                 //如果该holder是折叠模式
+                //If the holder is in collapse mode
                 if (itemIdTypes[selected.itemViewType]?.isFold == true) {
                     val item = getItem(selected.bindingAdapterPosition) as YasuoFoldItem
                     //如果选中的item已展开
+                    //If the selected item is expanded
                     if (item.isExpand) {
                         //可以实现监听，根据返回值判断是否可以继续拖拽或者侧滑
+                        //Can monitor, according to the return value to determine whether you can continue to drag or sideslip
                         if (onDisableDragOrSwipe?.invoke(item, actionState) == true) {
                             return
                         }
                         //如果可以，那么先收起已经展开的子级
+                        //If you can, collapse the expanded children first
                         expandOrFoldItem(item)
                     }
                 }
-                /*      if (adapter.isFold) {
-                          val position = selected.bindingAdapterPosition
-                          val item = adapter.getItem(position) as YasuoFoldItem
-                          //如果选中的item已展开
-                          if (item.isExpand) {
-                              //可以实现监听，根据返回值判断是否可以继续拖拽或者侧滑
-                              if (onDisableDragOrSwipe?.invoke(item, actionState) == true) {
-                                  return
-                              }
-                              //如果可以，那么先收起已经展开的子级
-                              adapter.expandOrFoldItem(item)
-                          }
-                      }*/
                 //如果是拖拽，为了防止ObservableList自带的notify影响，先移除itemList监听
+                //In case of dragging, in order to prevent the notify effect of ObservableList, first remove the itemList listener
                 if (actionState == ACTION_STATE_DRAG) {
                     itemList.removeOnListChangedCallback(itemListListener)
                 }
@@ -107,8 +103,6 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
     val innerSwipeListener: ((position: Int, direction: Int) -> Boolean)? = null
 ) : ItemTouchHelper.Callback() {
 
-
-    //禁用默认的长按，使用 setOnLongClickListener来监听长按
     override fun isLongPressDragEnabled(): Boolean = isLongPressDragEnable
 
     override fun isItemViewSwipeEnabled(): Boolean = isItemViewSwipeEnable
@@ -139,24 +133,30 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
         var parentItem: YasuoFoldItem? = null
         var parentItemIndex = 0
         //如果拖动的Holder是折叠布局（父级或子级）
+        //If the dragged holder is a fold layout (parent or child)
         val fromItemConfig = adapter.itemIdTypes[viewHolder.itemViewType] ?: throw RuntimeException("找不到对应Config")
         val targetItemConfig = adapter.itemIdTypes[target.itemViewType] ?: throw RuntimeException("找不到对应Config")
         when {
             //如果两个都为折叠布局
+            //If both are fold layout
             fromItemConfig.isFold && targetItemConfig.isFold -> {
                 fromItem = adapter.getItem(fromPosition) as YasuoFoldItem
                 targetItem = adapter.getItem(targetPosition) as YasuoFoldItem
                 //如果两个折叠布局不是同一个展开列表，或者不是同一级的情况，则不能交换
+                //If two fold layouts are not the same expanded list or the same level, they cannot be exchanged
                 if (fromItem.parentHash != targetItem.parentHash) {
                     return false
                 }
                 //如果目标item已经展开，也不能交换
+                //If the target item has been expanded, it cannot be exchanged
                 if (targetItem.isExpand) {
                     return false
                 }
                 //如果拖拽Holder的父节点不为空，说明此时拖拽的是子级
+                //If the parent node of the drag holder is not empty, it means that the child is being dragged
                 if (fromItem.parentHash != null) {
                     //那么找到父级item，在下方使用
+                    //Then find the parent item and use it below
                     run out@{
                         adapter.itemList.forEachIndexed { index, any ->
                             if (any.hashCode() == fromItem.parentHash) {
@@ -170,65 +170,31 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
                 }
             }
             //如果只有目标Holder是折叠布局
+            //If only the target holder is fold layout
             targetItemConfig.isFold -> {
                 targetItem = adapter.getItem(targetPosition) as YasuoFoldItem
                 //如果目标item是展开的，那么不能交换
+                //If the target item is expanded, it cannot be exchanged
                 if (targetItem.isExpand) {
                     return false
                 }
                 //如果目标item是子级，那么也不能交换
+                //If the target item is a child, it cannot be exchanged
                 if (targetItem.parentHash != null) {
                     return false
                 }
             }
         }
-/*        if (adapter.itemIdTypes[viewHolder.itemViewType]?.isFold == true) {
-            fromItem = adapter.getItem(fromPosition) as YasuoFoldItem
-            //并且目标的Holder也是折叠布局（父级或子级）
-            if (adapter.itemIdTypes[target.itemViewType]?.isFold == true) {
-                targetItem = adapter.getItem(targetPosition) as YasuoFoldItem
-                //如果两个折叠布局不是同一个展开列表，或者不是同一级的情况，则不能交换
-                if (fromItem.parentHash != targetItem.parentHash) {
-                    return false
-                }
-                //如果目标item已经展开，也不能交换
-                if (targetItem.isExpand) {
-                    return false
-                }
-                //如果拖拽Holder的父节点不为空，说明此时拖拽的是子级
-                if (fromItem.parentHash != null) {
-                    //那么找到父级item，在下方使用
-                    parentItem = adapter.itemList.find {
-                        it.hashCode() == fromItem.parentHash
-                    } as YasuoFoldItem
-                }
-            }
-        }*/
-        /* if (adapter.isFold) {
-             fromItem = adapter.getItem(fromPosition) as YasuoFoldItem
-             targetItem = adapter.getItem(targetPosition) as YasuoFoldItem
-             //如果不是同一个展开列表，或者不是同一级的情况，则不能交换
-             if (fromItem.parentHash != targetItem.parentHash) {
-                 return false
-             }
-             //如果目标item已经展开，也不能交换
-             if (targetItem.isExpand) {
-                 return false
-             }
-             //如果拖拽item的父节点不为空，那么找到父级item，在下方使用
-             if (fromItem.parentHash != null) {
-                 parentItem = adapter.itemList.find {
-                     it.hashCode() == fromItem.parentHash
-                 } as YasuoFoldItem
-             }
-         }*/
         //交换item
+        //Exchange item
         if (fromPosition < targetPosition) {
             //如果是拖拽的Holder是折叠布局，并且父节点不为空
+                //If the holder is dragged, the layout is fold and the parent node is not empty
             if (fromItemConfig.isFold && parentItem != null) {
                 for (i in fromPosition until targetPosition) {
                     Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i + 1))
                     //那么交换当前子级列表中的item
+                    //Then exchange the items in the current child list
                     Collections.swap(parentItem!!.list, adapter.getItemTruePosition(i) - parentItemIndex - 1, adapter.getItemTruePosition(i + 1) - parentItemIndex - 1)
                 }
             } else {
@@ -238,10 +204,12 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
             }
         } else {
             //如果是拖拽的Holder是折叠布局，并且父节点不为空
+                //If the holder is dragged, the layout is collapsed and the parent node is not empty
             if (fromItemConfig.isFold && parentItem != null) {
                 for (i in fromPosition downTo targetPosition + 1) {
                     Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i - 1))
                     //那么交换当前子级列表中的item
+                    //Then exchange the items in the current child list
                     Collections.swap(parentItem!!.list, adapter.getItemTruePosition(i) - parentItemIndex - 1, adapter.getItemTruePosition(i - 1) - parentItemIndex - 1)
                 }
             } else {
@@ -251,11 +219,6 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
             }
         }
         adapter.notifyItemMoved(fromPosition, targetPosition)
-
-/*        if (adapter.isFold && parentItem != null) {
-            //那么交换当前子级列表中的item
-            Collections.swap(parentItem.list, parentItem.list.indexOf(fromItem), parentItem.list.indexOf(targetItem))
-        }*/
         innerDragListener?.invoke(adapter.getItemTruePosition(fromPosition), adapter.getItemTruePosition(targetPosition))
         return true
     }
@@ -265,6 +228,7 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
         val item = adapter.getItem(viewHolder.bindingAdapterPosition)
         innerSwipeListener?.invoke(truePosition, direction)
         //判断是否是折叠布局，如果是折叠布局，那么将折叠布局中的原始item也删除
+        //Judge whether it is a folded layout. If it is a folded layout, the original items in the folded layout will also be deleted
         adapter.removeAndFoldListItem(item)
     }
 }

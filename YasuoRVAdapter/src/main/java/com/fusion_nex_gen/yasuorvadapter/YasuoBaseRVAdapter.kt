@@ -15,8 +15,9 @@ import kotlin.reflect.KClass
 
 /**
  * RecyclerView适配器基类
+ * Recyclerview adapter base class
  *
- * TODO 开发计划
+ * TODO 开发计划 Development plan
  * 1、List，Grid，StaggeredGrid类型的正常布局及多布局的基础配置，dataBinding配置及DSL
  * 2、空白页/头部/尾部
  * 3、加载更多
@@ -509,8 +510,11 @@ abstract class YasuoBaseRVAdapter<VH : RecyclerView.ViewHolder, Config : YasuoBa
 
     /**
      * 移除一个item的同时移除其折叠列表相同的item
+     * Remove an item with the same collapse list at the same time
      * @param childItem 需要移除的item
+     * Items to be removed
      * @param foldList 需要同步移除的折叠布局，如果这个item是折叠布局的子item，可以快速同步移除，否则将会去查询该item属于哪一个父级item
+     * For folded layouts that need to be removed synchronously, if the item is a child item of the folded layout, you can quickly remove it synchronously. Otherwise, you will query which parent item the item belongs to
      */
     fun removeAndFoldListItem(childItem: Any, foldList: YasuoList<YasuoFoldItem>? = null) {
         itemList.remove(childItem)
@@ -521,8 +525,11 @@ abstract class YasuoBaseRVAdapter<VH : RecyclerView.ViewHolder, Config : YasuoBa
 
     /**
      * 新增一个item的同时在折叠列表中也新增相同的item
+     * When adding an item, add the same item in the collapse list
      * @param childItem 新增的item
+     * New item
      * @param foldList 需要新增的折叠列表
+     * New collapse list needed
      */
     fun addAndFoldListItem(childItem: Any, foldList: YasuoList<YasuoFoldItem>) {
         itemList.add(childItem)
@@ -531,7 +538,7 @@ abstract class YasuoBaseRVAdapter<VH : RecyclerView.ViewHolder, Config : YasuoBa
         }
     }
 
-    /******布局占比相关******/
+    /****** 布局占比相关  Layout proportion related ******/
 
     override fun onViewAttachedToWindow(holder: VH) {
         super.onViewAttachedToWindow(holder)

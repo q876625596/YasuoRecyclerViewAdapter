@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 
 /**
  * 用于GridLayoutManager，并且所有item的span都为1的情况
+ * For GridLayoutManager, and the span of all items is 1
  */
 class GridSpacingItemDecoration(private val spanCount: Int, private val spacing: Int, private val includeEdge: Boolean) : ItemDecoration() {
 

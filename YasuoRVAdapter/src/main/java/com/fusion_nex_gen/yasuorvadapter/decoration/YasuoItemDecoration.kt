@@ -18,7 +18,10 @@ class YasuoItemDecoration : RecyclerView.ItemDecoration() {
     private var firstDecoration: DrawableBean? = null
     private var lastDecoration: DrawableBean? = null
 
-    //系统默认分割线
+    /**
+     * 系统默认分割线
+     * System default split line
+     */
     val defaultRes = R.drawable.yasuo_default_divider
 
     override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
@@ -31,6 +34,7 @@ class YasuoItemDecoration : RecyclerView.ItemDecoration() {
         } ?: return
 
         //为decoration预留位置
+        //Reserve space for decoration
         drawable.apply {
             outRect.left = rightDrawable?.intrinsicWidth ?: 0
             outRect.right = leftDrawable?.intrinsicWidth ?: 0

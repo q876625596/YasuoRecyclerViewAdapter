@@ -8,6 +8,7 @@ import androidx.databinding.BindingAdapter
 
 /**
  * 设置背景色
+ * Set background color
  */
 @BindingAdapter(value = ["android:background"])
 fun View.setYasuoBackground(background: Any?) {
@@ -21,7 +22,10 @@ fun View.setYasuoBackground(background: Any?) {
 
 }
 
-
+/**
+ * 设置文本尺寸
+ * Set text size
+ */
 @BindingAdapter("android:textSize")
 fun setYasuoTextSizeSp(view: TextView, size: Float) {
     view.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
