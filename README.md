@@ -293,7 +293,7 @@ An additional span equal grid layout space is attached to separate itemDecoratio
 | staggeredGridFullSpan | Is this type of layout full in the staggeedgrid | false |
 
 ## Ⅲ、Epilogue
-First of all, thank you for your reading. The new year is coming soon. I also wish you a happy new year. I hope this library can help you. If you like * * [YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter) * * this library, I hope to give you a star on GitHub as a driving force for my progress!
+First of all, thank you for your reading. The new year is coming soon. I also wish you a happy new year. I hope this library can help you. If you like **[YasuoRecyclerViewAdapter](https://github.com/q876625596/YasuoRecyclerViewAdapter)** this library, I hope to give you a star on GitHub as a driving force for my progress!
 If he has deficiencies or needs new functions, he can ask me issue or add my QQ: 876625596
 
 # [License](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/LICENSE)
