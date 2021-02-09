@@ -115,7 +115,7 @@ You must use [YasuoList](https://github.com/q876625596/YasuoRecyclerViewAdapter/
 There is only one difference between the above three modes, and it is quite convenient to switch between them.
 
 ##### 3）Empty Layout
-The use of empty layout is also very simple. First configure the holderConfig of empty layout, and then call** adapter.showEmptyLayout **That's it.
+The use of empty layout is also very simple. First configure the holderConfig of empty layout, and then call **adapter.showEmptyLayout** That's it.
 
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
@@ -159,7 +159,7 @@ Second, set the proportion of an item separately：
 **Judging priority: single item setting > type setting**
 
 ##### 5）LoadMore
-Loading more layouts is similar to loading empty layouts. After loading the holderConfig configuration of more layouts, call ** adapter.showLoadMoreLayout ** Make the empty layout display and add it at last ** adapter.onLoadMoreListener ** Just monitor.
+Loading more layouts is similar to loading empty layouts. After loading the holderConfig configuration of more layouts, call **adapter.showLoadMoreLayout** Make the empty layout display and add it at last **adapter.onLoadMoreListener** Just monitor.
 
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
@@ -174,7 +174,7 @@ Loading more layouts is similar to loading empty layouts. After loading the hold
 ```
 
 ##### 6）Drag / swipe delete
-Just use** adapter.enableDragOrSwipe **You can enable drag and drop, set monitor, set gesture direction, and disable certain layouts
+Just use **adapter.enableDragOrSwipe**You can enable drag and drop, set monitor, set gesture direction, and disable certain layouts
 
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
@@ -185,7 +185,7 @@ Just use** adapter.enableDragOrSwipe **You can enable drag and drop, set monitor
 ```
 
 ##### 7）Sticky header
-First, set the layout manager: * * stickylinear layout manager * *, * * stickygridlayout manager * *, * * stickystaged GridLayout manager**
+First, set the layout manager: **stickylinear layout manager**, **stickygridlayout manager**, **stickystaged GridLayout manager**
 There are two ways of Sticky header. The first is to set Sticky header for a certain type of layout
 ``` kotlin
         binding.myRV.adapterViewBinding(this,list){
@@ -210,7 +210,7 @@ list.add(ImageBean(MutableLiveData(ContextCompat.getDrawable(this@MainActivity, 
 **Judging priority: single item setting > type setting**
 
 ##### 8）Folding layout
-Folding layout requires data class to inherit [YasuoFoldItem](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/YasuoRVAdapter/src/main/java/com/fusion_nex_gen/yasuorvadapter/bean/YasuoFoldItem.kt), and then only need to use** adapter.expandOrFoldItem **It supports multi-level folding. If you need to delete or add an item in the folding layout, it is recommended to use** adapter.removeAndFoldListItem **And** adapter.addAndFoldListItem **Methods
+Folding layout requires data class to inherit [YasuoFoldItem](https://github.com/q876625596/YasuoRecyclerViewAdapter/blob/main/YasuoRVAdapter/src/main/java/com/fusion_nex_gen/yasuorvadapter/bean/YasuoFoldItem.kt), and then only need to use **adapter.expandOrFoldItem** It supports multi-level folding. If you need to delete or add an item in the folding layout, it is recommended to use **adapter.removeAndFoldListItem** And **adapter.addAndFoldListItem** Methods
 
 ##### 9）Animation configuration
 The animation uses mikepenz's [ItemAnimators](https://github.com/mikepenz/ItemAnimators) library. If necessary, please rely on this library.
