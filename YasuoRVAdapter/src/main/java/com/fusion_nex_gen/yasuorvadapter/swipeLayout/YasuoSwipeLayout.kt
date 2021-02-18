@@ -1,10 +1,10 @@
-package com.fusion_nex_gen.yasuorvadapter
+package com.fusion_nex_gen.yasuorvadapter.swipeLayout
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
 
-class YasuoSwipLayout : ViewGroup {
+class YasuoSwipeLayout : ViewGroup {
     constructor(context: Context?) : super(context, null)
     constructor(context: Context?, attrs: AttributeSet) : super(context, attrs, 0)
 //    constructor(context: Context?, attrs: AttributeSet, defStyleAttr: Int):super(context, attrs, defStyleAttr, 0)
