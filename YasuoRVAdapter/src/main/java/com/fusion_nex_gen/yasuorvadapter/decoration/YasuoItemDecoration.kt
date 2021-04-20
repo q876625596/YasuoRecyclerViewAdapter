@@ -113,8 +113,9 @@ class YasuoItemDecoration : RecyclerView.ItemDecoration() {
         topDrawable: Drawable? = null,
         rightDrawable: Drawable? = null,
         bottomDrawable: Drawable? = null,
-    ) {
+    ): YasuoItemDecoration {
         decorations.put(type, DrawableBean(leftDrawable, topDrawable, rightDrawable, bottomDrawable))
+        return this
     }
 
     fun setDecoration(
@@ -124,8 +125,9 @@ class YasuoItemDecoration : RecyclerView.ItemDecoration() {
         topDrawableRes: Int = 0,
         rightDrawableRes: Int = 0,
         bottomDrawableRes: Int = 0
-    ) {
+    ): YasuoItemDecoration {
         decorations.put(type, DrawableBean(context, leftDrawableRes, topDrawableRes, rightDrawableRes, bottomDrawableRes))
+        return this
     }
 
     fun setFirstDecoration(drawableBean: DrawableBean): YasuoItemDecoration {
