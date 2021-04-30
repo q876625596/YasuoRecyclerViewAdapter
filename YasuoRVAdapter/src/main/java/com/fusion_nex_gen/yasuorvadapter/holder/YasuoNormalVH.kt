@@ -3,7 +3,6 @@ package com.fusion_nex_gen.yasuorvadapter.holder
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import com.fusion_nex_gen.yasuorvadapter.YasuoRVViewBindingAdapter
 
 
 open class YasuoNormalVH(private val convertView: View) :

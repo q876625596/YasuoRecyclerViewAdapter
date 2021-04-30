@@ -31,9 +31,9 @@ inline fun RecyclerView.adapterViewBinding(
     itemList: YasuoList<Any>,
     headerList: YasuoList<Any> = YasuoList(),
     footerList: YasuoList<Any> = YasuoList(),
-    rvListener: YasuoRVViewBindingAdapter.() -> YasuoRVViewBindingAdapter
-): YasuoRVViewBindingAdapter {
-    return YasuoRVViewBindingAdapter(life, itemList, headerList, footerList).bindLife().rvListener()
+    rvListener: YasuoViewBindingRVAdapter.() -> YasuoViewBindingRVAdapter
+): YasuoViewBindingRVAdapter {
+    return YasuoViewBindingRVAdapter(life, itemList, headerList, footerList).bindLife().rvListener()
         .attach(this)
 }
 
@@ -46,13 +46,13 @@ inline fun RecyclerView.adapterViewBinding(
  * @param rvListener What to do before binding adapter entity
  */
 inline fun RecyclerView.adapterViewBinding(
-    adapter: YasuoRVViewBindingAdapter,
-    rvListener: YasuoRVViewBindingAdapter.() -> YasuoRVViewBindingAdapter
+    adapter: YasuoViewBindingRVAdapter,
+    rvListener: YasuoViewBindingRVAdapter.() -> YasuoViewBindingRVAdapter
 ) {
     adapter.bindLife().rvListener().attach(this)
 }
 
-open class YasuoRVViewBindingAdapter(
+open class YasuoViewBindingRVAdapter(
     private val life: LifecycleOwner,
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
@@ -81,7 +81,7 @@ open class YasuoRVViewBindingAdapter(
      * 绑定生命周期，初始化adapter之后必须调用
      * Binding life cycle, which must be called after initializing adapter
      */
-    fun bindLife(): YasuoRVViewBindingAdapter {
+    fun bindLife(): YasuoViewBindingRVAdapter {
         life.lifecycle.addObserver(this)
         return this
     }
@@ -115,12 +115,12 @@ open class YasuoRVViewBindingAdapter(
  * itemLayoutId
  * @param itemClass 对应实体类的Class
  * Class corresponding to entity class
- * @param createBindingFun 用于在[YasuoRVViewBindingAdapter.onCreateViewHolder]中创建[ViewBinding]
- * used in [YasuoRVViewBindingAdapter.onCreateViewHolder]Create [ViewBinding] in
+ * @param createBindingFun 用于在[YasuoViewBindingRVAdapter.onCreateViewHolder]中创建[ViewBinding]
+ * used in [YasuoViewBindingRVAdapter.onCreateViewHolder]Create [ViewBinding] in
  * @param execute 后续对[YasuoItemViewBindingConfig]的执行操作
  * Subsequent operations on [YasuoItemViewBindingConfig]
  */
-fun <T : Any, VB : ViewBinding, Adapter : YasuoRVViewBindingAdapter> Adapter.holderConfig(
+fun <T : Any, VB : ViewBinding, Adapter : YasuoViewBindingRVAdapter> Adapter.holderConfig(
     itemLayoutId: Int,
     itemClass: KClass<T>,
     createBindingFun: (view: View) -> VB,
