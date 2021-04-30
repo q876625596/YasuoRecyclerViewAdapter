@@ -107,7 +107,7 @@ open class YasuoViewBindingVPAdapter(
  * @param execute 后续对[YasuoItemViewBindingConfigForVP]的执行操作
  * Subsequent operations on [YasuoItemViewBindingConfigForVP]
  */
-fun <T : Any, VB : ViewBinding, Adapter : YasuoViewBindingVPAdapter> Adapter.holderConfig(
+fun <T : Any, VB : ViewBinding, Adapter : YasuoViewBindingVPAdapter> Adapter.holderConfigVP(
     itemLayoutId: Int,
     itemClass: KClass<T>,
     createBindingFun: (view: View) -> VB,

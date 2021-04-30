@@ -100,7 +100,7 @@ open class YasuoNormalVPAdapter(
  * @param execute 后续对[YasuoItemNormalConfigForVP]的执行操作
  * Subsequent operations on [YasuoItemNormalConfigForVP]
  */
-fun <T : Any, Adapter : YasuoNormalVPAdapter> Adapter.holderConfig(
+fun <T : Any, Adapter : YasuoNormalVPAdapter> Adapter.holderConfigVP(
     itemLayoutId: Int,
     itemClass: KClass<T>,
     execute: (YasuoItemNormalConfigForVP<T, YasuoNormalVH>.() -> Unit)? = null
