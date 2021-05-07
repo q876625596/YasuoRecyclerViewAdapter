@@ -18,6 +18,14 @@ import kotlin.reflect.KClass
 /******使用ViewDataBinding  Using ViewDataBinding******/
 
 /**
+ * 快速获取已绑定的[YasuoDataBindingVPAdapter]
+ * Quickly obtain the bound [YasuoDataBindingVPAdapter]
+ */
+fun ViewPager2.getDataBindingAdapter(): YasuoDataBindingVPAdapter {
+    return this.adapter as YasuoDataBindingVPAdapter
+}
+
+/**
  * 绑定adapter
  * Binding adapter
  * @param life LifecycleOwner object
@@ -28,9 +36,9 @@ import kotlin.reflect.KClass
 inline fun ViewPager2.adapterDataBinding(
     life: LifecycleOwner,
     itemList: YasuoList<Any>,
-    vpListener: YasuoVPDataBindingAdapter.() -> YasuoVPDataBindingAdapter
-): YasuoVPDataBindingAdapter {
-    return YasuoVPDataBindingAdapter(life, itemList).bindLife().vpListener()
+    vpListener: YasuoDataBindingVPAdapter.() -> YasuoDataBindingVPAdapter
+): YasuoDataBindingVPAdapter {
+    return YasuoDataBindingVPAdapter(life, itemList).bindLife().vpListener()
         .attach(this)
 }
 
@@ -43,13 +51,13 @@ inline fun ViewPager2.adapterDataBinding(
  * @param vpListener What to do before binding adapter entity
  */
 inline fun ViewPager2.adapterDataBinding(
-    adapter: YasuoVPDataBindingAdapter,
-    vpListener: YasuoVPDataBindingAdapter.() -> YasuoVPDataBindingAdapter
+    adapter: YasuoDataBindingVPAdapter,
+    vpListener: YasuoDataBindingVPAdapter.() -> YasuoDataBindingVPAdapter
 ) {
     adapter.bindLife().vpListener().attach(this)
 }
 
-open class YasuoVPDataBindingAdapter(
+open class YasuoDataBindingVPAdapter(
     private val life: LifecycleOwner,
     itemList: YasuoList<Any> = YasuoList(),
 ) : YasuoBaseVPAdapter<YasuoDataBindingVH<ViewDataBinding>, YasuoItemDataBindingConfigForVP<YasuoDataBindingVH<ViewDataBinding>, ViewDataBinding>>(
@@ -69,7 +77,7 @@ open class YasuoVPDataBindingAdapter(
      * 绑定生命周期，初始化adapter之后必须调用
      * Binding life cycle, which must be called after initializing adapter
      */
-    fun bindLife(): YasuoVPDataBindingAdapter {
+    fun bindLife(): YasuoDataBindingVPAdapter {
         life.lifecycle.addObserver(this)
         return this
     }
@@ -110,7 +118,7 @@ open class YasuoVPDataBindingAdapter(
  * @param execute 后续对[YasuoItemDataBindingConfigForVP]的执行操作
  * Subsequent operations on [YasuoItemDataBindingConfigForVP]
  */
-fun <T : Any, VB : ViewDataBinding, Adapter : YasuoVPDataBindingAdapter> Adapter.holderConfigVP(
+fun <T : Any, VB : ViewDataBinding, Adapter : YasuoDataBindingVPAdapter> Adapter.holderConfigVP(
     itemLayoutId: Int,
     itemClass: KClass<T>,
     bindingClass: KClass<VB>,

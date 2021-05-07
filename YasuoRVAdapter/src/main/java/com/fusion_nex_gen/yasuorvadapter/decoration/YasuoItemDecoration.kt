@@ -36,23 +36,26 @@ class YasuoItemDecoration : RecyclerView.ItemDecoration() {
         //为decoration预留位置
         //Reserve space for decoration
         drawable.apply {
-            outRect.left = rightDrawable?.intrinsicWidth ?: 0
-            outRect.right = leftDrawable?.intrinsicWidth ?: 0
+            outRect.left = leftDrawable?.intrinsicWidth ?: 0
+            outRect.right = rightDrawable?.intrinsicWidth ?: 0
             outRect.top = topDrawable?.intrinsicWidth ?: 0
             outRect.bottom = bottomDrawable?.intrinsicWidth ?: 0
         }
     }
 
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+        val lp = parent.layoutManager
         val childCount = parent.childCount
         for (i in 0 until childCount) {// >=0 && <=childCount-1
             val child = parent.getChildAt(i)
-            val childViewType = parent.layoutManager!!.getItemViewType(child)
+            val childViewType = lp!!.getItemViewType(child)
             val drawableBean = when {
                 isFirstPosition(child, parent) -> firstDecoration ?: decorations.get(childViewType)
                 isLastPosition(child, parent) -> lastDecoration ?: decorations.get(childViewType)
-                else -> decorations.get(childViewType)
-            } ?: return
+                else -> {
+                    decorations.get(childViewType)
+                }
+            } ?: continue
             drawableBean.topDrawable?.apply {
                 setBounds(child.left - intrinsicWidth, child.top - intrinsicHeight, child.right + intrinsicWidth, child.top)
                 draw(c)

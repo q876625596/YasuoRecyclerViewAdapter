@@ -23,7 +23,7 @@ data class YasuoItemDataBindingConfigForVP<VH : YasuoDataBindingVH<VB>, VB : Vie
     override val itemLayoutId: Int,
     //xml中对应的数据id
     //The corresponding data ID in XML
-    var variableId: Int = BR.item,
+    var variableId: Int = BR.vpItem,
     //该类型Holder创建时的监听
     //Listen when the type holder is created
     var holderCreateListener: (VB.(holder: YasuoDataBindingVH<VB>) -> Unit)? = null,

@@ -664,7 +664,6 @@ abstract class YasuoBaseRVAdapter<VH : RecyclerView.ViewHolder, Config : YasuoBa
                         //必须是父级item才能使用itemConfig.sticky占满
                         //Must be a parent item to use itemConfig.sticky set Full Span
                         if (itemConfig.sticky && item.parentHash == null) {
-                            Log.e("item::class111",item::class.toString())
                             return manager.spanCount
                         }
                         //否则根据gridSpan判断

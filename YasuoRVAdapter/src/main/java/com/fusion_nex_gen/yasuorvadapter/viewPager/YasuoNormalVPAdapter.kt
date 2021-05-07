@@ -13,6 +13,15 @@ import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.holder.YasuoNormalVH
 import kotlin.reflect.KClass
 
+
+/**
+ * 快速获取已绑定的[YasuoNormalVPAdapter]
+ * Quickly obtain the bound [YasuoNormalVPAdapter]
+ */
+fun ViewPager2.getNormalAdapter(): YasuoNormalVPAdapter {
+    return this.adapter as YasuoNormalVPAdapter
+}
+
 /**
  * 绑定adapter
  * Binding adapter

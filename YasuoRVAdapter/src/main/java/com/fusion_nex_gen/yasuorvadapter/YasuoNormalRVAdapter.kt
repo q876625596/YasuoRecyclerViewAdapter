@@ -12,6 +12,15 @@ import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.holder.YasuoNormalVH
 import kotlin.reflect.KClass
 
+
+/**
+ * 快速获取已绑定的[YasuoNormalRVAdapter]
+ * Quickly obtain the bound [YasuoNormalRVAdapter]
+ */
+fun <RV : RecyclerView> RV.getNormalAdapter(): YasuoNormalRVAdapter {
+    return this.adapter as YasuoNormalRVAdapter
+}
+
 /**
  * 绑定adapter
  * Binding adapter

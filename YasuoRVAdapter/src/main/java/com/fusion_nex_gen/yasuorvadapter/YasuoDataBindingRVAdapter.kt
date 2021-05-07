@@ -18,6 +18,14 @@ import kotlin.reflect.KClass
 /******使用ViewDataBinding  Using ViewDataBinding******/
 
 /**
+ * 快速获取已绑定的[YasuoDataBindingRVAdapter]
+ * Quickly obtain the bound [YasuoDataBindingRVAdapter]
+ */
+fun <RV : RecyclerView> RV.getDataBindingAdapter(): YasuoDataBindingRVAdapter {
+    return this.adapter as YasuoDataBindingRVAdapter
+}
+
+/**
  * 绑定adapter
  * Binding adapter
  * @param life LifecycleOwner object
@@ -32,9 +40,9 @@ inline fun RecyclerView.adapterDataBinding(
     itemList: YasuoList<Any>,
     headerList: YasuoList<Any> = YasuoList(),
     footerList: YasuoList<Any> = YasuoList(),
-    rvListener: YasuoRVDataBindingAdapter.() -> YasuoRVDataBindingAdapter
-): YasuoRVDataBindingAdapter {
-    return YasuoRVDataBindingAdapter(life, itemList, headerList, footerList).bindLife().rvListener()
+    rvListener: YasuoDataBindingRVAdapter.() -> YasuoDataBindingRVAdapter
+): YasuoDataBindingRVAdapter {
+    return YasuoDataBindingRVAdapter(life, itemList, headerList, footerList).bindLife().rvListener()
         .attach(this)
 }
 
@@ -47,13 +55,13 @@ inline fun RecyclerView.adapterDataBinding(
  * @param rvListener What to do before binding adapter entity
  */
 inline fun RecyclerView.adapterDataBinding(
-    adapter: YasuoRVDataBindingAdapter,
-    rvListener: YasuoRVDataBindingAdapter.() -> YasuoRVDataBindingAdapter
+    adapter: YasuoDataBindingRVAdapter,
+    rvListener: YasuoDataBindingRVAdapter.() -> YasuoDataBindingRVAdapter
 ) {
     adapter.bindLife().rvListener().attach(this)
 }
 
-open class YasuoRVDataBindingAdapter(
+open class YasuoDataBindingRVAdapter(
     private val life: LifecycleOwner,
     itemList: YasuoList<Any> = YasuoList(),
     headerItemList: YasuoList<Any> = YasuoList(),
@@ -85,7 +93,7 @@ open class YasuoRVDataBindingAdapter(
      * 绑定生命周期，初始化adapter之后必须调用
      * Binding life cycle, which must be called after initializing adapter
      */
-    fun bindLife(): YasuoRVDataBindingAdapter {
+    fun bindLife(): YasuoDataBindingRVAdapter {
         life.lifecycle.addObserver(this)
         return this
     }
@@ -141,7 +149,7 @@ open class YasuoRVDataBindingAdapter(
  * @param execute 后续对[YasuoItemDataBindingConfig]的执行操作
  * Subsequent operations on [YasuoItemDataBindingConfig]
  */
-fun <T : Any, VB : ViewDataBinding, Adapter : YasuoRVDataBindingAdapter> Adapter.holderConfig(
+fun <T : Any, VB : ViewDataBinding, Adapter : YasuoDataBindingRVAdapter> Adapter.holderConfig(
     itemLayoutId: Int,
     itemClass: KClass<T>,
     bindingClass: KClass<VB>,

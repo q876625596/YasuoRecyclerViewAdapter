@@ -16,6 +16,15 @@ import kotlin.reflect.KClass
 
 /******使用ViewBinding  Using ViewBinding******/
 
+
+/**
+ * 快速获取已绑定的[YasuoViewBindingRVAdapter]
+ * Quickly obtain the bound [YasuoViewBindingRVAdapter]
+ */
+fun <RV : RecyclerView> RV.getViewBindingAdapter(): YasuoViewBindingRVAdapter {
+    return this.adapter as YasuoViewBindingRVAdapter
+}
+
 /**
  * 绑定adapter
  * Binding adapter

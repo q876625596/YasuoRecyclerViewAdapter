@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
@@ -14,7 +15,6 @@ import com.fusion_nex_gen.yasuorvadapter.bean.DefaultLoadMoreItem
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoFoldItem
 import com.fusion_nex_gen.yasuorvadapter.bean.YasuoList
 import com.fusion_nex_gen.yasuorvadapter.databinding.DefaultLoadMoreLayoutBinding
-import com.fusion_nex_gen.yasuorvadapter.databinding.DefaultLoadMoreLayoutDataBindingBinding
 import com.fusion_nex_gen.yasuorvadapter.decoration.addYasuoDecoration
 import com.fusion_nex_gen.yasuorvadapter.listener.enableDragOrSwipe
 import com.fusion_nex_gen.yasuorvadapter.listener.onLoadMoreListener
@@ -52,9 +52,13 @@ class MainActivity : AppCompatActivity() {
         binding.myRV.addYasuoDecoration {
 //            setDecoration(R.layout.item_layout_text,DrawableBean(this@MainActivity, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp, R.drawable.divider_gray_10dp))
 //            setDecoration(R.layout.item_layout_image,DrawableBean(this@MainActivity, R.drawable.divider_black_10dp, R.drawable.divider_black_10dp, R.drawable.divider_black_10dp, R.drawable.divider_black_10dp))
-            setDecoration(R.layout.item_layout_text, this@MainActivity, defaultRes)
-            setDecoration(R.layout.item_layout_image, this@MainActivity, defaultRes)
+            /*setDecoration(R.layout.item_layout_text, this@MainActivity, defaultRes)
+            setDecoration(R.layout.item_layout_image, this@MainActivity, defaultRes)*/
+            //setFirstDecoration(this@MainActivity, leftDrawableRes = R.drawable.divider_gray_10dp)
+            setDecoration(R.layout.item_layout_text, this@MainActivity, R.drawable.divider_gray_10dp)
+            setLastDecoration(this@MainActivity, R.drawable.divider_gray_10dp)
         }
+        Log.e("qqq", R.layout.header_layout_one.toString())
         //only All span equal
         //binding.myRV.addItemDecoration(GridSpacingItemDecoration(3, 20, true))
         //findViewById用法

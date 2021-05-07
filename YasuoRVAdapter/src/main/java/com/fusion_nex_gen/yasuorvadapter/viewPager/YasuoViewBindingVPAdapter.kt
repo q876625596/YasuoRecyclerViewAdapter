@@ -18,6 +18,14 @@ import kotlin.reflect.KClass
 /******使用ViewBinding  Using ViewBinding******/
 
 /**
+ * 快速获取已绑定的[YasuoViewBindingVPAdapter]
+ * Quickly obtain the bound [YasuoViewBindingVPAdapter]
+ */
+fun ViewPager2.getViewBindingAdapter(): YasuoViewBindingVPAdapter {
+    return this.adapter as YasuoViewBindingVPAdapter
+}
+
+/**
  * 绑定adapter
  * Binding adapter
  * @param life LifecycleOwner object
