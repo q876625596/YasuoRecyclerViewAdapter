@@ -114,6 +114,21 @@ dependencies {
 
 以上三种模式的差异就只有这么一点，相互切换也相当的方便。
 
+**额外的ViewPager2Adapter**
+adapterDataBinding可以替换为adapterViewBinding，adapterBinding
+**创建布局时需要注意：adapterDataBinding中默认为的BR.vpItem**
+
+``` kotlin
+    binding.viewPager.adapterDataBinding(this, list) {
+        holderConfigVP(R.layout.empty_layout_one_data_binding, EmptyBeanOne::class, EmptyLayoutOneDataBindingBinding::class) {
+
+        }
+        holderConfigVP(R.layout.empty_layout_two_data_binding, EmptyBeanTwo::class, EmptyLayoutTwoDataBindingBinding::class) {
+
+        }
+     }
+```
+
 ##### 3）空布局
 空布局的使用也非常简单，先将空布局的holderConfig配置之后，再调用**adapter.showEmptyLayout**就行了。
 

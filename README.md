@@ -114,6 +114,21 @@ You must use [YasuoList](https://github.com/q876625596/YasuoRecyclerViewAdapter/
 
 There is only one difference between the above three modes, and it is quite convenient to switch between them.
 
+**Additional ViewPager2Adapter**
+adapterDataBinding can be replaced by adapterViewBinding, adapterBinding
+**When creating a layout, you should pay attention to: br.vpItem is the default value in adapterDataBinding**
+
+``` kotlin
+    binding.viewPager.adapterDataBinding(this, list) {
+        holderConfigVP(R.layout.empty_layout_one_data_binding, EmptyBeanOne::class, EmptyLayoutOneDataBindingBinding::class) {
+
+        }
+        holderConfigVP(R.layout.empty_layout_two_data_binding, EmptyBeanTwo::class, EmptyLayoutTwoDataBindingBinding::class) {
+
+        }
+     }
+```
+
 ##### 3）Empty Layout
 The use of empty layout is also very simple. First configure the holderConfig of empty layout, and then call **adapter.showEmptyLayout** That's it.
 
