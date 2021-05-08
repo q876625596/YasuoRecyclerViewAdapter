@@ -592,6 +592,7 @@ class StickyGridLayoutManager<T> : GridLayoutManager where T : RecyclerView.Adap
      */
     private inner class HeaderPositionsAdapterDataObserver : AdapterDataObserver() {
         override fun onChanged() {
+            //Log.e("mAdapter!!.itemCount", mAdapter!!.itemCount.toString())
             // There's no hint at what changed, so go through the adapter.
             mHeaderPositions.clear()
             val itemCount = mAdapter!!.itemCount
@@ -667,7 +668,7 @@ class StickyGridLayoutManager<T> : GridLayoutManager where T : RecyclerView.Adap
                     while (i != -1 && i < headerCount) {
                         val headerPos = mHeaderPositions[i]
                         if (headerPos >= fromPosition && headerPos < fromPosition + itemCount) {
-                            mHeaderPositions[i] = headerPos - (toPosition - fromPosition)
+                            mHeaderPositions[i] = headerPos - (fromPosition - toPosition)
                             sortHeaderAtIndex(i)
                         } else if (headerPos >= fromPosition + itemCount && headerPos <= toPosition) {
                             mHeaderPositions[i] = headerPos - itemCount
@@ -730,6 +731,7 @@ class StickyGridLayoutManager<T> : GridLayoutManager where T : RecyclerView.Adap
         }
 
         companion object {
+            @JvmField
             val CREATOR: Parcelable.Creator<SavedState> = object : Parcelable.Creator<SavedState> {
                 override fun createFromParcel(`in`: Parcel): SavedState {
                     return SavedState(`in`)

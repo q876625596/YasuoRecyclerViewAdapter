@@ -189,7 +189,7 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
         //Exchange item
         if (fromPosition < targetPosition) {
             //如果是拖拽的Holder是折叠布局，并且父节点不为空
-                //If the holder is dragged, the layout is fold and the parent node is not empty
+            //If the holder is dragged, the layout is fold and the parent node is not empty
             if (fromItemConfig.isFold && parentItem != null) {
                 for (i in fromPosition until targetPosition) {
                     Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i + 1))
@@ -204,7 +204,7 @@ class YasuoItemTouchHelperCallBack<VH : RecyclerView.ViewHolder, Adapter : Yasuo
             }
         } else {
             //如果是拖拽的Holder是折叠布局，并且父节点不为空
-                //If the holder is dragged, the layout is collapsed and the parent node is not empty
+            //If the holder is dragged, the layout is collapsed and the parent node is not empty
             if (fromItemConfig.isFold && parentItem != null) {
                 for (i in fromPosition downTo targetPosition + 1) {
                     Collections.swap(adapter.itemList, adapter.getItemTruePosition(i), adapter.getItemTruePosition(i - 1))

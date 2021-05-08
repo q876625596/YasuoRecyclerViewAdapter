@@ -1,7 +1,6 @@
 package com.fusion_nex_gen.yasuorvadapter
 
 import android.content.Context
-import android.util.Log
 import android.util.SparseArray
 import android.view.LayoutInflater
 import androidx.databinding.ObservableList
@@ -646,7 +645,6 @@ abstract class YasuoBaseRVAdapter<VH : RecyclerView.ViewHolder, Config : YasuoBa
                         //必须是父级item才能使用item.sticky占满
                         //Must be a parent item to use item.sticky set Full Span
                         if (item.sticky && item.parentHash == null) {
-                            Log.e("item::class",item::class.toString())
                             return manager.spanCount
                         }
                         //否则根据gridSpan判断
@@ -732,7 +730,6 @@ abstract class YasuoBaseRVAdapter<VH : RecyclerView.ViewHolder, Config : YasuoBa
             //那么必须是父级item才能吸顶
             //Then it must be a parent item to be sticky
             if (item.sticky && item.parentHash == null) {
-                Log.e("sticky",item::class.toString())
                 return true
             }
             //如果没有对实例单独设置，那么再判断布局类型有没有设置sticky

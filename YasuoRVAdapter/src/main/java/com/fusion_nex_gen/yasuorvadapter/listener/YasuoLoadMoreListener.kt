@@ -56,7 +56,6 @@ class YasuoLoadMoreListener(
             is GridLayoutManager -> {
                 //通过LayoutManager找到当前显示的最后的item的position
                 lastPosition = layoutManager.findLastVisibleItemPosition()
-                Log.e("lastPosition", lastPosition.toString())
             }
             is LinearLayoutManager -> {
                 lastPosition = layoutManager.findLastVisibleItemPosition()
@@ -72,7 +71,7 @@ class YasuoLoadMoreListener(
         //时判断界面显示的最后item的position是否等于所有列表item数之和，也就是最后一个loadMore的position
         //如果相等则说明已经滑动到最后了
         if (adapter.inLoadMoreList(lastPosition)) {
-            Log.e("loadMoreListener", "开始加载更多，最底部的item：position=${lastPosition}，已显示")
+            //Log.e("loadMoreListener", "开始加载更多，最底部的item：position=${lastPosition}，已显示")
             this.onLoadMore(lastPosition)
         }
     }

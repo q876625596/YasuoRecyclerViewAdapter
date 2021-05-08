@@ -666,7 +666,7 @@ class StickyLinearLayoutManager<T> : LinearLayoutManager where T : RecyclerView.
                     while (i != -1 && i < headerCount) {
                         val headerPos = mHeaderPositions[i]
                         if (headerPos >= fromPosition && headerPos < fromPosition + itemCount) {
-                            mHeaderPositions[i] = headerPos - (toPosition - fromPosition)
+                            mHeaderPositions[i] = headerPos - (fromPosition - toPosition)
                             sortHeaderAtIndex(i)
                         } else if (headerPos >= fromPosition + itemCount && headerPos <= toPosition) {
                             mHeaderPositions[i] = headerPos - itemCount

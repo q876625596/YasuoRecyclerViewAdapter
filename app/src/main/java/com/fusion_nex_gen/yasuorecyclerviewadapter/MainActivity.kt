@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.fusion_nex_gen.yasuorecyclerviewadapter.databinding.*
 import com.fusion_nex_gen.yasuorecyclerviewadapter.model.*
 import com.fusion_nex_gen.yasuorvadapter.*
@@ -265,7 +266,7 @@ class MainActivity : AppCompatActivity() {
         binding.myRV.adapterViewBinding(this, list, headerList, footerList) {
             //设置拖拽及侧滑删除
             //Settings can be deleted by dragging and sliding
-            enableDragOrSwipe(binding.myRV, isLongPressDragEnable = true, isItemViewSwipeEnable = true)
+            enableDragOrSwipe(binding.myRV, isLongPressDragEnable = true, isItemViewSwipeEnable = false)
             //展示加载更多
             //Show load more layouts
             showLoadMoreLayout(DefaultLoadMoreItem())
