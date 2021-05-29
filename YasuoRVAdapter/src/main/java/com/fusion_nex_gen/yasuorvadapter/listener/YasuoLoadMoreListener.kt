@@ -72,6 +72,7 @@ class YasuoLoadMoreListener(
         //如果相等则说明已经滑动到最后了
         if (adapter.inLoadMoreList(lastPosition)) {
             //Log.e("loadMoreListener", "开始加载更多，最底部的item：position=${lastPosition}，已显示")
+            adapter.disableLoadMoreListener()
             this.onLoadMore(lastPosition)
         }
     }
