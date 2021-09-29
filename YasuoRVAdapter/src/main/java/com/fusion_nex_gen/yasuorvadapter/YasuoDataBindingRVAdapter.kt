@@ -109,11 +109,11 @@ open class YasuoDataBindingRVAdapter(
         val holder = YasuoDataBindingVH(binding)
         binding.addOnRebindCallback(object : OnRebindCallback<ViewDataBinding>() {
             override fun onPreBind(binding: ViewDataBinding): Boolean = let {
-                recyclerView!!.isComputingLayout
+                recyclerView?.isComputingLayout?:false
             }
 
             override fun onCanceled(binding: ViewDataBinding) {
-                if (recyclerView!!.isComputingLayout) {
+                if (recyclerView?.isComputingLayout == true) {
                     return
                 }
                 val position = holder.bindingAdapterPosition
